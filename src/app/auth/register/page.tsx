@@ -6,19 +6,19 @@ import { supabase } from '../../../utils/supabaseClient'
 
 export default function RegisterPage() {
   const router = useRouter()
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [repeatPassword, setRepeatPassword] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [error, setError] = useState('')
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
     if (password !== repeatPassword) {
-      setError('Hasła się nie zgadzają')
+      setError('Hasła się nie zgadzają.')
       return
     }
 
@@ -41,17 +41,16 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-lg w-full space-y-6 bg-white p-10 rounded-xl shadow">
-        <div>
-          <h2 className="text-center text-2xl font-bold text-cyan-600">Utwórz swoje konto</h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Dołącz do Keeper, aby zacząć zachować własne dziedzictwo, aby
-            stać się administratorem Opiekuna istniejącego pomnika i wiele więcej!
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#f6faf9] flex items-center justify-center px-4">
+      <div className="w-full max-w-xl bg-white p-8 rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-center text-[#00bcd4] mb-2">
+          Utwórz swoje konto
+        </h1>
+        <p className="text-center text-sm text-gray-600 mb-6">
+          Dołącz do Keeper, aby zacząć zachować własne dziedzictwo, aby stać się administratorem Opiekuna istniejącego pomnika i wiele więcej!
+        </p>
 
-        <form onSubmit={handleRegister} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Twoje imię <span className="text-red-500">*</span>
@@ -60,12 +59,11 @@ export default function RegisterPage() {
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              required
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-[#00bcd4]"
               placeholder="Twoje imię"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Twoje nazwisko <span className="text-red-500">*</span>
@@ -74,12 +72,11 @@ export default function RegisterPage() {
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              required
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-[#00bcd4]"
               placeholder="Twoje nazwisko"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Adres e-mail <span className="text-red-500">*</span>
@@ -88,12 +85,11 @@ export default function RegisterPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-[#00bcd4]"
               placeholder="Adres e-mail"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Hasło <span className="text-red-500">*</span>
@@ -102,12 +98,11 @@ export default function RegisterPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-[#00bcd4]"
               placeholder="Hasło"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              required
             />
           </div>
-
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Powtórz hasło <span className="text-red-500">*</span>
@@ -116,32 +111,34 @@ export default function RegisterPage() {
               type="password"
               value={repeatPassword}
               onChange={(e) => setRepeatPassword(e.target.value)}
-              required
+              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-[#00bcd4]"
               placeholder="Powtórz hasło"
-              className="w-full mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              required
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {error && <p className="text-red-500 text-sm">{error}</p>}
 
           <button
             type="submit"
-            className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-md transition"
+            className="w-full bg-[#00bcd4] text-white py-2 rounded-md font-semibold hover:bg-[#00a6bb]"
           >
             Utwórz konto
           </button>
+
+          <p className="text-xs text-center text-gray-500 mt-2">
+            Klikając na założenie konta, zgadzasz się na{' '}
+            <span className="text-[#00bcd4] underline cursor-pointer">Regulamin</span>{' '}
+            i potwierdzasz, że masz powyżej 13 roku życia
+          </p>
+
+          <p className="text-sm text-center text-gray-600 mt-4">
+            Czy masz już konto?{' '}
+            <a href="/auth/login" className="text-[#00bcd4] hover:underline">
+              Zaloguj się
+            </a>
+          </p>
         </form>
-
-        <p className="mt-2 text-center text-xs text-gray-600">
-          Klikając na założenie konta, zgadzasz się na <a className="underline">Regulamin</a> i potwierdzasz, że masz powyżej 13 roku życia
-        </p>
-
-        <p className="mt-2 text-center text-sm">
-          Czy masz już konto?{' '}
-          <a href="/auth/login" className="text-cyan-600 hover:underline">
-            Zaloguj się
-          </a>
-        </p>
       </div>
     </div>
   )
