@@ -46,7 +46,7 @@ export default function RegisterPage() {
         <h1 className="text-2xl font-bold text-center text-[#00bcd4] mb-2">
           Utwórz swoje konto
         </h1>
-        <p className="text-center text-sm text-gray-600 mb-6">
+        <p className="text-center text-base leading-relaxed text-gray-600 mb-6">
           Dołącz do Keeper, aby zacząć zachować własne dziedzictwo, aby stać się administratorem Opiekuna istniejącego pomnika i wiele więcej!
         </p>
 
