@@ -50,7 +50,7 @@ export default function RegisterPage() {
           Dołącz do Keeper, aby zacząć zachować własne dziedzictwo, aby stać się administratorem Opiekuna istniejącego pomnika i wiele więcej!
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Twoje imię <span className="text-red-500">*</span>
