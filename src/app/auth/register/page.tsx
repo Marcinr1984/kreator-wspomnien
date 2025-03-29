@@ -1,48 +1,105 @@
-// src/app/register/page.tsx
+// src/app/auth/register/page.tsx
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '../../../utils/supabaseClient'
 import { useRouter } from 'next/navigation'
+import { supabase } from '../../../utils/supabaseClient'
 
-export default function RegisterPage() {
+export default function Register() {
   const router = useRouter()
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [error, setError] = useState('')
 
-  const handleRegister = async () => {
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+
+    if (password !== confirmPassword) {
+      setError('Hasła nie są takie same')
+      return
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+        }
+      }
     })
 
     if (error) {
       setError(error.message)
     } else {
-      router.push('/login')
+      router.push('/auth/login')
     }
   }
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">Rejestracja</h1>
-      <input
-        className="border p-2 w-full mb-2"
-        type="email"
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        className="border p-2 w-full mb-2"
-        type="password"
-        placeholder="Hasło"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      {error && <p className="text-red-600">{error}</p>}
-      <button onClick={handleRegister} className="bg-black text-white px-4 py-2 rounded">
-        Zarejestruj się
-      </button>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <form onSubmit={handleRegister} className="bg-white p-8 rounded shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Rejestracja</h2>
+
+        <input
+          type="text"
+          placeholder="Imię"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          className="w-full p-3 mb-4 border rounded"
+          required
+        />
+
+        <input
+          type="text"
+          placeholder="Nazwisko"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          className="w-full p-3 mb-4 border rounded"
+          required
+        />
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-3 mb-4 border rounded"
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Hasło"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-3 mb-4 border rounded"
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Powtórz hasło"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          className="w-full p-3 mb-4 border rounded"
+          required
+        />
+
+        {error && <p className="text-red-600 mb-4">{error}</p>}
+
+        <button
+          type="submit"
+          className="w-full bg-black text-white py-2 rounded hover:bg-gray-900"
+        >
+          Zarejestruj się
+        </button>
+      </form>
     </div>
   )
 }
