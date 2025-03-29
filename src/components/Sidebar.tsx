@@ -1,13 +1,14 @@
 // src/components/Sidebar.tsx
-
 export default function Sidebar() {
     return (
-      <aside className="w-64 bg-white shadow-md p-4 hidden md:block">
-        <h2 className="text-xl font-bold mb-6">🕊️ Kreator</h2>
-        <nav className="space-y-2">
-          <a href="/dashboard" className="block text-blue-600 hover:underline">Dashboard</a>
-          <a href="/auth/login" className="block text-blue-600 hover:underline">Wyloguj</a>
-        </nav>
+      <aside className="w-64 bg-white shadow h-screen p-4">
+        <h2 className="text-xl font-bold mb-4">Kreator</h2>
+        <ul>
+          <li><a href="/" className="block py-2 text-blue-700">Strona główna</a></li>
+          <li><a href="/dashboard" className="block py-2 text-blue-700">Dashboard</a></li>
+          <li><a href="/login" className="block py-2 text-blue-700">Logowanie</a></li>
+          <li><a href="/register" className="block py-2 text-blue-700">Rejestracja</a></li>
+        </ul>
       </aside>
     )
   }
