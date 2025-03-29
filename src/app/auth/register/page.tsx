@@ -1,28 +1,28 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { supabase } from '../../../utils/supabaseClient';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '../../../utils/supabaseClient'
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [error, setError] = useState('');
+  const router = useRouter()
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [repeatPassword, setRepeatPassword] = useState('')
+  const [error, setError] = useState('')
 
   const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
+    setError('')
 
-    if (password !== confirmPassword) {
-      setError('Hasła nie są takie same.');
-      return;
+    if (password !== repeatPassword) {
+      setError('Hasła się nie zgadzają')
+      return
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -31,104 +31,118 @@ export default function RegisterPage() {
           last_name: lastName,
         },
       },
-    });
+    })
 
     if (error) {
-      setError(error.message);
+      setError(error.message)
     } else {
-      router.push('/auth/login');
+      router.push('/auth/login')
     }
-  };
+  }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50 px-4">
-      <div className="w-full max-w-xl bg-white shadow-md rounded-lg p-8">
-        <h2 className="text-2xl font-semibold text-center text-cyan-600 mb-2">Utwórz swoje konto</h2>
-        <p className="text-center text-sm text-gray-700 mb-6">
-          Dołącz do Keeper, aby zacząć zachować własne dziedzictwo, aby stać się administratorem Opiekuna istniejącego pomnika i wiele więcej!
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-lg w-full space-y-6 bg-white p-10 rounded-xl shadow">
+        <div>
+          <h2 className="text-center text-2xl font-bold text-cyan-600">Utwórz swoje konto</h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Dołącz do Keeper, aby zacząć zachować własne dziedzictwo, aby
+            stać się administratorem Opiekuna istniejącego pomnika i wiele więcej!
+          </p>
+        </div>
+
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Twoje imię <span className="text-red-600">*</span>
+            <label className="block text-sm font-medium text-gray-700">
+              Twoje imię <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              placeholder="Twoje imię"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-100"
               required
+              placeholder="Twoje imię"
+              className="w-full mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Twoje nazwisko <span className="text-red-600">*</span>
+            <label className="block text-sm font-medium text-gray-700">
+              Twoje nazwisko <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
-              placeholder="Twoje nazwisko"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-100"
               required
+              placeholder="Twoje nazwisko"
+              className="w-full mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Adres e-mail <span className="text-red-600">*</span>
+            <label className="block text-sm font-medium text-gray-700">
+              Adres e-mail <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
-              placeholder="Adres e-mail"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-100"
               required
+              placeholder="Adres e-mail"
+              className="w-full mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Hasło <span className="text-red-600">*</span>
+            <label className="block text-sm font-medium text-gray-700">
+              Hasło <span className="text-red-500">*</span>
             </label>
             <input
               type="password"
-              placeholder="Hasło"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-100"
               required
+              placeholder="Hasło"
+              className="w-full mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Powtórz hasło <span className="text-red-600">*</span>
+            <label className="block text-sm font-medium text-gray-700">
+              Powtórz hasło <span className="text-red-500">*</span>
             </label>
             <input
               type="password"
-              placeholder="Powtórz hasło"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-gray-100"
+              value={repeatPassword}
+              onChange={(e) => setRepeatPassword(e.target.value)}
               required
+              placeholder="Powtórz hasło"
+              className="w-full mt-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500"
             />
           </div>
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
           <button
             type="submit"
-            className="w-full bg-cyan-600 text-white py-2 rounded hover:bg-cyan-700 transition"
+            className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-semibold py-3 rounded-md transition"
           >
             Utwórz konto
           </button>
         </form>
-        <p className="mt-4 text-xs text-center text-gray-600">
-          Klikając na założenie konta, zgadzasz się na <a href="#" className="text-cyan-600 underline">Regulamin</a> i potwierdzasz, że masz powyżej 13 roku życia
+
+        <p className="mt-2 text-center text-xs text-gray-600">
+          Klikając na założenie konta, zgadzasz się na <a className="underline">Regulamin</a> i potwierdzasz, że masz powyżej 13 roku życia
         </p>
-        <p className="mt-2 text-sm text-center">
+
+        <p className="mt-2 text-center text-sm">
           Czy masz już konto?{' '}
-          <Link href="/auth/login" className="text-cyan-600 hover:underline">Zaloguj się</Link>
+          <a href="/auth/login" className="text-cyan-600 hover:underline">
+            Zaloguj się
+          </a>
         </p>
       </div>
     </div>
-  );
+  )
 }
