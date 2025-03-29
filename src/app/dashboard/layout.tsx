@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Sidebar from '@/components/Sidebar'
-import { supabase } from '@/utils/supabaseClient'
+import Sidebar from '../../components/Sidebar'
+import { supabase } from '../../utils/supabaseClient'
 import { useRouter } from 'next/navigation'
+import Loading from '@/components/Loading'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [isLoading, setIsLoading] = useState(true)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const router = useRouter()
 
@@ -15,12 +17,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       if (data?.user) {
         setIsLoggedIn(true)
       } else {
-        router.push('/login')
+        router.push('/auth/login')
       }
+      setIsLoading(false)
     }
 
     checkUser()
   }, [router])
+
+  if (isLoading) return <Loading />
 
   return (
     <div className="flex min-h-screen">
