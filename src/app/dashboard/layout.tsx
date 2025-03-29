@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Sidebar from '../../components/Sidebar'
 import { supabase } from '../../utils/supabaseClient'
 import { useRouter } from 'next/navigation'
-import Loading from '@/components/Loading'
+import Loading from '../../components/Loading'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
