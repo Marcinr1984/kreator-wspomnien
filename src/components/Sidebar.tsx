@@ -6,9 +6,7 @@ export default function Sidebar() {
         <ul>
           <li><a href="/" className="block py-2 text-blue-700">Strona główna</a></li>
           <li><a href="/dashboard" className="block py-2 text-blue-700">Dashboard</a></li>
-          <li><a href="/auth/login" className="block py-2 text-blue-700">Logowanie</a></li>
-          <li><a href="/auth/register" className="block py-2 text-blue-700">Rejestracja</a></li>
         </ul>
-      </aside>
+    </aside>
     )
   }
