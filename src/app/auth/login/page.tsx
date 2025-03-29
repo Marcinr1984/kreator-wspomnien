@@ -1,17 +1,18 @@
-// src/app/login/page.tsx
+// src/app/auth/login/page.tsx
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '../../../utils/supabaseClient'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/utils/supabaseClient'
 
-export default function LoginPage() {
+export default function Login() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState('')
 
   const handleLogin = async () => {
+    setError('')
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -24,25 +25,47 @@ export default function LoginPage() {
     }
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleLogin()
+    }
+  }
+
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h1 className="text-xl font-bold mb-4">Logowanie</h1>
-      <input
-        className="border p-2 w-full mb-2"
-        type="email"
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        className="border p-2 w-full mb-2"
-        type="password"
-        placeholder="Hasło"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      {error && <p className="text-red-600">{error}</p>}
-      <button onClick={handleLogin} className="bg-black text-white px-4 py-2 rounded">
-        Zaloguj się
-      </button>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <form
+        className="bg-white p-8 rounded shadow-md w-full max-w-md"
+        onKeyDown={handleKeyDown}
+      >
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">Logowanie</h2>
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full p-3 mb-4 border rounded"
+        />
+
+        <input
+          type="password"
+          placeholder="Hasło"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="w-full p-3 mb-4 border rounded"
+        />
+
+        {error && <p className="text-red-600 mb-4">{error}</p>}
+
+        <button
+          type="button"
+          onClick={handleLogin}
+          className="w-full bg-black text-white py-2 rounded hover:bg-gray-900"
+        >
+          Zaloguj się
+        </button>
+      </form>
     </div>
   )
 }
