@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../../utils/supabaseClient'
 
 export default function Dashboard() {
-  const [userEmail, setUserEmail] = useState<string | null>(null)
+  const [userName, setUserName] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export default function Dashboard() {
       if (error || !data?.user) {
         router.push('/login')
       } else {
-        setUserEmail(data.user.email ?? null)
+        setUserName(data.user.user_metadata?.first_name ?? null)
       }
     }
 
@@ -33,7 +33,7 @@ export default function Dashboard() {
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
             <div>
-              <p className="font-semibold text-gray-800">Witam, {userEmail}</p>
+              <p className="font-semibold text-gray-800">Witam, {userName}</p>
               <p className="text-sm text-gray-500">Jesteś obecnie na Planie FREE</p>
             </div>
           </div>
