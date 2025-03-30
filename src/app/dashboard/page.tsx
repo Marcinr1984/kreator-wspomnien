@@ -31,12 +31,17 @@ export default function Dashboard() {
     <div className="min-h-screen w-full bg-gray-100 p-0 m-0">
       {/* Sekcja nagłówka */}
       <div className="w-full bg-white rounded-md shadow py-4 px-6 mb-0">
-        <div className="max-w-6xl mx-auto flex items-center space-x-4">
-          <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
-          <div>
-            <p className="font-semibold text-3xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
-            <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
+            <div>
+              <p className="font-semibold text-3xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
+              <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
+            </div>
           </div>
+          <button onClick={handleLogout} className="text-sm text-red-500 hover:underline">
+            Wyloguj się
+          </button>
         </div>
       </div>
 
@@ -76,12 +81,6 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </div>
-
-        <div className="text-right mt-4">
-          <button onClick={handleLogout} className="text-sm text-red-500 hover:underline">
-            Wyloguj się
-          </button>
         </div>
       </div>
     </div>
