@@ -36,7 +36,7 @@ export default function Dashboard() {
             <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
             <div>
               <p className="font-semibold text-3xl text-gray-800">Witam, {userName || 'Użytkowniku'}</p>
-              <p className="text-sm text-gray-500">Jesteś obecnie na Planie FREE</p>
+              <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
