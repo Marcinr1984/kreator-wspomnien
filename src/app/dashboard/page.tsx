@@ -1,9 +1,8 @@
-// src/app/dashboard/page.tsx
 'use client'
 
 import { useEffect, useState } from 'react'
-import { supabase } from '../../utils/supabaseClient'
 import { useRouter } from 'next/navigation'
+import { supabase } from '../../utils/supabaseClient'
 
 export default function Dashboard() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
@@ -28,12 +27,41 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Twój dashboard</h1>
-      <p className="mb-4">Zalogowany jako: <strong>{userEmail}</strong></p>
-      <button onClick={handleLogout} className="bg-red-600 text-white px-4 py-2 rounded">
-        Wyloguj się
-      </button>
+    <div className="min-h-screen bg-gray-100 p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-md shadow p-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
+            <div>
+              <p className="font-semibold text-gray-800">Witam, {userEmail}</p>
+              <p className="text-sm text-gray-500">Jesteś obecnie na Planie FREE</p>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
+            <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100">Ustawienia konta</button>
+            <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100">Stwórz mój Żywy Pomnik</button>
+            <button className="border border-blue-500 text-blue-600 rounded-full px-4 py-2 text-sm hover:bg-blue-50">Utwórz stronę pamięci</button>
+          </div>
+        </div>
+
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h2 className="text-lg font-semibold mb-4">Twoje pamiątki</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-lg p-4 h-32 text-center text-sm text-gray-600 hover:bg-gray-100 cursor-pointer">
+                <div className="text-2xl mb-2">＋</div>
+                <div>Nowa strona pamięci</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="text-right mt-4">
+          <button onClick={handleLogout} className="text-sm text-red-500 hover:underline">
+            Wyloguj się
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
