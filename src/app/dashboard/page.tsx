@@ -37,21 +37,22 @@ export default function Dashboard() {
             <div>
               <p className="font-semibold text-3xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
               <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
+              {/* Sekcja przycisków pod nagłówkiem */}
+              <div className="mt-6 flex flex-wrap gap-2">
+                <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
+                  <span className="text-cyan-500">⚙️</span>
+                  Ustawienia konta
+                </button>
+                <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
+                  <span className="text-cyan-500">➕</span>
+                  Stwórz mój Żywy Pomnik
+                </button>
+                <button className="border border-cyan-500 text-cyan-600 rounded-full px-4 py-2 text-sm hover:bg-cyan-50 flex items-center gap-2">
+                  <span className="text-cyan-500">➕</span>
+                  Utwórz stronę pamięci
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-6 md:mt-4">
-            <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
-              <span className="text-cyan-500">⚙️</span>
-              Ustawienia konta
-            </button>
-            <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
-              <span className="text-cyan-500">➕</span>
-              Stwórz mój Żywy Pomnik
-            </button>
-            <button className="border border-cyan-500 text-cyan-600 rounded-full px-4 py-2 text-sm hover:bg-cyan-50 flex items-center gap-2">
-              <span className="text-cyan-500">➕</span>
-              Utwórz stronę pamięci
-            </button>
           </div>
         </div>
       </div>
