@@ -1,9 +1,12 @@
 // src/app/layout.tsx
 import './globals.css'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Nunito } from 'next/font/google'
 
-const inter = Inter({ subsets: ['latin'] })
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+})
 
 export const metadata: Metadata = {
   title: 'Kreator wspomnień',
@@ -13,7 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pl">
-      <body className={inter.className + ' bg-gray-50 text-gray-900'}>
+      <body className={nunito.className + ' bg-gray-50 text-gray-900'}>
         {children}
       </body>
     </html>
