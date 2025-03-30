@@ -32,8 +32,8 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#f6faf9] flex items-center justify-center p-0 m-0">
-      <div className="w-full max-w-md bg-white p-0 rounded-lg shadow-md">
+    <div className="h-screen w-full bg-[#f6faf9] flex items-center justify-center p-0">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center text-[#00bcd4] mb-2">
           Zaloguj się
         </h1>
@@ -42,7 +42,7 @@ export default function Login() {
         </p>
 
         <form
-          className="space-y-4 max-w-[20rem] mx-auto"
+          className="space-y-4 max-w-[28rem] mx-auto"
           onKeyDown={handleKeyDown}
         >
           <div>
