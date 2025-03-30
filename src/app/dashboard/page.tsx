@@ -30,7 +30,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen w-full bg-gray-100 p-0 m-0">
       {/* Sekcja nagłówka */}
-      <div className="w-full bg-white rounded-md shadow py-16 px-6 mb-0">
+      <div className="w-full bg-white rounded-md shadow py-8 px-6 mb-0">
         <div className="max-w-6xl mx-auto flex items-center space-x-4">
           <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
           <div>
@@ -41,8 +41,8 @@ export default function Dashboard() {
       </div>
 
       {/* Sekcja przycisków */}
-      <div className="w-full bg-white rounded-md shadow py-6 px-6 mb-6">
-        <div className="max-w-6xl mx-auto flex flex-wrap gap-2">
+      <div className="w-full bg-white rounded-md shadow py-4 px-6 mb-6">
+        <div className="max-w-6xl mx-auto flex flex-wrap gap-2 justify-end">
           <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
             <span className="text-cyan-500">⚙️</span>
             Ustawienia konta
