@@ -7,15 +7,12 @@ import Loading from '../../components/Loading'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data, error } = await supabase.auth.getUser()
-      if (data?.user) {
-        setIsLoggedIn(true)
-      } else {
+      const { data } = await supabase.auth.getUser()
+      if (!data?.user) {
         router.push('/auth/login')
       }
       setIsLoading(false)
@@ -26,7 +23,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (isLoading) return <Loading />
 
-  return (
-    <main className="min-h-screen p-0 bg-gray-50">{children}</main>
-  )
+  return children
 }
