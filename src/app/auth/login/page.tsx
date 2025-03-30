@@ -18,7 +18,7 @@ export default function Login() {
     })
 
     if (error) {
-      setError(error.message)
+      setError('Nieprawidłowy adres e-mail lub hasło')
     } else {
       router.push('/dashboard')
     }
