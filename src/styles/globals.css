@@ -6,3 +6,7 @@ html, body {
 }
 @tailwind base;
 @tailwind components;
+
+.p-6 {
+    padding: 0rem;
+  }
