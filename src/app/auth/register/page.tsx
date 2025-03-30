@@ -41,7 +41,7 @@ export default function RegisterPage() {
   }
 
   return (
-  <div className="h-screen w-full bg-[#f6faf9] flex items-center justify-center overflow-hidden">
+  <div className="h-screen w-full bg-[#EDF2F7] flex items-center justify-center overflow-hidden">
       <div className="w-full max-w-3xl bg-white p-8 rounded-lg shadow-md">
         <h1 className="text-3xl font-semibold text-center text-[#00bcd4] mb-2">
           Utwórz swoje konto
