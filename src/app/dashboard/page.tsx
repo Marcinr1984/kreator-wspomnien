@@ -29,9 +29,9 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gray-100 p-0 m-0">
+    <div className="min-h-screen w-full bg-[#f3f6f8] p-0 m-0">
       {/* Sekcja nagłówka */}
-      <div className="w-full bg-white rounded-md shadow py-4 px-6 mb-0">
+      <div className="w-full bg-white rounded-md shadow-md shadow-gray-300/30 py-4 px-6 mb-0">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <UserCircleIcon className="w-12 h-12 text-cyan-600" />
@@ -48,7 +48,7 @@ export default function Dashboard() {
       </div>
 
       {/* Sekcja przycisków */}
-      <div className="w-full bg-white rounded-md shadow py-4 px-6 mb-6">
+      <div className="w-full bg-white rounded-md shadow-md shadow-gray-300/30 py-4 px-6 mb-6">
         <div className="max-w-6xl mx-auto flex flex-wrap gap-2 justify-end">
           <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
             <Cog6ToothIcon className="w-5 h-5 text-cyan-600" />
@@ -66,7 +66,7 @@ export default function Dashboard() {
       </div>
 
       {/* Sekcja pamięci */}
-      <div className="max-w-6xl mx-auto bg-white rounded-md shadow p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-md shadow-md shadow-gray-300/30 p-6">
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Twoje pamiątki</h2>
