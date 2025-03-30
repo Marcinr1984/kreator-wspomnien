@@ -30,8 +30,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen w-full bg-gray-100 p-0 m-0">
       {/* Sekcja nagłówka */}
-      <div className="w-full bg-white shadow py-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between px-6 max-w-full">
+      <div className="w-full bg-white rounded-md shadow p-6 mb-6">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
             <div>
