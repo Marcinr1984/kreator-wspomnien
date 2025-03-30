@@ -56,7 +56,7 @@ export default function Dashboard() {
             <span className="text-cyan-500">➕</span>
             Stwórz mój Żywy Pomnik
           </button>
-          <button className="border border-cyan-500 text-cyan-600 rounded-full px-4 py-2 text-sm hover:bg-cyan-50 flex items-center gap-2">
+          <button className="border border-gray-300 text-cyan-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
             <span className="text-cyan-500">➕</span>
             Utwórz stronę pamięci
           </button>
