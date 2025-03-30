@@ -68,13 +68,9 @@ export default function Dashboard() {
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Twoje pamiątkii</h2>
-            <div className="flex gap-2">
-              <button className="border border-gray-300 text-gray-700 rounded-full px-3 py-1 text-sm hover:bg-gray-100">Poprzednie</button>
-              <button className="border border-gray-300 text-gray-700 rounded-full px-3 py-1 text-sm hover:bg-gray-100">Następny</button>
-            </div>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(5)].map((_, i) => (
               <div key={i} className="flex flex-col items-center justify-center border border-dashed border-gray-300 rounded-lg p-4 h-32 text-center text-sm text-gray-600 hover:bg-gray-100 cursor-pointer">
                 <div className="text-2xl mb-2">＋</div>
                 <div>Nowa strona pamięci</div>
