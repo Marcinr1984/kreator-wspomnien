@@ -56,7 +56,7 @@ export default function Dashboard() {
           </button>
           <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
             <PlusIcon className="w-5 h-5 text-cyan-500" />
-            Stwórz mój Żywy Pomnik
+            Stwórz mój żywy pomnik
           </button>
           <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
             <PlusIcon className="w-5 h-5 text-cyan-500" />
