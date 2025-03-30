@@ -36,7 +36,7 @@ export default function Dashboard() {
           <div className="flex items-center space-x-4">
             <UserCircleIcon className="w-12 h-12 text-cyan-600" />
             <div>
-              <p className="font-semibold text-3xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
+              <p className="font-semibold text-2xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
               <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
             </div>
           </div>
