@@ -31,7 +31,7 @@ export default function Dashboard() {
     <div className="min-h-screen w-full bg-gray-100 p-0 m-0">
       {/* Sekcja nagłówka */}
       <div className="w-full bg-white rounded-md shadow p-6 mb-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between">
+        <div className="w-full flex flex-col md:flex-row md:items-center md:justify-between px-6">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
             <div>
@@ -48,7 +48,7 @@ export default function Dashboard() {
       </div>
 
       {/* Sekcja pamięci */}
-      <div className="max-w-6xl mx-auto bg-white rounded-md shadow p-6">
+      <div className="w-full bg-white rounded-md shadow p-6 mx-0">
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold">Twoje pamiątki</h2>
