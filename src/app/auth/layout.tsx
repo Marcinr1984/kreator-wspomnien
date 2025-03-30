@@ -1,7 +1,17 @@
+// src/app/auth/layout.tsx
+import { Nunito } from 'next/font/google'
+
+const nunito = Nunito({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+})
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-    return (
-      <main className="min-h-screen flex items-center justify-center p-0 m-0 bg-[#f6faf9]">
+  return (
+    <html lang="pl">
+      <body className={nunito.className}>
         {children}
-      </main>
-    )
-  }
+      </body>
+    </html>
+  )
+}
