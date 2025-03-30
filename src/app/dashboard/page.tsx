@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../utils/supabaseClient'
-import { Cog6ToothIcon, PlusIcon } from '@heroicons/react/24/solid'
+import { Cog6ToothIcon, PlusIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 
 export default function Dashboard() {
   const [userName, setUserName] = useState<string | null>(null)
@@ -34,7 +34,7 @@ export default function Dashboard() {
       <div className="w-full bg-white rounded-md shadow py-4 px-6 mb-0">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
+            <UserCircleIcon className="w-12 h-12 text-cyan-600" />
             <div>
               <p className="font-semibold text-3xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
               <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
@@ -68,7 +68,7 @@ export default function Dashboard() {
       <div className="max-w-6xl mx-auto bg-white rounded-md shadow p-6">
         <div className="bg-gray-50 p-4 rounded-lg">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold">Twoje pamiątkii</h2>
+            <h2 className="text-lg font-semibold">Twoje pamiątki</h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
             {[...Array(5)].map((_, i) => (
