@@ -27,6 +27,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (isLoading) return <Loading />
 
   return (
-    <main className="min-h-screen p-6 bg-gray-50">{children}</main>
+    <main className="min-h-screen p-0 bg-gray-50">{children}</main>
   )
 }
