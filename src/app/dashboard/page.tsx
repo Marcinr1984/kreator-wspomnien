@@ -35,7 +35,7 @@ export default function Dashboard() {
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
             <div>
-              <p className="font-normal text-2x1 text-gray-800">Witam, {userName || 'Użytkowniku'}</p>
+              <p className="font-semibold text-3xl text-gray-800">Witam, {userName || 'Użytkowniku'}</p>
               <p className="text-sm text-gray-500">Jesteś obecnie na Planie FREE</p>
             </div>
           </div>
