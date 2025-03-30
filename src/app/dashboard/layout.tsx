@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Sidebar from '../../components/Sidebar'
 import { supabase } from '../../utils/supabaseClient'
 import { useRouter } from 'next/navigation'
 import Loading from '../../components/Loading'
@@ -28,9 +27,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (isLoading) return <Loading />
 
   return (
-    <div className="flex min-h-screen">
-      {isLoggedIn && <Sidebar />}
-      <main className="flex-1 p-6 bg-gray-50">{children}</main>
-    </div>
+    <main className="min-h-screen p-6 bg-gray-50">{children}</main>
   )
 }
