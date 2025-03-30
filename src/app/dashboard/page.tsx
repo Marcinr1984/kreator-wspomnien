@@ -40,9 +40,18 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
-            <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100">Ustawienia konta</button>
-            <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100">Stwórz mój Żywy Pomnik</button>
-            <button className="border border-blue-500 text-blue-600 rounded-full px-4 py-2 text-sm hover:bg-blue-50">Utwórz stronę pamięci</button>
+            <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
+              <span>⚙️</span>
+              Ustawienia konta
+            </button>
+            <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
+              <span>➕</span>
+              Stwórz mój Żywy Pomnik
+            </button>
+            <button className="border border-blue-500 text-blue-600 rounded-full px-4 py-2 text-sm hover:bg-blue-50 flex items-center gap-2">
+              <span>➕</span>
+              Utwórz stronę pamięci
+            </button>
           </div>
         </div>
       </div>
