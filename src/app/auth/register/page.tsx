@@ -49,6 +49,7 @@ export default function RegisterPage() {
         <p className="text-center text-base leading-relaxed text-gray-600 mb-8">
           Dołącz do DlaBliskich, aby zachować własne dziedzictwo, aby utworzyć stronę pamięci lub żywy pomnika!
         </p>
+        <div className="w-full h-[2px] bg-[#00bcd4] mb-8" />
 
         <form onSubmit={handleSubmit} className="space-y-4 max-w-[20rem] mx-auto">
           <div>
