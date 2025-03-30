@@ -30,30 +30,31 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen w-full bg-gray-100 p-0 m-0">
       {/* Sekcja nagłówka */}
-      <div className="w-full bg-white rounded-md shadow py-20 px-6 mb-6">
-          <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-end md:justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
-            <div>
-              <p className="font-semibold text-3xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
-              <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
-              {/* Sekcja przycisków pod nagłówkiem */}
-              <div className="mt-6 flex flex-wrap gap-2">
-                <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
-                  <span className="text-cyan-500">⚙️</span>
-                  Ustawienia konta
-                </button>
-                <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
-                  <span className="text-cyan-500">➕</span>
-                  Stwórz mój Żywy Pomnik
-                </button>
-                <button className="border border-cyan-500 text-cyan-600 rounded-full px-4 py-2 text-sm hover:bg-cyan-50 flex items-center gap-2">
-                  <span className="text-cyan-500">➕</span>
-                  Utwórz stronę pamięci
-                </button>
-              </div>
-            </div>
+      <div className="w-full bg-white rounded-md shadow py-16 px-6 mb-0">
+        <div className="max-w-6xl mx-auto flex items-center space-x-4">
+          <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
+          <div>
+            <p className="font-semibold text-3xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
+            <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
           </div>
+        </div>
+      </div>
+
+      {/* Sekcja przycisków */}
+      <div className="w-full bg-white rounded-md shadow py-6 px-6 mb-6">
+        <div className="max-w-6xl mx-auto flex flex-wrap gap-2">
+          <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
+            <span className="text-cyan-500">⚙️</span>
+            Ustawienia konta
+          </button>
+          <button className="border border-gray-300 text-gray-700 rounded-full px-4 py-2 text-sm hover:bg-gray-100 flex items-center gap-2">
+            <span className="text-cyan-500">➕</span>
+            Stwórz mój Żywy Pomnik
+          </button>
+          <button className="border border-cyan-500 text-cyan-600 rounded-full px-4 py-2 text-sm hover:bg-cyan-50 flex items-center gap-2">
+            <span className="text-cyan-500">➕</span>
+            Utwórz stronę pamięci
+          </button>
         </div>
       </div>
 
