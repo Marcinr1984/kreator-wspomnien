@@ -34,7 +34,7 @@ export default function Login() {
   return (
   <div className="h-screen w-full bg-[#f6faf9] flex items-center justify-center p-0 font-sans">
       <div className="w-full max-w-4xl bg-white p-8 rounded-lg shadow-md font-sans">
-        <h1 className="text-2xl font-bold text-center text-[#00bcd4] mb-2">
+        <h1 className="text-2xl font-semiblod text-center text-[#00bcd4] mb-2">
           Zaloguj się
         </h1>
         <p className="text-center text-base leading-relaxed text-gray-600 mb-8">
