@@ -9,7 +9,7 @@ const nunito = Nunito({
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pl">
-      <body className={nunito.className}>
+      <body className={`${nunito.className} font-sans`}>
         {children}
       </body>
     </html>
