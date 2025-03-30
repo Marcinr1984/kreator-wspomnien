@@ -30,8 +30,8 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen w-full bg-gray-100 p-0 m-0">
       {/* Sekcja nagłówka */}
-      <div className="w-full bg-white rounded-md shadow py-10 px-6 mb-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between">
+      <div className="w-full bg-white rounded-md shadow py-20 px-6 mb-6">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-end md:justify-between">
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center font-bold text-lg text-white">👤</div>
             <div>
@@ -48,7 +48,7 @@ export default function Dashboard() {
               <span>➕</span>
               Stwórz mój Żywy Pomnik
             </button>
-            <button className="border border-blue-500 text-blue-600 rounded-full px-4 py-2 text-sm hover:bg-blue-50 flex items-center gap-2">
+            <button className="border border-cyan-500 text-cyan-600 rounded-full px-4 py-2 text-sm hover:bg-cyan-50 flex items-center gap-2">
               <span>➕</span>
               Utwórz stronę pamięci
             </button>
