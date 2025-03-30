@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../utils/supabaseClient'
-import { Cog6ToothIcon, PlusIcon, UserCircleIcon } from '@heroicons/react/24/solid'
+import { Cog6ToothIcon, PlusIcon, UserCircleIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/solid'
 
 export default function Dashboard() {
   const [userName, setUserName] = useState<string | null>(null)
@@ -40,7 +40,8 @@ export default function Dashboard() {
               <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
             </div>
           </div>
-          <button onClick={handleLogout} className="text-sm text-red-500 hover:underline">
+          <button onClick={handleLogout} className="text-sm text-red-500 hover:underline flex items-center gap-1">
+            <ArrowRightOnRectangleIcon className="w-5 h-5 text-red-500" />
             Wyloguj się
           </button>
         </div>
