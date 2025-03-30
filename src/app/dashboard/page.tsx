@@ -32,7 +32,7 @@ export default function Dashboard() {
     <div className="min-h-screen w-full bg-[#EDF2F7] p-0 m-0">
       {/* Sekcja nagłówka */}
       <div className="w-full bg-white rounded-md shadow-md shadow-gray-300/30 py-4 px-6 mb-0">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+        <div className="max-w-6xl mx-auto flex items-start justify-between">
           <div className="flex items-center space-x-4">
             <UserCircleIcon className="w-12 h-12 text-cyan-600" />
             <div>
