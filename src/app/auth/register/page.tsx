@@ -47,7 +47,7 @@ export default function RegisterPage() {
           Utwórz swoje konto
         </h1>
         <p className="text-center text-base leading-relaxed text-gray-600 mb-8">
-          Dołącz do Keeper, aby zacząć zachować własne dziedzictwo, aby stać się administratorem Opiekuna istniejącego pomnika i wiele więcej!
+          Dołącz do DlaBliskich, aby zachować własne dziedzictwo, aby utworzyć stronę pamięci lub żywy pomnika!
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4 max-w-[20rem] mx-auto">
