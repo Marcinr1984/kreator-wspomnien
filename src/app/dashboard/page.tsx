@@ -80,9 +80,16 @@ export default function Dashboard() {
       <StepFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSave={() => {
+        onSave={async () => {
           setIsModalOpen(false)
-          router.refresh()
+          const { data, error } = await supabase
+            .from('memorial_pages')
+            .select('*')
+            .order('created_at', { ascending: false })
+
+          if (!error) {
+            setMemorialPages(data)
+          }
         }}
       />
       {/* Sekcja nagłówka */}
