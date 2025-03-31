@@ -8,9 +8,10 @@ import { supabase } from '../utils/supabaseClient';
 interface StepFormModalProps {
   isOpen: boolean
   onClose: () => void
+  onSave: () => void
 }
 
-export default function StepFormModal({ isOpen, onClose }: StepFormModalProps) {
+export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModalProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const session = useSession();
   const user = session?.user;
@@ -124,6 +125,7 @@ export default function StepFormModal({ isOpen, onClose }: StepFormModalProps) {
       setIsSaved(true);
       setTimeout(() => {
         setIsSaved(false);
+        onSave();
         onClose();
       }, 1500);
     }
