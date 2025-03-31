@@ -77,7 +77,14 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen w-full bg-[#EDF2F7] p-0 m-0">
-      <StepFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <StepFormModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={() => {
+          setIsModalOpen(false)
+          router.refresh()
+        }}
+      />
       {/* Sekcja nagłówka */}
       <div className="w-full bg-white rounded-md shadow-md shadow-gray-300/30 py-4 px-6 mb-0">
         <div className="max-w-6xl mx-auto flex items-start justify-between">
