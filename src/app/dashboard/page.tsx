@@ -122,38 +122,35 @@ export default function Dashboard() {
             </button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {Array.from({ length: 5 }).map((_, i) => {
-              const page = memorialPages[i];
-              return (
-                <div
-                  key={page?.id || i}
-                  className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square text-center text-sm text-gray-600 hover:bg-gray-100 cursor-pointer"
-                >
-                  {page ? (
-                    <>
-                      <div className="bg-gray-100 p-4 rounded-full flex items-center justify-center w-16 h-16 mb-2">
-                        {page.photo_url ? (
-                          <img src={page.photo_url} alt="miniatura" className="w-full h-full object-cover rounded-full" />
-                        ) : (
-                          <span className="text-2xl text-gray-500">📘</span>
-                        )}
-                      </div>
-                      <div className="text-sm font-semibold text-gray-700 truncate w-full text-center">
-                        {page.name || 'Strona pamięci'}
-                      </div>
-                      <div className="text-xs text-gray-400">{page.created_at?.slice(0, 10)}</div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="bg-gray-100 p-4 rounded-full flex items-center justify-center w-16 h-16 mb-2">
-                        <PlusIcon className="w-6 h-6 text-cyan-500" />
-                      </div>
-                      <div className="text-sm text-gray-400">Pusta pamiątka</div>
-                    </>
-                  )}
-                </div>
-              )
-            })}
+            {memorialPages.map((page, i) => (
+              <div
+                key={page?.id || i}
+                className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square text-center text-sm text-gray-600 hover:bg-gray-100 cursor-pointer"
+              >
+                {page ? (
+                  <>
+                    <div className="bg-gray-100 p-4 rounded-full flex items-center justify-center w-16 h-16 mb-2">
+                      {page.photo_url ? (
+                        <img src={page.photo_url} alt="miniatura" className="w-full h-full object-cover rounded-full" />
+                      ) : (
+                        <span className="text-2xl text-gray-500">📘</span>
+                      )}
+                    </div>
+                    <div className="text-sm font-semibold text-gray-700 truncate w-full text-center">
+                      {[page.first_name, page.last_name].filter(Boolean).join(' ') || 'Strona pamięci'}
+                    </div>
+                    <div className="text-xs text-gray-400">{page.created_at?.slice(0, 10)}</div>
+                  </>
+                ) : (
+                  <>
+                    <div className="bg-gray-100 p-4 rounded-full flex items-center justify-center w-16 h-16 mb-2">
+                      <PlusIcon className="w-6 h-6 text-cyan-500" />
+                    </div>
+                    <div className="text-sm text-gray-400">Pusta pamiątka</div>
+                  </>
+                )}
+              </div>
+            ))}
           </div>
           <div className="mt-4 text-center text-sm text-gray-500">
             {memorialPages.length > 0
