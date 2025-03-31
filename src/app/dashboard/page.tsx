@@ -13,6 +13,8 @@ export default function Dashboard() {
   const router = useRouter()
 
   useEffect(() => {
+    let subscription: any
+
     const getMemorialPages = async () => {
       const {
         data: { user },
@@ -45,20 +47,26 @@ export default function Dashboard() {
         const name = data.user.user_metadata?.first_name || data.user.user_metadata?.name || data.user.email
         setUserName(name)
       }
-      getMemorialPages()
+      await getMemorialPages()
+
+      subscription = supabase
+        .channel('custom-all-channel')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'memorial_pages' },
+          async () => {
+            await getMemorialPages()
+          }
+        )
+        .subscribe()
     }
 
     getUserAndMemorialPages()
 
-    const subscription = supabase
-      .channel('custom-all-channel')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'memorial_pages' }, () => {
-        getMemorialPages()
-      })
-      .subscribe()
-
     return () => {
-      supabase.removeChannel(subscription)
+      if (subscription) {
+        supabase.removeChannel(subscription)
+      }
     }
   }, [router])
 
