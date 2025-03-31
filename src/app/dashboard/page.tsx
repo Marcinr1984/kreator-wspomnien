@@ -155,6 +155,11 @@ export default function Dashboard() {
               )
             })}
           </div>
+          <div className="mt-4 text-center text-sm text-gray-500">
+            {memorialPages.length > 0
+              ? `Liczba załadowanych stron pamięci: ${memorialPages.length}`
+              : 'Brak pobranych danych ze strony memorial_pages'}
+          </div>
         </div>
       </div>
     </div>
