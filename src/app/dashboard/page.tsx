@@ -142,6 +142,19 @@ export default function Dashboard() {
                         {[page.first_name, page.last_name].filter(Boolean).join(' ') || 'Strona pamięci'}
                       </div>
                       <div className="text-xs text-gray-400">{page.created_at?.slice(0, 10)}</div>
+                      <button
+                        onClick={async () => {
+                          const { error } = await supabase.from('memorial_pages').delete().eq('id', page.id);
+                          if (error) {
+                            console.error('Błąd podczas usuwania strony pamięci:', error);
+                          } else {
+                            setMemorialPages(memorialPages.filter(p => p.id !== page.id));
+                          }
+                        }}
+                        className="mt-2 text-xs text-red-500 hover:underline"
+                      >
+                        Usuń
+                      </button>
                     </>
                   ) : (
                     <>
@@ -154,11 +167,6 @@ export default function Dashboard() {
                 </div>
               )
             })}
-          </div>
-          <div className="mt-4 text-center text-sm text-gray-500">
-            {memorialPages.length > 0
-              ? `Liczba załadowanych stron pamięci: ${memorialPages.length}`
-              : 'Brak pobranych danych ze strony memorial_pages'}
           </div>
         </div>
       </div>
