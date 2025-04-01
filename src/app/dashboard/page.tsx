@@ -180,10 +180,10 @@ export default function Dashboard() {
                     </>
                   ) : (
                     <>
-                      <div className="bg-gray-100 p-4 rounded-full flex items-center justify-center w-20 h-20 mb-2">
+                      <div className="bg-gray-100 p-6 rounded-lg flex items-center justify-center w-24 h-24 mb-2">
                         <PlusIcon className="w-6 h-6 text-cyan-500" />
                       </div>
-                      <div className="text-sm text-gray-400">Pusta pamiątka</div>
+                      <div className="text-sm text-gray-600 font-medium">Nowa strona pamięci</div>
                     </>
                   )}
                 </div>
