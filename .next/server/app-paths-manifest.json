@@ -1,5 +1,7 @@
 {
+  "/not-found": "app/not-found.js",
+  "/memorial/[memorialId]/page": "app/memorial/[memorialId]/page.js",
   "/page": "app/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/auth/login/page": "app/auth/login/page.js"
+  "/auth/login/page": "app/auth/login/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
 }

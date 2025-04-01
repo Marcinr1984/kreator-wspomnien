@@ -2,7 +2,7 @@
 
 import { Dialog, Transition } from '@headlessui/react'
 import { useSession } from '@supabase/auth-helpers-react'
-import { Fragment, useState } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { supabase } from '../utils/supabaseClient';
 
 interface StepFormModalProps {
@@ -13,8 +13,19 @@ interface StepFormModalProps {
 
 export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModalProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const session = useSession();
-  const user = session?.user;
+  const [user, setUser] = useState<any>(null);
+  
+  useEffect(() => {
+    const getUser = async () => {
+      const { data, error } = await supabase.auth.getUser();
+      if (data?.user) {
+        setUser(data.user);
+      } else {
+        setUser(null);
+      }
+    };
+    getUser();
+  }, []);
   const [step1Data, setStep1Data] = useState({
     firstName: '',
     lastName: '',
@@ -33,6 +44,7 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
   });
   const [step3Errors, setStep3Errors] = useState<{ [key: string]: string }>({});
   const [isSaved, setIsSaved] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
 
   const validateStep1 = () => {
@@ -71,7 +83,11 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
   };
   
   const handleSave = async () => {
-  if (!user?.id) {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    if (isSaved) return;
+    setIsSaved(true);
+    if (!user?.id) {
     alert("Nie jesteś zalogowany. Nie można zapisać strony pamięci.");
     return;
   }
@@ -115,19 +131,23 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
 
     const { data, error } = await supabase
       .from('memorial_pages')
-      .insert([allData]);
+      .insert([allData])
+      .select();
 
     if (error) {
       console.error('Błąd przy zapisie strony pamięci:', error);
       alert("Błąd przy zapisie: " + error.message);
+      setIsSaved(false);
+      setIsSubmitting(false);
     } else {
       console.log('Strona pamięci zapisana:', data);
-      setIsSaved(true);
+      console.log("ID nowo utworzonej strony:", data?.[0]?.id);
+      console.log("Zamykam modal...");
+      onClose();
+      console.log("Przekierowuję do:", `/memorial/${data?.[0]?.id}`);
       setTimeout(() => {
-        setIsSaved(false);
-        onSave();
-        onClose();
-      }, 1500);
+        window.location.href = `/memorial/${data?.[0]?.id}`;
+      }, 300);
     }
   };
 
@@ -394,11 +414,7 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
                   </form>
                 )}
 
-                {isSaved && (
-                  <div className="px-6 py-2 text-green-600 text-sm font-medium text-center">
-                    ✅ Strona pamięci została zapisana!
-                  </div>
-                )}
+                
                 <div className="px-6 py-4 flex justify-between border-t border-gray-200">
                   {currentStep > 1 && (
                     <button
@@ -421,7 +437,8 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
                   <button
                       type="button"
                       onClick={handleSave}
-                      className="ml-auto inline-flex justify-center rounded-md border border-transparent bg-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-cyan-700"
+                      disabled={isSubmitting}
+                      className="ml-auto inline-flex justify-center rounded-md border border-transparent bg-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-cyan-700 disabled:opacity-50"
                     >
                       Zapisz
                     </button>

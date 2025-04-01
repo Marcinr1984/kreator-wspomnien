@@ -152,7 +152,10 @@ export default function Dashboard() {
                   className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square text-center text-sm text-gray-600 hover:bg-gray-100 cursor-pointer"
                 >
                   {page ? (
-                    <>
+                    <button
+                      onClick={() => router.push(`/memorial/${page.id}`)}
+                      className="flex flex-col items-center justify-center w-full h-full"
+                    >
                       <div className="bg-gray-100 p-0 rounded-lg flex items-center justify-center w-24 h-24 mb-2">
                         {page.photo_url ? (
                           <img src={page.photo_url} alt="miniatura" className="w-full h-full object-cover rounded-lg" />
@@ -164,8 +167,9 @@ export default function Dashboard() {
                         {[page.first_name, page.last_name].filter(Boolean).join(' ') || 'Strona pamięci'}
                       </div>
                       <div className="text-xs text-gray-400">{page.created_at?.slice(0, 10)}</div>
-                      <button
-                        onClick={async () => {
+                      <div
+                        onClick={async (e) => {
+                          e.stopPropagation()
                           const { error } = await supabase.from('memorial_pages').delete().eq('id', page.id);
                           if (error) {
                             console.error('Błąd podczas usuwania strony pamięci:', error);
@@ -173,11 +177,11 @@ export default function Dashboard() {
                             setMemorialPages(memorialPages.filter(p => p.id !== page.id));
                           }
                         }}
-                        className="mt-2 text-xs text-red-500 hover:underline"
+                        className="mt-2 text-xs text-red-500 hover:underline cursor-pointer"
                       >
                         Usuń
-                      </button>
-                    </>
+                      </div>
+                    </button>
                   ) : (
                     <>
                       <div className="bg-gray-100 p-6 rounded-lg flex items-center justify-center w-24 h-24 mb-2">
