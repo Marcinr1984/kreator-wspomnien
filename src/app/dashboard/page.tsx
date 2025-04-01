@@ -153,7 +153,7 @@ export default function Dashboard() {
                 >
                   {page ? (
                     <>
-                      <div className="bg-gray-100 p-4 rounded-lg flex items-center justify-center w-24 h-24 mb-2">
+                      <div className="bg-gray-100 p-0 rounded-lg flex items-center justify-center w-24 h-24 mb-2">
                         {page.photo_url ? (
                           <img src={page.photo_url} alt="miniatura" className="w-full h-full object-cover rounded-lg" />
                         ) : (
