@@ -153,7 +153,7 @@ export default function Dashboard() {
                 >
                   {page ? (
                     <>
-                      <div className="bg-gray-100 p-4 rounded-lg flex items-center justify-center w-24 h-24 mb-2">
+                      <div className="w-full h-full mb-2">
                         {page.photo_url ? (
                           <img src={page.photo_url} alt="miniatura" className="w-full h-full object-cover rounded-lg" />
                         ) : (
@@ -180,7 +180,7 @@ export default function Dashboard() {
                     </>
                   ) : (
                     <>
-                      <div className="bg-gray-100 p-6 rounded-lg flex items-center justify-center w-24 h-24 mb-2">
+                      <div className="bg-gray-100 rounded-lg flex items-center justify-center w-full h-full mb-2">
                         <PlusIcon className="w-6 h-6 text-cyan-500" />
                       </div>
                       <div className="text-sm text-gray-600 font-medium">Nowa strona pamięci</div>
