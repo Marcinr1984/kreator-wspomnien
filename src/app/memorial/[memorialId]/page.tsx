@@ -83,7 +83,7 @@ export default function MemorialPage() {
         </div>
 
         {/* Sekcja z kartą */}
-        <div className="bg-white -mt-16 pt-24 max-w-4xl mx-auto rounded-lg shadow-md p-6 relative z-10 flex flex-col md:flex-row md:items-center md:gap-6 md:pl-72">
+        <div className="bg-white -mt-16 pt-24 max-w-4xl mx-auto rounded-lg shadow-md p-6 relative z-10 flex flex-col md:flex-row">
           <div className="absolute -top-32 left-6 md:left-12 z-20">
             <img
               src={pageData.photo_url}
@@ -91,15 +91,17 @@ export default function MemorialPage() {
               className="w-64 h-64 object-cover rounded-md shadow-md border-4 border-white"
             />
           </div>
-          <h1 className="text-2xl font-semibold text-gray-800 mb-1 text-center md:text-left">
-            {pageData.first_name} {pageData.last_name}
-          </h1>
-          <p className="text-sm text-gray-500 text-center md:text-left">
-            {pageData.birth_date} - {pageData.death_date || 'Obecnie'}
-          </p>
-          <div className="mt-2">
-            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full mr-2">Opublikowano</span>
-            <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">Szkic</span>
+          <div className="flex flex-col justify-center items-center text-center w-full mt-36 md:mt-0">
+            <h1 className="text-2xl font-semibold text-gray-800 mb-1">
+              {pageData.first_name} {pageData.last_name}
+            </h1>
+            <p className="text-sm text-gray-500">
+              {pageData.birth_date} - {pageData.death_date || 'Obecnie'}
+            </p>
+            <div className="mt-2">
+              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full mr-2">Opublikowano</span>
+              <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">Szkic</span>
+            </div>
           </div>
         </div>
 
