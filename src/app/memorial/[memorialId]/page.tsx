@@ -83,14 +83,12 @@ export default function MemorialPage() {
         </div>
 
         {/* Sekcja z kartą */}
-        <div className="bg-white mt-20 max-w-4xl mx-auto rounded-lg shadow-md p-6 relative z-10 flex flex-col items-center">
-          <div className="relative w-full flex justify-center">
-            <img
-              src={pageData.photo_url}
-              alt="Zdjęcie"
-              className="w-48 h-48 object-cover rounded-md shadow-md border-4 border-white absolute -top-24"
-            />
-          </div>
+        <div className="bg-white -mt-16 max-w-4xl mx-auto rounded-lg shadow-md p-6 relative z-10 flex flex-col items-center">
+          <img
+            src={pageData.photo_url}
+            alt="Zdjęcie"
+            className="w-32 h-32 object-cover rounded-md shadow-md mb-4 border-4 border-white"
+          />
           <h1 className="text-2xl font-semibold text-gray-800 mb-1">
             {pageData.first_name} {pageData.last_name}
           </h1>
