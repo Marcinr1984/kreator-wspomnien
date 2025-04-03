@@ -8,22 +8,28 @@ export default function AuthCallbackPage() {
   const [showMessage, setShowMessage] = useState(false)
 
   useEffect(() => {
-    const hash = window.location.hash.substring(1) // usuwa #
+    const hash = window.location.hash.substring(1)
     const params = new URLSearchParams(hash)
     const type = params.get('type')
 
     if (type === 'signup') {
       setShowMessage(true)
       const timer = setTimeout(() => {
-        router.push('/login')
+        router.push('/auth/login') // zmienione na prawidłową ścieżkę logowania
       }, 3000)
       return () => clearTimeout(timer)
     } else {
-      router.push('/login')
+      router.push('/auth/login')
     }
   }, [router])
 
-  if (!showMessage) return null
+  if (!showMessage) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center text-gray-500 text-sm">Aktywuję konto...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center">
