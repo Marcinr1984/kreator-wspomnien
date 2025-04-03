@@ -41,6 +41,14 @@ export default function MemorialPage() {
     }
   }, [parsedId])
 
+  const handleBannerChange = async (newUrl: string) => {
+    setPageData((prev: any) => ({ ...prev, banner_url: newUrl }))
+    await supabase
+      .from('memorial_pages')
+      .update({ banner_url: newUrl })
+      .eq('id', parsedId)
+  }
+
   if (loading) {
     return <div className="p-8">Ładowanie...</div>
   }
@@ -53,8 +61,12 @@ export default function MemorialPage() {
     <div className="bg-[#f8fbfa] min-h-screen w-full">
       <div className="max-w-4xl mx-auto">
         {/* Sekcja górna z banerem */}
-        <div className="relative h-48 bg-cover bg-center" style={{ backgroundImage: 'url(/placeholder-banner.jpg)' }}>
-          {/* Placeholder, potem będzie edytowalny */}
+        <div className="relative w-full h-56 md:h-64 lg:h-72 xl:h-80 bg-cover bg-center transition-all duration-300" style={{ backgroundImage: `url(${pageData.banner_url || '/banner1.jpg'})` }}>
+          <div className="absolute top-2 right-2 flex gap-2">
+            <button className="bg-white text-sm text-gray-700 px-3 py-1 rounded shadow" onClick={() => handleBannerChange('/banner1.jpg')}>Tło 1</button>
+            <button className="bg-white text-sm text-gray-700 px-3 py-1 rounded shadow" onClick={() => handleBannerChange('/banner2.jpg')}>Tło 2</button>
+            <button className="bg-white text-sm text-gray-700 px-3 py-1 rounded shadow" onClick={() => handleBannerChange('/banner3.jpg')}>Tło 3</button>
+          </div>
         </div>
 
         {/* Sekcja z kartą */}
