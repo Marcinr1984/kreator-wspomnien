@@ -1,15 +1,16 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
-function AuthMessage() {
+export default function AuthCallbackPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [showMessage, setShowMessage] = useState(false)
 
   useEffect(() => {
-    const type = searchParams.get('type')
+    const hash = window.location.hash.substring(1) // usuwa #
+    const params = new URLSearchParams(hash)
+    const type = params.get('type')
 
     if (type === 'signup') {
       setShowMessage(true)
@@ -20,7 +21,7 @@ function AuthMessage() {
     } else {
       router.push('/login')
     }
-  }, [router, searchParams])
+  }, [router])
 
   if (!showMessage) return null
 
@@ -33,15 +34,3 @@ function AuthMessage() {
     </div>
   )
 }
-
-export default function AuthCallbackPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Ładowanie...</div>}>
-      <AuthMessage />
-    </Suspense>
-  )
-}
-
-
-
-
