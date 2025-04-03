@@ -8,9 +8,10 @@ export default function AuthCallbackPage() {
   const [showMessage, setShowMessage] = useState(false)
 
   useEffect(() => {
-    const hash = window.location.hash.substring(1)
-    const params = new URLSearchParams(hash)
-    const type = params.get('type')
+    const fullUrl = window.location.href
+    const url = new URL(fullUrl)
+    const hashParams = new URLSearchParams(url.hash.substring(1))
+    const type = hashParams.get('type')
 
     if (type === 'signup') {
       setShowMessage(true)
@@ -19,7 +20,6 @@ export default function AuthCallbackPage() {
       }, 3000)
       return () => clearTimeout(timer)
     } else {
-      setShowMessage(false)
       router.push('/auth/login')
     }
   }, [router])
