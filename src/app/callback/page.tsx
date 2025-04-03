@@ -1,9 +1,3 @@
-// Create file /src/app/callback/layout.tsx
-export default function CallbackLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
-}
-
-// Update /src/app/callback/page.tsx
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
