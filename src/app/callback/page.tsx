@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-export default function AuthCallbackPage() {
+function AuthMessage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [showMessage, setShowMessage] = useState(false)
@@ -31,5 +31,13 @@ export default function AuthCallbackPage() {
         <p className="text-gray-600 mt-2">Zaraz zostaniesz przekierowany do strony logowania...</p>
       </div>
     </div>
+  )
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Ładowanie...</div>}>
+      <AuthMessage />
+    </Suspense>
   )
 }
