@@ -59,7 +59,7 @@ export default function MemorialPage() {
 
   return (
     <div className="bg-[#f8fbfa] min-h-screen w-full">
-      <div className="max-w-4xl mx-auto">
+      <div className="w-full">
         {/* Sekcja górna z banerem */}
         <div
           className="relative w-full h-56 md:h-64 lg:h-72 xl:h-80 bg-cover bg-center transition-all duration-300"
@@ -83,7 +83,7 @@ export default function MemorialPage() {
         </div>
 
         {/* Sekcja z kartą */}
-        <div className="bg-white -mt-16 rounded-lg shadow-md p-6 mx-4 relative z-10 flex flex-col items-center">
+        <div className="bg-white -mt-16 max-w-4xl mx-auto rounded-lg shadow-md p-6 relative z-10 flex flex-col items-center">
           <img
             src={pageData.photo_url}
             alt="Zdjęcie"
@@ -109,13 +109,13 @@ export default function MemorialPage() {
         </div>
 
         {/* Sekcja wspomnień */}
-        <div className="bg-white mt-6 mx-4 rounded-lg shadow-md p-6">
+        <div className="bg-white mt-6 max-w-4xl mx-auto rounded-lg shadow-md p-6">
           <h2 className="text-lg font-semibold mb-2">Wspomnienia</h2>
           <p className="text-sm text-gray-600">Tutaj będą szczegóły, wspomnienia itd...</p>
         </div>
 
         {/* Sekcja upamiętnień */}
-        <div className="bg-white mt-6 mx-4 rounded-lg shadow-md p-6">
+        <div className="bg-white mt-6 max-w-4xl mx-auto rounded-lg shadow-md p-6">
           <h2 className="text-lg font-semibold mb-2">Upamiętnienia</h2>
           <p className="text-sm text-gray-500 italic">Brak wiadomości. Bądź pierwszym, który coś doda.</p>
           <div className="mt-4">
