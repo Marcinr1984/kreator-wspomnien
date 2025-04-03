@@ -84,11 +84,11 @@ export default function MemorialPage() {
 
         {/* Sekcja z kartą */}
         <div className="bg-white -mt-16 pt-24 max-w-4xl mx-auto rounded-lg shadow-md p-6 relative z-10 flex flex-col items-center">
-          <div className="absolute -top-24 z-20">
+          <div className="absolute -top-24 left-8 md:left-16 z-20">
             <img
               src={pageData.photo_url}
               alt="Zdjęcie"
-              className="w-48 h-48 object-cover rounded-md shadow-md mb-4 border-4 border-white"
+              className="w-56 h-56 object-cover rounded-md shadow-md mb-4 border-4 border-white"
             />
           </div>
           <h1 className="text-2xl font-semibold text-gray-800 mb-1">
