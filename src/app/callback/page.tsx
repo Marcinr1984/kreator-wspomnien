@@ -15,10 +15,11 @@ export default function AuthCallbackPage() {
     if (type === 'signup') {
       setShowMessage(true)
       const timer = setTimeout(() => {
-        router.push('/auth/login') // zmienione na prawidłową ścieżkę logowania
+        router.push('/auth/login')
       }, 3000)
       return () => clearTimeout(timer)
     } else {
+      setShowMessage(false)
       router.push('/auth/login')
     }
   }, [router])
