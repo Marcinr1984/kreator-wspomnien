@@ -11,12 +11,12 @@ export default function MemorialPage() {
 
   const [pageData, setPageData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [position, setPosition] = useState('center')
+  const [position, setPosition] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [repositionMode, setRepositionMode] = useState(false)
   const [dragging, setDragging] = useState(false)
 
   const startDragPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
-  const startObjectPosition = useRef<string>('50% 50%')
+  const startObjectPosition = useRef<{ x: number; y: number }>({ x: 50, y: 50 })
 
   const parsedId = Number(Array.isArray(memorialId) ? memorialId[0] : memorialId)
   if (!memorialId || Array.isArray(memorialId) || isNaN(parsedId)) {
@@ -49,7 +49,8 @@ export default function MemorialPage() {
 
   useEffect(() => {
     if (pageData?.banner_position) {
-      setPosition(pageData.banner_position)
+      const [x, y] = pageData.banner_position.split(' ')
+      setPosition({ x: parseFloat(x), y: parseFloat(y) })
     }
   }, [pageData])
 
@@ -78,7 +79,7 @@ export default function MemorialPage() {
             src={pageData.banner_url || '/banner1.jpg'}
             className="w-full h-full object-cover transition-all duration-300 select-none"
             style={{
-              objectPosition: position,
+              objectPosition: `${position.x}% ${position.y}%`,
               cursor: repositionMode ? (dragging ? 'grabbing' : 'grab') : 'auto',
             }}
             draggable={false}
@@ -87,7 +88,7 @@ export default function MemorialPage() {
                 e.preventDefault()
                 setDragging(true)
                 startDragPosition.current = { x: e.clientX, y: e.clientY }
-                startObjectPosition.current = position
+                startObjectPosition.current = { ...position }
               }
             }}
             onMouseMove={(e) => {
@@ -95,9 +96,11 @@ export default function MemorialPage() {
                 const dx = e.clientX - startDragPosition.current.x
                 const dy = e.clientY - startDragPosition.current.y
                 const rect = e.currentTarget.getBoundingClientRect()
-                const percentX = Math.min(Math.max(0, parseFloat(startObjectPosition.current.split(' ')[0]) + (dx / rect.width) * 100), 100)
-                const percentY = Math.min(Math.max(0, parseFloat(startObjectPosition.current.split(' ')[1]) + (dy / rect.height) * 100), 100)
-                setPosition(`${percentX.toFixed(0)}% ${percentY.toFixed(0)}%`)
+
+                const newX = Math.min(Math.max(0, startObjectPosition.current.x + (dx / rect.width) * 100), 100)
+                const newY = Math.min(Math.max(0, startObjectPosition.current.y + (dy / rect.height) * 100), 100)
+
+                setPosition({ x: newX, y: newY })
               }
             }}
             onMouseUp={() => {
@@ -135,7 +138,7 @@ export default function MemorialPage() {
                   <button
                     className="bg-cyan-500 text-white px-4 py-2 rounded-full shadow hover:bg-cyan-600"
                     onClick={() => {
-                      supabase.from('memorial_pages').update({ banner_position: position }).eq('id', parsedId)
+                      supabase.from('memorial_pages').update({ banner_position: `${position.x}% ${position.y}%` }).eq('id', parsedId)
                       setRepositionMode(false)
                     }}
                   >
