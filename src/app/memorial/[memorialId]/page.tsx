@@ -61,8 +61,8 @@ export default function MemorialPage() {
 
       const dx = e.clientX - startDragPosition.current.x;
       const dy = e.clientY - startDragPosition.current.y;
-      const newX = Math.min(Math.max(0, startObjectPosition.current.x + (dx / imageRef.current!.offsetWidth) * 50), 100);
-      const newY = Math.min(Math.max(0, startObjectPosition.current.y + (dy / imageRef.current!.offsetHeight) * 50), 100);
+      const newX = Math.min(Math.max(0, startObjectPosition.current.x + (dx / imageRef.current!.offsetWidth) * 100), 100);
+      const newY = Math.min(Math.max(0, startObjectPosition.current.y + (dy / imageRef.current!.offsetHeight) * 100), 100);
       setPosition({ x: newX, y: newY });
     };
 
@@ -109,7 +109,7 @@ export default function MemorialPage() {
           <img
             ref={imageRef}
             src={pageData.banner_url || '/banner1.jpg'}
-            className={`w-full h-full object-cover transition-all duration-300 select-none ${repositionMode ? 'cursor-move pointer-events-auto' : 'pointer-events-none'}`}
+            className={`w-full h-full object-cover transition-all duration-300 select-none ${repositionMode ? 'cursor-grab pointer-events-auto' : 'pointer-events-none'}`}
             style={{
               objectPosition: `${position.x}% ${position.y}%`,
             }}
@@ -125,7 +125,7 @@ export default function MemorialPage() {
             }}
             draggable={false}
           />
-          <div className={`absolute ${repositionMode ? 'top-2' : 'top-10'} inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100`}>
+          <div className={`absolute ${repositionMode ? 'top-6' : 'top-10'} inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100`}>
             <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
               {!repositionMode && (
                 <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
