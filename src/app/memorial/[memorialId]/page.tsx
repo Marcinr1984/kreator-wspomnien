@@ -17,6 +17,7 @@ export default function MemorialPage() {
 
   const startDragPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
   const startObjectPosition = useRef<{ x: number; y: number }>({ x: 50, y: 50 })
+  const imageRef = useRef<HTMLImageElement | null>(null)
 
   const parsedId = Number(Array.isArray(memorialId) ? memorialId[0] : memorialId)
   if (!memorialId || Array.isArray(memorialId) || isNaN(parsedId)) {
@@ -62,6 +63,34 @@ export default function MemorialPage() {
       .eq('id', parsedId)
   }
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!repositionMode) return
+    e.preventDefault()
+    setDragging(true)
+    startDragPosition.current = { x: e.clientX, y: e.clientY }
+    startObjectPosition.current = { ...position }
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!repositionMode || !dragging) return
+    const dx = e.clientX - startDragPosition.current.x
+    const dy = e.clientY - startDragPosition.current.y
+    const rect = imageRef.current?.getBoundingClientRect()
+    if (!rect) return
+
+    const newX = Math.min(Math.max(0, startObjectPosition.current.x + (dx / rect.width) * 100), 100)
+    const newY = Math.min(Math.max(0, startObjectPosition.current.y + (dy / rect.height) * 100), 100)
+    setPosition({ x: newX, y: newY })
+  }
+
+  const handleMouseUp = () => {
+    if (repositionMode) setDragging(false)
+  }
+
+  const handleMouseLeave = () => {
+    if (repositionMode && dragging) setDragging(false)
+  }
+
   if (loading) {
     return <div className="p-8">Ładowanie...</div>
   }
@@ -76,6 +105,7 @@ export default function MemorialPage() {
         {/* Sekcja górna z banerem */}
         <div className="group relative w-full h-80 md:h-[22rem] lg:h-[26rem] xl:h-[30rem] overflow-hidden">
           <img
+            ref={imageRef}
             src={pageData.banner_url || '/banner1.jpg'}
             className="w-full h-full object-cover transition-all duration-300 select-none"
             style={{
@@ -83,32 +113,10 @@ export default function MemorialPage() {
               cursor: repositionMode ? (dragging ? 'grabbing' : 'grab') : 'auto',
             }}
             draggable={false}
-            onMouseDown={(e) => {
-              if (repositionMode) {
-                e.preventDefault()
-                setDragging(true)
-                startDragPosition.current = { x: e.clientX, y: e.clientY }
-                startObjectPosition.current = { ...position }
-              }
-            }}
-            onMouseMove={(e) => {
-              if (repositionMode && dragging) {
-                const dx = e.clientX - startDragPosition.current.x
-                const dy = e.clientY - startDragPosition.current.y
-                const rect = e.currentTarget.getBoundingClientRect()
-
-                const newX = Math.min(Math.max(0, startObjectPosition.current.x + (dx / rect.width) * 100), 100)
-                const newY = Math.min(Math.max(0, startObjectPosition.current.y + (dy / rect.height) * 100), 100)
-
-                setPosition({ x: newX, y: newY })
-              }
-            }}
-            onMouseUp={() => {
-              if (repositionMode) setDragging(false)
-            }}
-            onMouseLeave={() => {
-              if (repositionMode && dragging) setDragging(false)
-            }}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseLeave}
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
             <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
