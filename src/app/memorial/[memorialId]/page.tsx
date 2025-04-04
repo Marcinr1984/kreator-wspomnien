@@ -129,13 +129,15 @@ export default function MemorialPage() {
           <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100 z-20">
             {!repositionMode && (
               <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
+                <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition flex items-center gap-2">
+                  <span className="text-cyan-500 text-lg">✏️</span>
                   Zmień zdjęcie w tle
                 </button>
                 <button
-                  className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition"
+                  className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition flex items-center gap-2"
                   onClick={() => setRepositionMode(true)}
                 >
+                  <span className="text-cyan-500 text-lg">✏️</span>
                   Zmień pozycję zdjęcia
                 </button>
               </div>
