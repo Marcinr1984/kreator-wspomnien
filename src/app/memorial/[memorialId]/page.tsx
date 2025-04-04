@@ -61,8 +61,8 @@ export default function MemorialPage() {
 
       const dx = e.clientX - startDragPosition.current.x;
       const dy = e.clientY - startDragPosition.current.y;
-      const newX = Math.min(Math.max(0, startObjectPosition.current.x + dx / 5), 100);
-      const newY = Math.min(Math.max(0, startObjectPosition.current.y + dy / 5), 100);
+      const newX = Math.min(Math.max(0, startObjectPosition.current.x + dx / imageRef.current!.offsetWidth * 100), 100);
+      const newY = Math.min(Math.max(0, startObjectPosition.current.y + dy / imageRef.current!.offsetHeight * 100), 100);
       setPosition({ x: newX, y: newY });
     };
 
@@ -118,7 +118,10 @@ export default function MemorialPage() {
               e.preventDefault();
               setIsDragging(true);
               startDragPosition.current = { x: e.clientX, y: e.clientY };
-              startObjectPosition.current = { ...position };
+              const rect = e.currentTarget.getBoundingClientRect();
+              const currentX = (e.clientX - rect.left) / rect.width * 100;
+              const currentY = (e.clientY - rect.top) / rect.height * 100;
+              startObjectPosition.current = { x: currentX, y: currentY };
             }}
             draggable={false}
           />
