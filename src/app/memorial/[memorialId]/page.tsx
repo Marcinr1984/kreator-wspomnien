@@ -86,7 +86,7 @@ export default function MemorialPage() {
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
             <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
               {!repositionMode && (
-                <div className="flex gap-4 opacity-100">
+                <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
                     Zmień zdjęcie w tle
                   </button>
