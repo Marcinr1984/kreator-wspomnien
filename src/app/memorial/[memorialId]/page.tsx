@@ -130,7 +130,7 @@ export default function MemorialPage() {
             {!repositionMode && (
               <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button className="bg-white text-cyan-600 px-4 py-2 rounded-full shadow-md hover:bg-cyan-100 transition flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l2 2M4 20h4l10-10a2.828 2.828 0 00-4-4L4 16v4z" />
                   </svg>
                   Zmień zdjęcie w tle
@@ -139,7 +139,7 @@ export default function MemorialPage() {
                   className="bg-white text-cyan-600 px-4 py-2 rounded-full shadow-md hover:bg-cyan-100 transition flex items-center gap-2"
                   onClick={() => setRepositionMode(true)}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v16h16V4H4zm4 4h8v8H8V8z" />
                   </svg>
                   Zmień pozycję zdjęcia
