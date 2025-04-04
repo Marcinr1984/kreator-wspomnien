@@ -61,24 +61,18 @@ export default function MemorialPage() {
     <div className="bg-[#f8fbfa] min-h-screen w-full">
       <div className="w-full">
         {/* Sekcja górna z banerem */}
-        <div
-          className="relative w-full h-56 md:h-64 lg:h-72 xl:h-80 bg-cover bg-center transition-all duration-300"
+        <div className="group relative w-full h-56 md:h-64 lg:h-72 xl:h-80 bg-cover bg-center transition-all duration-300"
           style={{ backgroundImage: `url(${pageData.banner_url || '/banner1.jpg'})` }}
         >
-          <div className="absolute top-2 right-2 flex gap-2 bg-white bg-opacity-60 p-2 rounded-md shadow-md">
-            {['banner1.jpg', 'banner2.jpg', 'banner3.jpg'].map((file) => (
-              <button
-                key={file}
-                className="w-12 h-12 rounded overflow-hidden border border-gray-300 hover:ring-2 ring-cyan-600 transition-all"
-                onClick={() => handleBannerChange(`/${file}`)}
-              >
-                <img
-                  src={`/${file}`}
-                  alt={file}
-                  className="object-cover w-full h-full"
-                />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="flex gap-4">
+              <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
+                Zmień zdjęcie w tle
               </button>
-            ))}
+              <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
+                Zmień pozycję zdjęcia
+              </button>
+            </div>
           </div>
         </div>
 
