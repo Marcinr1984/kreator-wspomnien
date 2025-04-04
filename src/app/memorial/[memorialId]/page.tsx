@@ -75,14 +75,16 @@ export default function MemorialPage() {
           onMouseMove={(e) => {
             if (repositionMode && dragging) {
               const rect = e.currentTarget.getBoundingClientRect()
-              const percentX = ((e.clientX - rect.left) / rect.width) * 100
-              const percentY = ((e.clientY - rect.top) / rect.height) * 100
+              const offsetX = e.clientX - rect.left
+              const offsetY = e.clientY - rect.top
+              const percentX = (offsetX / rect.width) * 100
+              const percentY = (offsetY / rect.height) * 100
               setPosition(`${percentX.toFixed(0)}% ${percentY.toFixed(0)}%`)
             }
           }}
         >
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
-            <div className="absolute top-10 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
+            <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
               {!repositionMode && (
                 <div className="flex gap-4 opacity-100">
                   <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
