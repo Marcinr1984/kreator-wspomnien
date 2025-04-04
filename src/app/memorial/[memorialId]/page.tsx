@@ -75,11 +75,8 @@ export default function MemorialPage() {
     if (!repositionMode || !dragging) return
     const dx = e.clientX - startDragPosition.current.x
     const dy = e.clientY - startDragPosition.current.y
-    const rect = imageRef.current?.getBoundingClientRect()
-    if (!rect) return
-
-    const newX = Math.min(Math.max(0, startObjectPosition.current.x + (dx / rect.width) * 100), 100)
-    const newY = Math.min(Math.max(0, startObjectPosition.current.y + (dy / rect.height) * 100), 100)
+    const newX = Math.min(Math.max(0, startObjectPosition.current.x + dx / 5), 100)
+    const newY = Math.min(Math.max(0, startObjectPosition.current.y + dy / 5), 100)
     setPosition({ x: newX, y: newY })
   }
 
@@ -113,10 +110,26 @@ export default function MemorialPage() {
               cursor: repositionMode ? (dragging ? 'grabbing' : 'grab') : 'auto',
             }}
             draggable={false}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseLeave}
+            onMouseDown={(e) => {
+              if (!repositionMode) return;
+              setDragging(true);
+              startDragPosition.current = { x: e.clientX, y: e.clientY };
+              startObjectPosition.current = { ...position };
+            }}
+            onMouseMove={(e) => {
+              if (!repositionMode || !dragging) return;
+              const dx = e.clientX - startDragPosition.current.x;
+              const dy = e.clientY - startDragPosition.current.y;
+              const newX = Math.min(Math.max(0, startObjectPosition.current.x + dx / 5), 100);
+              const newY = Math.min(Math.max(0, startObjectPosition.current.y + dy / 5), 100);
+              setPosition({ x: newX, y: newY });
+            }}
+            onMouseUp={() => {
+              if (repositionMode) setDragging(false);
+            }}
+            onMouseLeave={() => {
+              if (repositionMode && dragging) setDragging(false);
+            }}
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
             <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
