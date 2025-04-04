@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../utils/supabaseClient'
 
@@ -14,6 +14,9 @@ export default function MemorialPage() {
   const [position, setPosition] = useState('center')
   const [repositionMode, setRepositionMode] = useState(false)
   const [dragging, setDragging] = useState(false)
+
+  const startDragPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
+  const startObjectPosition = useRef<string>('50% 50%')
 
   const parsedId = Number(Array.isArray(memorialId) ? memorialId[0] : memorialId)
   if (!memorialId || Array.isArray(memorialId) || isNaN(parsedId)) {
@@ -44,6 +47,12 @@ export default function MemorialPage() {
     }
   }, [parsedId])
 
+  useEffect(() => {
+    if (pageData?.banner_position) {
+      setPosition(pageData.banner_position)
+    }
+  }, [pageData])
+
   const handleBannerChange = async (newUrl: string) => {
     setPageData((prev: any) => ({ ...prev, banner_url: newUrl }))
     await supabase
@@ -67,21 +76,27 @@ export default function MemorialPage() {
         <div className="group relative w-full h-80 md:h-[22rem] lg:h-[26rem] xl:h-[30rem] overflow-hidden">
           <img
             src={pageData.banner_url || '/banner1.jpg'}
-            className="w-full h-full object-cover transition-all duration-300"
-            style={{ objectPosition: position, cursor: repositionMode ? (dragging ? 'grabbing' : 'grab') : 'auto' }}
+            className="w-full h-full object-cover transition-all duration-300 select-none"
+            style={{
+              objectPosition: position,
+              cursor: repositionMode ? (dragging ? 'grabbing' : 'grab') : 'auto',
+            }}
+            draggable={false}
             onMouseDown={(e) => {
               if (repositionMode) {
                 e.preventDefault()
                 setDragging(true)
+                startDragPosition.current = { x: e.clientX, y: e.clientY }
+                startObjectPosition.current = position
               }
             }}
             onMouseMove={(e) => {
               if (repositionMode && dragging) {
+                const dx = e.clientX - startDragPosition.current.x
+                const dy = e.clientY - startDragPosition.current.y
                 const rect = e.currentTarget.getBoundingClientRect()
-                const offsetX = e.clientX - rect.left
-                const offsetY = e.clientY - rect.top
-                const percentX = (offsetX / rect.width) * 100
-                const percentY = (offsetY / rect.height) * 100
+                const percentX = Math.min(Math.max(0, parseFloat(startObjectPosition.current.split(' ')[0]) + (dx / rect.width) * 100), 100)
+                const percentY = Math.min(Math.max(0, parseFloat(startObjectPosition.current.split(' ')[1]) + (dy / rect.height) * 100), 100)
                 setPosition(`${percentX.toFixed(0)}% ${percentY.toFixed(0)}%`)
               }
             }}
