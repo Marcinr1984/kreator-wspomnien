@@ -11,6 +11,8 @@ export default function MemorialPage() {
 
   const [pageData, setPageData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [position, setPosition] = useState('center')
+  const [repositionMode, setRepositionMode] = useState(false)
 
   const parsedId = Number(Array.isArray(memorialId) ? memorialId[0] : memorialId)
   if (!memorialId || Array.isArray(memorialId) || isNaN(parsedId)) {
@@ -61,8 +63,14 @@ export default function MemorialPage() {
     <div className="bg-[#f8fbfa] min-h-screen w-full">
       <div className="w-full">
         {/* Sekcja górna z banerem */}
-        <div className="group relative w-full h-56 md:h-64 lg:h-72 xl:h-80 bg-cover bg-center transition-all duration-300"
-          style={{ backgroundImage: `url(${pageData.banner_url || '/banner1.jpg'})` }}
+        <div className="group relative w-full h-80 md:h-[22rem] lg:h-[26rem] xl:h-[30rem] bg-cover bg-center transition-all duration-300"
+          style={{ backgroundImage: `url(${pageData.banner_url || '/banner1.jpg'})`, backgroundPosition: position }}
+          onMouseMove={(e) => {
+            if (repositionMode) {
+              const percent = (e.clientY / e.currentTarget.clientHeight) * 100
+              setPosition(`center ${percent.toFixed(0)}%`)
+            }
+          }}
         >
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
             <div className="absolute top-4 inset-x-0 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -70,10 +78,34 @@ export default function MemorialPage() {
                 <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
                   Zmień zdjęcie w tle
                 </button>
-                <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
+                <button
+                  className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition"
+                  onClick={() => setRepositionMode(true)}
+                >
                   Zmień pozycję zdjęcia
                 </button>
               </div>
+              {repositionMode && (
+                <div className="absolute top-16 inset-x-0 flex justify-center gap-4">
+                  <button
+                    className="bg-white text-gray-800 px-4 py-2 rounded-full shadow hover:bg-gray-100"
+                    onClick={() => {
+                      setRepositionMode(false)
+                    }}
+                  >
+                    Anuluj
+                  </button>
+                  <button
+                    className="bg-cyan-500 text-white px-4 py-2 rounded-full shadow hover:bg-cyan-600"
+                    onClick={() => {
+                      supabase.from('memorial_pages').update({ banner_position: position }).eq('id', parsedId)
+                      setRepositionMode(false)
+                    }}
+                  >
+                    Zapisz zmiany
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
