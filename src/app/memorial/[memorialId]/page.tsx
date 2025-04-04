@@ -13,6 +13,7 @@ export default function MemorialPage() {
   const [loading, setLoading] = useState(true)
   const [position, setPosition] = useState('center')
   const [repositionMode, setRepositionMode] = useState(false)
+  const [dragging, setDragging] = useState(false)
 
   const parsedId = Number(Array.isArray(memorialId) ? memorialId[0] : memorialId)
   if (!memorialId || Array.isArray(memorialId) || isNaN(parsedId)) {
@@ -64,16 +65,24 @@ export default function MemorialPage() {
       <div className="w-full">
         {/* Sekcja górna z banerem */}
         <div className="group relative w-full h-80 md:h-[22rem] lg:h-[26rem] xl:h-[30rem] bg-cover bg-center transition-all duration-300"
-          style={{ backgroundImage: `url(${pageData.banner_url || '/banner1.jpg'})`, backgroundPosition: position }}
+          style={{ backgroundImage: `url(${pageData.banner_url || '/banner1.jpg'})`, backgroundPosition: position, cursor: repositionMode ? 'grab' : 'auto' }}
+          onMouseDown={(e) => {
+            if (repositionMode) setDragging(true)
+          }}
+          onMouseUp={() => {
+            if (repositionMode) setDragging(false)
+          }}
           onMouseMove={(e) => {
-            if (repositionMode) {
-              const percent = (e.clientY / e.currentTarget.clientHeight) * 100
-              setPosition(`center ${percent.toFixed(0)}%`)
+            if (repositionMode && dragging) {
+              const rect = e.currentTarget.getBoundingClientRect()
+              const percentX = ((e.clientX - rect.left) / rect.width) * 100
+              const percentY = ((e.clientY - rect.top) / rect.height) * 100
+              setPosition(`${percentX.toFixed(0)}% ${percentY.toFixed(0)}%`)
             }
           }}
         >
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
-            <div className="absolute top-4 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
+            <div className="absolute top-10 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
               {!repositionMode && (
                 <div className="flex gap-4 opacity-100">
                   <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
