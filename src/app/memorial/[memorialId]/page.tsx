@@ -64,35 +64,34 @@ export default function MemorialPage() {
     <div className="bg-[#f8fbfa] min-h-screen w-full">
       <div className="w-full">
         {/* Sekcja górna z banerem */}
-        <div className="group relative w-full h-80 md:h-[22rem] lg:h-[26rem] xl:h-[30rem] bg-cover bg-center transition-all duration-300 select-none"
-          style={{ backgroundImage: `url(${pageData.banner_url || '/banner1.jpg'})`, backgroundPosition: position, cursor: repositionMode ? (dragging ? 'grabbing' : 'grab') : 'auto' }}
-          onMouseDown={(e) => {
-            if (repositionMode) {
-              e.preventDefault()
-              setDragging(true)
-            }
-          }}
-          onMouseMove={(e) => {
-            if (repositionMode && dragging) {
-              const rect = e.currentTarget.getBoundingClientRect()
-              const offsetX = e.clientX - rect.left
-              const offsetY = e.clientY - rect.top
-              const percentX = (offsetX / rect.width) * 100
-              const percentY = (offsetY / rect.height) * 100
-              setPosition(`${percentX.toFixed(0)}% ${percentY.toFixed(0)}%`)
-            }
-          }}
-          onMouseUp={() => {
-            if (repositionMode) {
-              setDragging(false)
-            }
-          }}
-          onMouseLeave={() => {
-            if (repositionMode && dragging) {
-              setDragging(false)
-            }
-          }}
-        >
+        <div className="group relative w-full h-80 md:h-[22rem] lg:h-[26rem] xl:h-[30rem] overflow-hidden">
+          <img
+            src={pageData.banner_url || '/banner1.jpg'}
+            className="w-full h-full object-cover transition-all duration-300"
+            style={{ objectPosition: position, cursor: repositionMode ? (dragging ? 'grabbing' : 'grab') : 'auto' }}
+            onMouseDown={(e) => {
+              if (repositionMode) {
+                e.preventDefault()
+                setDragging(true)
+              }
+            }}
+            onMouseMove={(e) => {
+              if (repositionMode && dragging) {
+                const rect = e.currentTarget.getBoundingClientRect()
+                const offsetX = e.clientX - rect.left
+                const offsetY = e.clientY - rect.top
+                const percentX = (offsetX / rect.width) * 100
+                const percentY = (offsetY / rect.height) * 100
+                setPosition(`${percentX.toFixed(0)}% ${percentY.toFixed(0)}%`)
+              }
+            }}
+            onMouseUp={() => {
+              if (repositionMode) setDragging(false)
+            }}
+            onMouseLeave={() => {
+              if (repositionMode && dragging) setDragging(false)
+            }}
+          />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
             <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
               {!repositionMode && (
