@@ -13,7 +13,6 @@ export default function MemorialPage() {
   const [loading, setLoading] = useState(true)
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [repositionMode, setRepositionMode] = useState(false)
-  const [dragging, setDragging] = useState(false)
 
   const startDragPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
   const startObjectPosition = useRef<{ x: number; y: number }>({ x: 50, y: 50 })
@@ -63,31 +62,6 @@ export default function MemorialPage() {
       .eq('id', parsedId)
   }
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!repositionMode) return
-    e.preventDefault()
-    setDragging(true)
-    startDragPosition.current = { x: e.clientX, y: e.clientY }
-    startObjectPosition.current = { ...position }
-  }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!repositionMode || !dragging) return
-    const dx = e.clientX - startDragPosition.current.x
-    const dy = e.clientY - startDragPosition.current.y
-    const newX = Math.min(Math.max(0, startObjectPosition.current.x + dx / 5), 100)
-    const newY = Math.min(Math.max(0, startObjectPosition.current.y + dy / 5), 100)
-    setPosition({ x: newX, y: newY })
-  }
-
-  const handleMouseUp = () => {
-    if (repositionMode) setDragging(false)
-  }
-
-  const handleMouseLeave = () => {
-    if (repositionMode && dragging) setDragging(false)
-  }
-
   if (loading) {
     return <div className="p-8">Ładowanie...</div>
   }
@@ -107,28 +81,29 @@ export default function MemorialPage() {
             className="w-full h-full object-cover transition-all duration-300 select-none"
             style={{
               objectPosition: `${position.x}% ${position.y}%`,
-              cursor: repositionMode ? (dragging ? 'grabbing' : 'grab') : 'auto',
+              cursor: repositionMode ? 'move' : 'auto',
             }}
-            draggable={false}
-            onMouseDown={(e) => {
+            draggable={repositionMode}
+            onDragStart={(e) => {
               if (!repositionMode) return;
-              setDragging(true);
               startDragPosition.current = { x: e.clientX, y: e.clientY };
               startObjectPosition.current = { ...position };
             }}
-            onMouseMove={(e) => {
-              if (!repositionMode || !dragging) return;
+            onDrag={(e) => {
+              if (!repositionMode || e.clientX === 0 && e.clientY === 0) return;
               const dx = e.clientX - startDragPosition.current.x;
               const dy = e.clientY - startDragPosition.current.y;
               const newX = Math.min(Math.max(0, startObjectPosition.current.x + dx / 5), 100);
               const newY = Math.min(Math.max(0, startObjectPosition.current.y + dy / 5), 100);
               setPosition({ x: newX, y: newY });
             }}
-            onMouseUp={() => {
-              if (repositionMode) setDragging(false);
-            }}
-            onMouseLeave={() => {
-              if (repositionMode && dragging) setDragging(false);
+            onDragEnd={() => {
+              if (!repositionMode) return;
+              supabase
+                .from('memorial_pages')
+                .update({ banner_position: `${position.x}% ${position.y}%` })
+                .eq('id', parsedId);
+              setRepositionMode(false);
             }}
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
