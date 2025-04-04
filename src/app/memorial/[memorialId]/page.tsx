@@ -109,7 +109,7 @@ export default function MemorialPage() {
           <img
             ref={imageRef}
             src={pageData.banner_url || '/banner1.jpg'}
-            className={`w-full h-full object-cover transition-all duration-300 select-none ${repositionMode ? 'cursor-move pointer-events-auto' : 'pointer-events-none'}`}
+            className={`w-full h-full object-cover transition-all duration-300 select-none z-0 ${repositionMode ? 'cursor-move pointer-events-auto' : 'pointer-events-none'}`}
             style={{
               objectPosition: `${position.x}% ${position.y}%`,
             }}
@@ -125,7 +125,8 @@ export default function MemorialPage() {
             }}
             draggable={false}
           />
-          <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
+          <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none z-10" />
+          <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100 z-20">
             {!repositionMode && (
               <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                 <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
