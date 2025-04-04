@@ -13,6 +13,7 @@ export default function MemorialPage() {
   const [loading, setLoading] = useState(true)
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [repositionMode, setRepositionMode] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
 
   const startDragPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
   const startObjectPosition = useRef<{ x: number; y: number }>({ x: 50, y: 50 })
@@ -54,6 +55,36 @@ export default function MemorialPage() {
     }
   }, [pageData])
 
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDragging || !repositionMode) return;
+
+      const dx = e.clientX - startDragPosition.current.x;
+      const dy = e.clientY - startDragPosition.current.y;
+      const newX = Math.min(Math.max(0, startObjectPosition.current.x + dx / 5), 100);
+      const newY = Math.min(Math.max(0, startObjectPosition.current.y + dy / 5), 100);
+      setPosition({ x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      if (isDragging && repositionMode) {
+        setIsDragging(false);
+        supabase
+          .from('memorial_pages')
+          .update({ banner_position: `${position.x}% ${position.y}%` })
+          .eq('id', parsedId);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, repositionMode, position, parsedId]);
+
   const handleBannerChange = async (newUrl: string) => {
     setPageData((prev: any) => ({ ...prev, banner_url: newUrl }))
     await supabase
@@ -83,27 +114,11 @@ export default function MemorialPage() {
               objectPosition: `${position.x}% ${position.y}%`,
               cursor: repositionMode ? 'move' : 'auto',
             }}
-            draggable={repositionMode}
-            onDragStart={(e) => {
+            onMouseDown={(e) => {
               if (!repositionMode) return;
+              setIsDragging(true);
               startDragPosition.current = { x: e.clientX, y: e.clientY };
               startObjectPosition.current = { ...position };
-            }}
-            onDrag={(e) => {
-              if (!repositionMode || e.clientX === 0 && e.clientY === 0) return;
-              const dx = e.clientX - startDragPosition.current.x;
-              const dy = e.clientY - startDragPosition.current.y;
-              const newX = Math.min(Math.max(0, startObjectPosition.current.x + dx / 5), 100);
-              const newY = Math.min(Math.max(0, startObjectPosition.current.y + dy / 5), 100);
-              setPosition({ x: newX, y: newY });
-            }}
-            onDragEnd={() => {
-              if (!repositionMode) return;
-              supabase
-                .from('memorial_pages')
-                .update({ banner_position: `${position.x}% ${position.y}%` })
-                .eq('id', parsedId);
-              setRepositionMode(false);
             }}
           />
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
