@@ -125,43 +125,41 @@ export default function MemorialPage() {
             }}
             draggable={false}
           />
-          <div className={`absolute ${repositionMode ? 'top-4' : 'top-16'} inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100`}>
-            <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
-              {!repositionMode && (
-                <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
-                    Zmień zdjęcie w tle
-                  </button>
-                  <button
-                    className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition"
-                    onClick={() => setRepositionMode(true)}
-                  >
-                    Zmień pozycję zdjęcia
-                  </button>
-                </div>
-              )}
-              {repositionMode && (
-                <div className="flex gap-4">
-                  <button
-                    className="bg-white text-gray-800 px-4 py-2 rounded-full shadow hover:bg-gray-100"
-                    onClick={() => {
-                      setRepositionMode(false)
-                    }}
-                  >
-                    Anuluj
-                  </button>
-                  <button
-                    className="bg-cyan-500 text-white px-4 py-2 rounded-full shadow hover:bg-cyan-600"
-                    onClick={() => {
-                      supabase.from('memorial_pages').update({ banner_position: `${position.x}% ${position.y}%` }).eq('id', parsedId)
-                      setRepositionMode(false)
-                    }}
-                  >
-                    Zapisz zmiany
-                  </button>
-                </div>
-              )}
-            </div>
+          <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100">
+            {!repositionMode && (
+              <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
+                  Zmień zdjęcie w tle
+                </button>
+                <button
+                  className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition"
+                  onClick={() => setRepositionMode(true)}
+                >
+                  Zmień pozycję zdjęcia
+                </button>
+              </div>
+            )}
+            {repositionMode && (
+              <div className="flex gap-4">
+                <button
+                  className="bg-white text-gray-800 px-4 py-2 rounded-full shadow hover:bg-gray-100"
+                  onClick={() => {
+                    setRepositionMode(false)
+                  }}
+                >
+                  Anuluj
+                </button>
+                <button
+                  className="bg-cyan-500 text-white px-4 py-2 rounded-full shadow hover:bg-cyan-600"
+                  onClick={() => {
+                    supabase.from('memorial_pages').update({ banner_position: `${position.x}% ${position.y}%` }).eq('id', parsedId)
+                    setRepositionMode(false)
+                  }}
+                >
+                  Zapisz zmiany
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
