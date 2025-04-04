@@ -64,14 +64,16 @@ export default function MemorialPage() {
         <div className="group relative w-full h-56 md:h-64 lg:h-72 xl:h-80 bg-cover bg-center transition-all duration-300"
           style={{ backgroundImage: `url(${pageData.banner_url || '/banner1.jpg'})` }}
         >
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="flex gap-4">
-              <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
-                Zmień zdjęcie w tle
-              </button>
-              <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
-                Zmień pozycję zdjęcia
-              </button>
+          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300">
+            <div className="absolute top-4 inset-x-0 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="flex gap-4">
+                <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
+                  Zmień zdjęcie w tle
+                </button>
+                <button className="bg-white text-gray-800 px-4 py-2 rounded-full shadow-md hover:bg-gray-100 transition">
+                  Zmień pozycję zdjęcia
+                </button>
+              </div>
             </div>
           </div>
         </div>
