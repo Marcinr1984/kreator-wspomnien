@@ -20,6 +20,7 @@ export default function MemorialPage() {
   const imageRef = useRef<HTMLImageElement | null>(null)
 
   const parsedId = Number(Array.isArray(memorialId) ? memorialId[0] : memorialId)
+  console.log('parsedId:', parsedId, 'typ:', typeof parsedId)
   if (!memorialId || Array.isArray(memorialId) || isNaN(parsedId)) {
     return <div className="p-8">Nieprawidłowy identyfikator strony pamięci.</div>
   }
@@ -49,9 +50,12 @@ export default function MemorialPage() {
   }, [parsedId])
 
   useEffect(() => {
-    if (pageData?.banner_position) {
-      const [x, y] = pageData.banner_position.split(' ')
-      setPosition({ x: parseFloat(x), y: parseFloat(y) })
+    if (pageData?.banner_position && typeof pageData.banner_position === 'string') {
+      console.log('Odczytana pozycja z bazy:', pageData.banner_position)
+      const [x, y] = pageData.banner_position.split('%').map(v => parseFloat(v.trim()))
+      if (!isNaN(x) && !isNaN(y)) {
+        setPosition({ x, y })
+      }
     }
   }, [pageData])
 
@@ -69,10 +73,6 @@ export default function MemorialPage() {
     const handleMouseUp = () => {
       if (isDragging && repositionMode) {
         setIsDragging(false);
-        supabase
-          .from('memorial_pages')
-          .update({ banner_position: `${position.x}% ${position.y}%` })
-          .eq('id', parsedId);
       }
     };
 
@@ -109,7 +109,7 @@ export default function MemorialPage() {
           <img
             ref={imageRef}
             src={pageData.banner_url || '/banner1.jpg'}
-            className={`w-full h-full object-cover transition-all duration-300 select-none z-0 ${repositionMode ? 'cursor-move pointer-events-auto' : 'pointer-events-none'}`}
+            className={`w-full h-full object-cover select-none z-0 ${repositionMode ? 'cursor-move pointer-events-auto' : 'pointer-events-none'}`}
             style={{
               objectPosition: `${position.x}% ${position.y}%`,
             }}
@@ -158,8 +158,36 @@ export default function MemorialPage() {
                 </button>
                 <button
                   className="bg-cyan-500 text-white px-4 py-2 rounded-full shadow hover:bg-cyan-600"
-                  onClick={() => {
-                    supabase.from('memorial_pages').update({ banner_position: `${position.x}% ${position.y}%` }).eq('id', parsedId)
+                  onClick={async () => {
+                    console.log('Kliknięto przycisk zapisz')
+                    if (!parsedId || isNaN(parsedId)) {
+                      console.error('Brak prawidłowego ID strony pamięci')
+                      return
+                    }
+
+                    const pos = `${position.x}% ${position.y}%`
+                    console.log('ID strony pamięci:', parsedId)
+                    console.log('Zapisuję pozycję:', pos)
+                    console.log('Aktualne dane strony:', pageData)
+
+                    const response = await supabase
+                      .from('memorial_pages')
+                      .update({ banner_position: pos })
+                      .eq('id', parsedId)
+                      .select()
+
+                    console.log('Zapisano:', response)
+
+                    if (response.error) {
+                      console.error('Błąd zapisu pozycji:', response.error)
+                    } else {
+                      console.log('Zapisano pomyślnie:', response.data)
+                      setPageData((prev: any) => ({
+                        ...prev,
+                        banner_position: pos,
+                      }))
+                    }
+
                     setRepositionMode(false)
                   }}
                 >
@@ -170,26 +198,57 @@ export default function MemorialPage() {
           </div>
         </div>
 
-        {/* Sekcja z kartą */}
-        <div className="bg-white -mt-16 pt-24 max-w-4xl mx-auto rounded-lg shadow-md p-6 relative z-10 flex flex-col md:flex-row">
-          <div className="absolute -top-32 left-6 md:left-12 z-20">
+        {/* Przywrócone zdjęcie profilowe */}
+        <div className="absolute top-[20rem] left-[35%] transform -translate-x-[calc(50%-70px)] z-30">
+            <div className="bg-gray-100 rounded-2xl p-1 shadow-md">
             <img
               src={pageData.photo_url}
               alt="Zdjęcie"
-              className="w-64 h-64 object-cover rounded-md shadow-md border-4 border-white"
+              className="w-80 h-80 object-cover rounded-xl"
             />
           </div>
-          <div className="flex flex-col justify-center items-center text-center w-full mt-36 md:mt-0">
-            <h1 className="text-2xl font-semibold text-gray-800 mb-1">
-              {pageData.first_name} {pageData.last_name}
-            </h1>
-            <p className="text-sm text-gray-500">
-              {pageData.birth_date} - {pageData.death_date || 'Obecnie'}
-            </p>
-            <div className="mt-2">
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full mr-2">Opublikowano</span>
-              <span className="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full">Szkic</span>
+        </div>
+        {/* Sekcja z kartą */}
+        <div className="bg-white -mt-20 max-w-6xl mx-auto rounded-lg shadow-md p-6 relative z-10">
+          <div className="flex flex-wrap md:flex-nowrap gap-6 w-full">
+            {/* Lewa kolumna */}
+            <div className="w-full md:w-1/2 flex justify-center -ml-[2.325rem] mt-[18rem] md:mt-50">
+              <div className="bg-gray-100 rounded-xl p-4 shadow-sm w-80">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-gray-700">Opiekunowie pamięci (1)</span>
+                  <a href="#" className="text-sm text-cyan-600 hover:underline">Zobacz więcej</a>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white border border-gray-300 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
+                    MR
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">Marcin rud <span className="text-xs text-gray-500">(ty)</span></p>
+                    <p className="text-xs text-gray-500">Dziecko</p>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Prawa kolumna */}
+            <div className="w-full md:w-1/2 flex flex-col justify-center items-center text-center mt-[60px]">
+              <h1 className="text-3xl font-semibold text-gray-800 mb-2">
+                {pageData.first_name} {pageData.last_name}
+              </h1>
+              <p className="text-base text-gray-600">
+                {pageData.birth_date} - {pageData.death_date || 'Obecnie'}
+              </p>
+              <div className="mt-32 flex justify-center">
+                <div className="flex items-center justify-center bg-gradient-to-r from-cyan-400 to-rose-400 text-white text-sm font-medium rounded-full px-6 py-3 w-fit shadow-md relative">
+                  <span className="mr-4">Opublikowano</span>
+                  <span className="opacity-70">Szkic</span>
+                  <span className="absolute -top-2 -right-2 bg-slate-800 p-1 rounded-full text-white text-xs">
+                    🔒
+                  </span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
