@@ -15,6 +15,7 @@ export default function MemorialPage() {
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [repositionMode, setRepositionMode] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  const [activeTab, setActiveTab] = useState('podglad')
 
   const startDragPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
   const startObjectPosition = useRef<{ x: number; y: number }>({ x: 50, y: 50 })
@@ -285,18 +286,58 @@ export default function MemorialPage() {
             </div>
 
           </div>
-          <div className="flex justify-center mt-10 space-x-4">
-            <button className="bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-2 px-6 rounded-md shadow">
+          
+        </div>
+
+        {/* Sekcja z przyciskami i treścią */}
+        <div className="w-full mt-10 bg-white max-w-6xl mx-auto rounded-lg shadow-md p-6">
+          <hr className="w-full border-t-1 border-gray-200" />
+          <div className="flex justify-center space-x-0.5 my-4">
+            <button
+              className={`text-cyan-600 border-b-2 border-transparent hover:border-cyan-600 font-medium py-1.5 px-4 mx-0.5 ${activeTab === 'podglad' ? 'border-b-2 border-cyan-600' : ''}`}
+              onClick={() => setActiveTab('podglad')}
+            >
               Podgląd
             </button>
-            <button className="bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded-md border border-gray-300 shadow">
+            <button
+              className={`text-gray-600 hover:text-cyan-600 font-medium py-1.5 px-6 mx-0.5 ${activeTab === 'ustawienia' ? 'border-b-2 border-cyan-600' : ''}`}
+              onClick={() => setActiveTab('ustawienia')}
+            >
               Ustawienia strony
             </button>
-            <button className="bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded-md border border-gray-300 shadow">
+            <button
+              className={`text-gray-600 hover:text-cyan-600 font-medium py-1.5 px-4 mx-0.5 ${activeTab === 'udostepnij' ? 'border-b-2 border-cyan-600' : ''}`}
+              onClick={() => setActiveTab('udostepnij')}
+            >
               Udostępnij
             </button>
           </div>
+          <div className="w-full mt-1">
+            <hr className="w-full border-t-1 border-gray-200" />
+          </div>
+          
+          {activeTab === 'podglad' && (
+            <div>
+              <h2 className="text-xl font-semibold">Podgląd</h2>
+              <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Podgląd".</p>
+            </div>
+          )}
+
+          {activeTab === 'ustawienia' && (
+            <div>
+              <h2 className="text-xl font-semibold">Ustawienia strony</h2>
+              <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Ustawienia strony".</p>
+            </div>
+          )}
+
+          {activeTab === 'udostepnij' && (
+            <div>
+              <h2 className="text-xl font-semibold">Udostępnij</h2>
+              <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Udostępnij".</p>
+            </div>
+          )}
         </div>
+
 
         {/* Stopka */}
         <footer className="text-center text-xs text-gray-400 mt-12 mb-6">
