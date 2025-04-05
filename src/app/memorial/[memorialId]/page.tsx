@@ -105,7 +105,7 @@ export default function MemorialPage() {
     <div className="bg-[#f8fbfa] min-h-screen w-full">
       <div className="w-full">
         {/* Sekcja górna z banerem */}
-        <div className="group relative w-full h-80 md:h-[22rem] lg:h-[26rem] xl:h-[30rem] overflow-hidden">
+        <div className="group relative w-full h-80 md:h-[22rem] lg:h-[26rem] xl:h-[28rem] overflow-hidden">
           <img
             ref={imageRef}
             src={pageData.banner_url || '/banner1.jpg'}
