@@ -52,7 +52,7 @@ export default function MemorialPage() {
   useEffect(() => {
     if (pageData?.banner_position && typeof pageData.banner_position === 'string') {
       console.log('Odczytana pozycja z bazy:', pageData.banner_position)
-      const [x, y] = pageData.banner_position.split('%').map(v => parseFloat(v.trim()))
+      const [x, y] = pageData.banner_position.split('%').map((v: string) => parseFloat(v.trim()))
       if (!isNaN(x) && !isNaN(y)) {
         setPosition({ x, y })
       }
