@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { LockClosedIcon } from '@heroicons/react/24/solid'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../utils/supabaseClient'
 
@@ -94,7 +95,17 @@ export default function MemorialPage() {
   }
 
   if (loading) {
-    return <div className="p-8">Ładowanie...</div>
+    return (
+      <div className="relative h-1 w-full">
+        <div className="absolute top-0 left-0 h-1 bg-gradient-to-r from-rose-400 via-purple-500 to-cyan-400 animate-[slide_1.5s_linear_infinite] w-1/3 rounded-r-full"></div>
+        <style jsx>{`
+          @keyframes slide {
+            0% { left: -33%; }
+            100% { left: 100%; }
+          }
+        `}</style>
+      </div>
+    )
   }
 
   if (!pageData) {
@@ -126,6 +137,26 @@ export default function MemorialPage() {
             draggable={false}
           />
           <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none z-10" />
+          <div className="absolute top-[19.5rem] left-1/2 transform -translate-x-[calc(50%-290px)] z-30 flex gap-2">
+            <button className="bg-white px-4 py-2.5 rounded-md shadow-md hover:bg-gray-100 text-sm font-medium text-gray-800 pointer-events-auto flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-500" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 2C6 2 2.73 5.11 1 10c1.73 4.89 5 8 9 8s7.27-3.11 9-8c-1.73-4.89-5-8-9-8zm0 12a4 4 0 110-8 4 4 0 010 8z" />
+              </svg>
+              Podgląd jako gość
+            </button>
+            <button className="bg-white px-4 py-2.5 rounded-md shadow-md hover:bg-gray-100 text-sm font-medium text-gray-800 pointer-events-auto flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-500" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 1a1 1 0 011 1v1.09a7.966 7.966 0 014.03 1.66l.77-.77a1 1 0 111.42 1.42l-.77.77A7.966 7.966 0 0120.91 11H22a1 1 0 110 2h-1.09a7.966 7.966 0 01-1.66 4.03l.77.77a1 1 0 11-1.42 1.42l-.77-.77A7.966 7.966 0 0113 20.91V22a1 1 0 11-2 0v-1.09a7.966 7.966 0 01-4.03-1.66l-.77.77a1 1 0 11-1.42-1.42l.77-.77A7.966 7.966 0 013.09 13H2a1 1 0 110-2h1.09a7.966 7.966 0 011.66-4.03l-.77-.77a1 1 0 111.42-1.42l.77.77A7.966 7.966 0 0111 3.09V2a1 1 0 011-1zm0 5a6 6 0 100 12 6 6 0 000-12z" />
+              </svg>
+              Edytuj ustawienia strony
+            </button>
+            <button className="bg-cyan-600 px-4 py-2.5 rounded-md shadow-md hover:bg-cyan-700 text-sm font-medium text-white pointer-events-auto flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 8a3 3 0 100-6 3 3 0 000 6zM9 21a3 3 0 100-6 3 3 0 000 6zM21 15a3 3 0 100-6 3 3 0 000 6zM8.59 13.51l6.83-4.02M8.59 10.49l6.83 4.02" />
+              </svg>
+              Udostępnij stronę
+            </button>
+          </div>
           <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100 z-20">
             {!repositionMode && (
               <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -198,28 +229,32 @@ export default function MemorialPage() {
           </div>
         </div>
 
-        {/* Przywrócone zdjęcie profilowe */}
-        <div className="absolute top-[20rem] left-[35%] transform -translate-x-[calc(50%-70px)] z-30">
-            <div className="bg-gray-100 rounded-2xl p-1 shadow-md">
-            <img
-              src={pageData.photo_url}
-              alt="Zdjęcie"
-              className="w-80 h-80 object-cover rounded-xl"
-            />
-          </div>
-        </div>
         {/* Sekcja z kartą */}
         <div className="bg-white -mt-20 max-w-6xl mx-auto rounded-lg shadow-md p-6 relative z-10">
           <div className="flex flex-wrap md:flex-nowrap gap-6 w-full">
             {/* Lewa kolumna */}
-            <div className="w-full md:w-1/2 flex justify-center -ml-[2.325rem] mt-[18rem] md:mt-50">
-              <div className="bg-gray-100 rounded-xl p-4 shadow-sm w-80">
+            <div className="w-full md:w-1/2 flex flex-col items-center -ml-[2.325rem] mt-[4rem] md:mt-[6rem] relative">
+              <div className="absolute -top-[175px] z-20">
+              <div className="bg-gray-100 rounded-2xl p-1 shadow-md">
+                  <img
+                    src={pageData.photo_url}
+                    alt="Zdjęcie"
+                    className="w-[360px] h-[360px] object-cover rounded-2xl"
+                  />
+              </div>
+              </div>
+              <div className="bg-gray-100 rounded-xl p-4 shadow-sm w-[370px] mt-[220px] mb-[20px] transition-all duration-300 hover:ring-2 hover:ring-cyan-500">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-700">Opiekunowie pamięci (1)</span>
-                  <a href="#" className="text-sm text-cyan-600 hover:underline">Zobacz więcej</a>
+                  <span className="text-base font-medium text-gray-700">Opiekunowie pamięci (1)</span>
+                  <a href="#" className="text-sm text-black hover:underline flex items-center gap-1">
+                    Zobacz więcej
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 111.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                  </a>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white border border-gray-300 rounded-full flex items-center justify-center text-sm font-semibold text-gray-700">
+                <div className="flex items-center gap-3 mt-6">
+                  <div className="w-10 h-10 bg-white border border-cyan-500 rounded-full flex items-center justify-center text-sm font-semibold text-cyan-500">
                     MR
                   </div>
                   <div>
@@ -239,46 +274,27 @@ export default function MemorialPage() {
                 {pageData.birth_date} - {pageData.death_date || 'Obecnie'}
               </p>
               <div className="mt-32 flex justify-center">
-                <div className="flex items-center justify-center bg-gradient-to-r from-cyan-400 to-rose-400 text-white text-sm font-medium rounded-full px-6 py-3 w-fit shadow-md relative">
+                <div className="flex items-center justify-center bg-gradient-to-r from-cyan-400 to-rose-400 text-white text-sm font-medium rounded-full px-6 py-4 w-fit shadow-md relative">
                   <span className="mr-4">Opublikowano</span>
                   <span className="opacity-70">Szkic</span>
-                  <span className="absolute -top-2 -right-2 bg-slate-800 p-1 rounded-full text-white text-xs">
-                    🔒
+                  <span className="absolute -top-2 -right-2 bg-slate-800 p-1.5 rounded-full text-white text-xs border-4 border-white">
+                    <LockClosedIcon className="w-3 h-3" />
                   </span>
                 </div>
               </div>
             </div>
 
           </div>
-        </div>
-
-        {/* Sekcja przycisków */}
-        <div className="flex justify-center gap-4 mt-4">
-          <button className="bg-cyan-600 text-white px-4 py-2 rounded-md text-sm shadow-sm">Podgląd</button>
-          <button className="bg-white border border-gray-300 px-4 py-2 rounded-md text-sm shadow-sm">Ustawienia strony</button>
-          <button className="bg-white border border-gray-300 px-4 py-2 rounded-md text-sm shadow-sm">Udostępnij</button>
-        </div>
-
-        {/* Sekcja wspomnień */}
-        <div className="bg-white mt-6 max-w-4xl mx-auto rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-2">Wspomnienia</h2>
-          <p className="text-sm text-gray-600">Tutaj będą szczegóły, wspomnienia itd...</p>
-        </div>
-
-        {/* Sekcja upamiętnień */}
-        <div className="bg-white mt-6 max-w-4xl mx-auto rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold mb-2">Upamiętnienia</h2>
-          <p className="text-sm text-gray-500 italic">Brak wiadomości. Bądź pierwszym, który coś doda.</p>
-          <div className="mt-4">
-            <textarea
-              placeholder="Napisz wiadomość, wspomnienie, kondolencje..."
-              className="w-full border border-gray-300 rounded-md p-2 text-sm"
-              rows={3}
-            />
-            <div className="flex justify-between mt-2">
-              <button className="text-cyan-600 text-sm hover:underline">Dodaj zdjęcia i filmy</button>
-              <button className="bg-cyan-600 text-white px-4 py-1 rounded-md text-sm">Opublikuj</button>
-            </div>
+          <div className="flex justify-center mt-10 space-x-4">
+            <button className="bg-cyan-600 hover:bg-cyan-700 text-white font-medium py-2 px-6 rounded-md shadow">
+              Podgląd
+            </button>
+            <button className="bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded-md border border-gray-300 shadow">
+              Ustawienia strony
+            </button>
+            <button className="bg-white hover:bg-gray-100 text-gray-800 font-medium py-2 px-6 rounded-md border border-gray-300 shadow">
+              Udostępnij
+            </button>
           </div>
         </div>
 
