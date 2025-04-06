@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import EditPageSettingsModal from '../../../components/EditPageSettingsModal';
 import { LockClosedIcon } from '@heroicons/react/24/solid'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../utils/supabaseClient'
@@ -16,6 +17,10 @@ export default function MemorialPage() {
   const [repositionMode, setRepositionMode] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [activeTab, setActiveTab] = useState('podglad')
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const startDragPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
   const startObjectPosition = useRef<{ x: number; y: number }>({ x: 50, y: 50 })
@@ -145,7 +150,7 @@ export default function MemorialPage() {
               </svg>
               Podgląd jako gość
             </button>
-            <button className="bg-white px-4 py-2.5 rounded-md shadow-md hover:bg-gray-100 text-sm font-medium text-gray-800 pointer-events-auto flex items-center gap-2">
+            <button className="bg-white px-4 py-2.5 rounded-md shadow-md hover:bg-gray-100 text-sm font-medium text-gray-800 pointer-events-auto flex items-center gap-2" onClick={openModal}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-500" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 1a1 1 0 011 1v1.09a7.966 7.966 0 014.03 1.66l.77-.77a1 1 0 111.42 1.42l-.77.77A7.966 7.966 0 0120.91 11H22a1 1 0 110 2h-1.09a7.966 7.966 0 01-1.66 4.03l.77.77a1 1 0 11-1.42 1.42l-.77-.77A7.966 7.966 0 0113 20.91V22a1 1 0 11-2 0v-1.09a7.966 7.966 0 01-4.03-1.66l-.77.77a1 1 0 11-1.42-1.42l.77-.77A7.966 7.966 0 013.09 13H2a1 1 0 110-2h1.09a7.966 7.966 0 011.66-4.03l-.77-.77a1 1 0 111.42-1.42l.77.77A7.966 7.966 0 0111 3.09V2a1 1 0 011-1zm0 5a6 6 0 100 12 6 6 0 000-12z" />
               </svg>
@@ -288,61 +293,72 @@ export default function MemorialPage() {
           </div>
           
         </div>
+{/* Sekcja z przyciskami i treścią */}
+<div className="w-full mt-10 bg-white max-w-6xl mx-auto rounded-lg shadow-md p-6 pb-6 pt-0 overflow-hidden">
+ 
 
-        {/* Sekcja z przyciskami i treścią */}
-        <div className="w-full mt-10 bg-white max-w-6xl mx-auto rounded-lg shadow-md p-6">
-          <hr className="w-full border-t-1 border-gray-200" />
-          <div className="flex justify-center space-x-0.5 my-4">
-            <button
-              className={`text-cyan-600 border-b-2 border-transparent hover:border-cyan-600 font-medium py-1.5 px-4 mx-0.5 ${activeTab === 'podglad' ? 'border-b-2 border-cyan-600' : ''}`}
-              onClick={() => setActiveTab('podglad')}
-            >
-              Podgląd
-            </button>
-            <button
-              className={`text-gray-600 hover:text-cyan-600 font-medium py-1.5 px-6 mx-0.5 ${activeTab === 'ustawienia' ? 'border-b-2 border-cyan-600' : ''}`}
-              onClick={() => setActiveTab('ustawienia')}
-            >
-              Ustawienia strony
-            </button>
-            <button
-              className={`text-gray-600 hover:text-cyan-600 font-medium py-1.5 px-4 mx-0.5 ${activeTab === 'udostepnij' ? 'border-b-2 border-cyan-600' : ''}`}
-              onClick={() => setActiveTab('udostepnij')}
-            >
-              Udostępnij
-            </button>
-          </div>
-          <div className="w-full mt-1">
-            <hr className="w-full border-t-1 border-gray-200" />
-          </div>
-          
-          {activeTab === 'podglad' && (
-            <div>
-              <h2 className="text-xl font-semibold">Podgląd</h2>
-              <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Podgląd".</p>
-            </div>
-          )}
+  {/* Nawigacja z przyciskami – rozciągnięta na całą szerokość dzięki -mx-6 i px-6 */}
+  <div className="-mx-6 border-b border-gray-200 bg-white py-4 px-6">
+    <nav className="flex justify-center items-center space-x-10">
+      <button 
+        onClick={() => setActiveTab('podglad')}
+        className={`relative text-base font-medium py-2 ${activeTab === 'podglad' ? 'text-cyan-600' : 'text-gray-600'}`}
+      >
+        Podgląd
+        {activeTab === 'podglad' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
+      </button>
+      <button 
+        onClick={() => setActiveTab('ustawienia')}
+        className={`relative text-base font-medium py-2 ${activeTab === 'ustawienia' ? 'text-cyan-600' : 'text-gray-600'}`}
+      >
+        Ustawienia strony
+        {activeTab === 'ustawienia' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[130%] h-[2px] bg-cyan-600"></div>}
+      </button>
+      <button 
+        onClick={() => setActiveTab('udostepnij')}
+        className={`relative text-base font-medium py-2 ${activeTab === 'udostepnij' ? 'text-cyan-600' : 'text-gray-600'}`}
+      >
+        Udostępnij
+        {activeTab === 'udostepnij' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[140%] h-[2px] bg-cyan-600"></div>}
+      </button>
+    </nav>
+  </div>
 
-          {activeTab === 'ustawienia' && (
-            <div>
-              <h2 className="text-xl font-semibold">Ustawienia strony</h2>
-              <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Ustawienia strony".</p>
-            </div>
-          )}
+  {/* Zawartość zakładek */}
+  <div className="pt-6">
+    {activeTab === 'podglad' && (
+      <div>
+        <h2 className="text-xl font-semibold">Podgląd</h2>
+        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Podgląd".</p>
+      </div>
+    )}
 
-          {activeTab === 'udostepnij' && (
-            <div>
-              <h2 className="text-xl font-semibold">Udostępnij</h2>
-              <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Udostępnij".</p>
-            </div>
-          )}
-        </div>
+    {activeTab === 'ustawienia' && (
+      <div>
+        <h2 className="text-xl font-semibold">Ustawienia strony</h2>
+        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Ustawienia strony".</p>
+      </div>
+    )}
 
+    {activeTab === 'udostepnij' && (
+      <div>
+        <h2 className="text-xl font-semibold">Udostępnij</h2>
+        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Udostępnij".</p>
+      </div>
+    )}
+  </div>
+</div>
 
         {/* Stopka */}
         <footer className="text-center text-xs text-gray-400 mt-12 mb-6">
           © 2025 DlaBliskich. Wszelkie prawa zastrzeżone.
-        </footer>
+          </footer>
+          <EditPageSettingsModal 
+            isOpen={isModalOpen} 
+            closeModal={closeModal} 
+            memorialId={parsedId} 
+            pageData={pageData} 
+          />
       </div>
     </div>
   )
