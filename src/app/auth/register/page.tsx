@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../../utils/supabaseClient'
+import '../../../styles/globals.css';  // Upewnij się, że ścieżka jest prawidłowa
 
 export default function RegisterPage() {
   const router = useRouter()

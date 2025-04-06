@@ -7,3 +7,102 @@ html, body {
 @tailwind base;
 @tailwind components;
 
+
+/* Formularz responsywny */
+@media screen and (max-width: 1366px) {
+  .max-w-3xl {
+    max-width: 50%;
+  }
+  
+  .max-w-6xl {
+    max-width: 95%;
+  }
+  
+  .w-full {
+    width: 100%;
+  }
+
+  .space-y-4 {
+    margin-bottom: 20px;
+  }
+
+  .p-6 {
+    padding: 1.5rem;
+  }
+
+  .text-3xl {
+    font-size: 2rem;
+  }
+
+  .text-xl {
+    font-size: 1.25rem;
+  }
+
+  .text-sm {
+    font-size: 0.875rem;
+  }
+
+  .text-center {
+    text-align: center;
+  }
+
+  .text-gray-700 {
+    color: #4a5568;
+  }
+
+  .w-full {
+    width: 100%;
+  }
+
+  .my-4 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .mt-6 {
+    margin-top: 1.5rem;
+  }
+
+  .mt-2 {
+    margin-top: 0.5rem;
+  }
+  
+}
+
+/* Reszta stylów dla różnych rozdzielczości */
+@media screen and (max-width: 768px) {
+  .w-full {
+    width: 100%;
+  }
+
+  .max-w-6xl {
+    max-width: 100%;
+  }
+
+  .p-8 {
+    padding: 1.25rem;
+  }
+
+  .font-semibold {
+    font-weight: 600;
+  }
+
+  .my-4 {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .space-x-0.5 {
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+  }
+
+  .mx-0.5 {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
+  .space-y-4 {
+    margin-bottom: 1.5rem;
+  }
+}
