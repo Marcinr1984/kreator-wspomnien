@@ -7,6 +7,7 @@ interface EditPageSettingsModalProps {
   closeModal: () => void;
   memorialId: number;
   pageData: any;
+  onRelationsChange?: (newRelations: string) => Promise<void>;
 }
 
 const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, closeModal, memorialId, pageData }) => {
