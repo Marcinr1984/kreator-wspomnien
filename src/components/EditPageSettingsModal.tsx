@@ -55,21 +55,15 @@ const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, c
       return;
     }
   
-    const { data: publicData, error: publicUrlError } = supabase
-      .storage
-      .from('memorial-photos')
-      .getPublicUrl(filePath);
-  
-    if (publicUrlError) {
-      console.error('Błąd pobierania URL:', publicUrlError);
-      setUploading(false);
-      return;
-    }
-  
-    const publicURL = publicData?.publicUrl;
-    console.log('Publiczny URL:', publicURL);
-    setPhotoUrl(publicURL || '');
-    setUploading(false);
+    const { data: publicData } = supabase
+  .storage
+  .from('memorial-photos')
+  .getPublicUrl(filePath);
+
+const publicURL = publicData?.publicUrl;
+console.log('Publiczny URL:', publicURL);
+setPhotoUrl(publicURL || '');
+setUploading(false);
   };
   
   const [activeTab, setActiveTab] = useState('profile'); // Domyślnie aktywna jest karta 'profile'
