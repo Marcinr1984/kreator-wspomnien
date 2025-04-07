@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { supabase } from '../utils/supabaseClient';
 
@@ -23,6 +23,54 @@ const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, c
   const [relation, setRelation] = useState(pageData.relation || '');
   const [relationDescription, setRelationDescription] = useState(pageData.relation_description || '');
   const [photoUrl, setPhotoUrl] = useState(pageData.photo_url);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+  
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+  
+    setUploading(true);
+  
+    const localPreviewUrl = URL.createObjectURL(file);
+    setPhotoUrl(localPreviewUrl);
+  
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${memorialId}-${Date.now()}.${fileExt}`;
+    const filePath = `memorial-photos/${fileName}`;
+  
+    const { data, error } = await supabase
+      .storage
+      .from('memorial-photos')
+      .upload(filePath, file);
+  
+    if (error) {
+      console.error('Błąd przesyłania pliku:', error);
+      setUploading(false);
+      return;
+    }
+  
+    const { data: publicData, error: publicUrlError } = supabase
+      .storage
+      .from('memorial-photos')
+      .getPublicUrl(filePath);
+  
+    if (publicUrlError) {
+      console.error('Błąd pobierania URL:', publicUrlError);
+      setUploading(false);
+      return;
+    }
+  
+    const publicURL = publicData?.publicUrl;
+    console.log('Publiczny URL:', publicURL);
+    setPhotoUrl(publicURL || '');
+    setUploading(false);
+  };
+  
   const [activeTab, setActiveTab] = useState('profile'); // Domyślnie aktywna jest karta 'profile'
 
   const handleSave = async () => {
@@ -329,16 +377,70 @@ const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, c
 
                             {/* Przyciski akcji */}
                             <div className="flex flex-wrap gap-2 mt-4">
-                            <button className="bg-cyan-600 text-white px-3 py-1 text-sm rounded-md hover:bg-cyan-700">
-                                Edytuj
-                            </button>
-                            <button className="bg-cyan-600 text-white px-3 py-1 text-sm rounded-md hover:bg-cyan-700">
-                                Prześlij nowe zdjęcie
-                            </button>
-                            <button className="bg-gray-200 text-gray-700 px-3 py-1 text-sm rounded-md hover:bg-gray-300">
-                                Wybierz z pamiątek
-                            </button>
-                            </div>
+  {/* Edit */}
+  <button className="flex items-center gap-2 border border-gray-200 px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-4 w-4 text-gray-500"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M15.232 5.232l3.536 3.536M2.5 21.5l4.621-1.157a2 2 0 00.947-.547l12.487-12.487a2 2 0 000-2.828l-3.536-3.536a2 2 0 00-2.828 0L1.535 13.432a2 2 0 00-.547.947L-.17 19.379a.5.5 0 00.61.61l2.06-.515z"
+      />
+    </svg>
+    Edytuj
+  </button>
+
+  {/* Upload new photo */}
+  <button
+    onClick={handleUploadClick}
+    className="flex items-center gap-2 border border-gray-200 px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-4 w-4 text-gray-500"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+    Prześlij nowe zdjęcie
+  </button>
+
+  {/* Choose from Mementos */}
+  <button className="flex items-center gap-2 border border-gray-200 px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-4 w-4 text-gray-500"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={2}
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"
+      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M8 11l2 2 4-4" />
+    </svg>
+    Wybierz z pamiątek
+  </button>
+</div>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              ref={fileInputRef}
+                              hidden
+                              onChange={handleFileChange}
+                            />
 
                             {/* Informacja o bibliotece obrazów */}
                             <p className="mt-4 text-sm text-gray-600 text-center">
@@ -376,6 +478,7 @@ const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, c
                 {validationError && <p className="text-red-500 text-sm mb-2">{validationError}</p>}
                   <button 
                     onClick={handleSave} 
+                    disabled={uploading}
                     className="inline-flex justify-center rounded-md border border-transparent bg-cyan-600 px-6 py-2 text-sm font-medium text-white shadow-sm hover:bg-cyan-700 disabled:opacity-50"
                   >
                     Zapisz zmiany

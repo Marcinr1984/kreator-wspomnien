@@ -100,6 +100,21 @@ export default function MemorialPage() {
       .eq('id', parsedId)
   }
 
+  const handleRelationsChange = async (newRelations: string) => {
+    setPageData((prev: any) => ({ ...prev, relations: newRelations }));
+    const response = await supabase
+      .from('memorial_pages')
+      .update({ relations: newRelations })
+      .eq('id', parsedId)
+      .select();
+
+    if (response.error) {
+      console.error('Błąd aktualizacji relacji:', response.error);
+    } else {
+      console.log('Relacja zaktualizowana:', response.data);
+    }
+  };
+
   if (loading) {
     return (
       <div className="relative h-1 w-full">
@@ -265,7 +280,7 @@ export default function MemorialPage() {
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-800">Marcin rud <span className="text-xs text-gray-500">(ty)</span></p>
-                    <p className="text-xs text-gray-500">Dziecko</p>
+                    <p className="text-xs text-gray-500">{pageData.relation}</p>
                   </div>
                 </div>
               </div>
@@ -337,6 +352,7 @@ export default function MemorialPage() {
       <div>
         <h2 className="text-xl font-semibold">Ustawienia strony</h2>
         <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Ustawienia strony".</p>
+        
       </div>
     )}
 
@@ -358,6 +374,7 @@ export default function MemorialPage() {
             closeModal={closeModal} 
             memorialId={parsedId} 
             pageData={pageData} 
+            onRelationsChange={handleRelationsChange}
           />
       </div>
     </div>
