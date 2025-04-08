@@ -18,9 +18,13 @@ export default function MemorialPage() {
   const [isDragging, setIsDragging] = useState(false)
   const [activeTab, setActiveTab] = useState('podglad')
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalDefaultTab, setModalDefaultTab] = useState('ustawienia');
 
   const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalDefaultTab('ustawienia');
+  };
 
   const startDragPosition = useRef<{ x: number; y: number }>({ x: 0, y: 0 })
   const startObjectPosition = useRef<{ x: number; y: number }>({ x: 50, y: 50 })
@@ -165,7 +169,13 @@ export default function MemorialPage() {
               </svg>
               Podgląd jako gość
             </button>
-            <button className="bg-white px-4 py-2.5 rounded-md shadow-md hover:bg-gray-100 text-sm font-medium text-gray-800 pointer-events-auto flex items-center gap-2" onClick={openModal}>
+            <button
+              className="bg-white px-4 py-2.5 rounded-md shadow-md hover:bg-gray-100 text-sm font-medium text-gray-800 pointer-events-auto flex items-center gap-2"
+              onClick={() => {
+                setModalDefaultTab('profile');
+                openModal();
+              }}
+            >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-500" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 1a1 1 0 011 1v1.09a7.966 7.966 0 014.03 1.66l.77-.77a1 1 0 111.42 1.42l-.77.77A7.966 7.966 0 0120.91 11H22a1 1 0 110 2h-1.09a7.966 7.966 0 01-1.66 4.03l.77.77a1 1 0 11-1.42 1.42l-.77-.77A7.966 7.966 0 0113 20.91V22a1 1 0 11-2 0v-1.09a7.966 7.966 0 01-4.03-1.66l-.77.77a1 1 0 11-1.42-1.42l.77-.77A7.966 7.966 0 013.09 13H2a1 1 0 110-2h1.09a7.966 7.966 0 011.66-4.03l-.77-.77a1 1 0 111.42-1.42l.77.77A7.966 7.966 0 0111 3.09V2a1 1 0 011-1zm0 5a6 6 0 100 12 6 6 0 000-12z" />
               </svg>
@@ -181,12 +191,18 @@ export default function MemorialPage() {
           <div className="absolute top-16 inset-x-0 flex justify-center transition-opacity duration-300 group-hover:opacity-100 z-20">
             {!repositionMode && (
               <div className="flex gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <button className="bg-white px-4 py-2 rounded-full shadow-md hover:bg-cyan-100 transition flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l2 2M4 20h4l10-10a2.828 2.828 0 00-4-4L4 16v4z" />
-                  </svg>
-                  <span className="text-black">Zmień zdjęcie w tle</span>
-                </button>
+                <button
+                className="bg-white px-4 py-2 rounded-full shadow-md hover:bg-cyan-100 transition flex items-center gap-2"
+                onClick={() => {
+                  setModalDefaultTab('theme'); // Ustawiamy, aby modal otwierał się z zakładką motyw
+                  openModal();
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l2 2M4 20h4l10-10a2.828 2.828 0 00-4-4L4 16v4z" />
+                </svg>
+                <span className="text-black">Zmień zdjęcie w tle</span>
+              </button>
                 <button
                   className="bg-white px-4 py-2 rounded-full shadow-md hover:bg-cyan-100 transition flex items-center gap-2"
                   onClick={() => setRepositionMode(true)}
@@ -255,15 +271,48 @@ export default function MemorialPage() {
           <div className="flex flex-wrap md:flex-nowrap gap-6 w-full">
             {/* Lewa kolumna */}
             <div className="w-full md:w-1/2 flex flex-col items-center -ml-[2.325rem] mt-[4rem] md:mt-[6rem] relative">
-              <div className="absolute -top-[175px] z-20">
-              <div className="bg-gray-100 rounded-2xl p-1 shadow-md">
-                  <img
-                    src={pageData.photo_url}
-                    alt="Zdjęcie"
-                    className="w-[360px] h-[360px] object-cover rounded-2xl"
-                  />
-              </div>
-              </div>
+            <div className="absolute -top-[175px] z-20">
+            <div
+  className="relative group bg-gray-100 rounded-2xl p-1 shadow-md cursor-pointer"
+  onClick={() => {
+    setModalDefaultTab('profile');
+    openModal();
+  }}
+>
+  <img
+    src={pageData.photo_url}
+    alt="Zdjęcie"
+    className="w-[360px] h-[360px] object-cover rounded-2xl transition duration-300 ease-in-out"
+  />
+  {/* Overlay – zaczynamy od opacity-0, a przy hover przechodzi do półprzezroczystości */}
+  <div className="absolute inset-0 bg-black opacity-0 rounded-2xl transition duration-300 ease-in-out group-hover:opacity-30"></div>
+  {/* Przycisk – domyślnie ukryty (opacity-0), pojawia się przy najechaniu */}
+  <button
+  className="absolute top-4 left-4 bg-white px-4 py-2 rounded-full shadow-md hover:bg-cyan-100 transition flex items-center gap-2 text-base font-medium text-gray-800 pointer-events-auto opacity-0 group-hover:opacity-100"
+  onClick={(e) => {
+    e.stopPropagation();
+    setModalDefaultTab('profile'); // Ustawiamy, aby modal otwierał się z zakładką profile
+    openModal();
+  }}
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5 text-cyan-500"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2l2 2M4 20h4l10-10a2.828 2.828 0 00-4-4L4 16v4z"
+    />
+  </svg>
+  <span className="text-black">Zmień zdjęcie profilowe</span>
+</button>
+</div>
+</div>
               <div className="bg-gray-100 rounded-xl p-4 shadow-sm w-[370px] mt-[220px] mb-[20px] transition-all duration-300 hover:ring-2 hover:ring-cyan-500">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-base font-medium text-gray-700">Opiekunowie pamięci (1)</span>
@@ -375,6 +424,7 @@ export default function MemorialPage() {
             memorialId={parsedId} 
             pageData={pageData} 
             onRelationsChange={handleRelationsChange}
+            defaultTab={modalDefaultTab}
           />
       </div>
     </div>

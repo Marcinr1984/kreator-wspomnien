@@ -3,14 +3,15 @@ import { Dialog, Transition } from '@headlessui/react';
 import { supabase } from '../utils/supabaseClient';
 
 interface EditPageSettingsModalProps {
-  isOpen: boolean;
-  closeModal: () => void;
-  memorialId: number;
-  pageData: any;
-  onRelationsChange?: (newRelations: string) => Promise<void>;
-}
+    isOpen: boolean;
+    closeModal: () => void;
+    memorialId: number;
+    pageData: any;
+    onRelationsChange?: (newRelations: string) => Promise<void>;
+    defaultTab?: string;
+  }
 
-const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, closeModal, memorialId, pageData }) => {
+const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, closeModal, memorialId, pageData, defaultTab }) => {
     const [validationError, setValidationError] = useState('');
     const [firstName, setFirstName] = useState(pageData.first_name);
   const [middleName, setMiddleName] = useState(pageData.middle_name || '');
@@ -66,7 +67,12 @@ setPhotoUrl(publicURL || '');
 setUploading(false);
   };
   
-  const [activeTab, setActiveTab] = useState('profile'); // Domyślnie aktywna jest karta 'profile'
+  const [activeTab, setActiveTab] = useState(defaultTab || 'profile');
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
 
   const handleSave = async () => {
     setValidationError('');
