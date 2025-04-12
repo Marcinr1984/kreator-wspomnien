@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { supabase } from '../utils/supabaseClient';
+import ImageEditor from '../components/ImageEditor';
+
 
 interface EditPageSettingsModalProps {
     isOpen: boolean;
@@ -10,6 +12,7 @@ interface EditPageSettingsModalProps {
     onRelationsChange?: (newRelations: string) => Promise<void>;
     defaultTab?: string;
   }
+  
 
 const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, closeModal, memorialId, pageData, defaultTab }) => {
     const [validationError, setValidationError] = useState('');
@@ -26,6 +29,7 @@ const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, c
   const [relationDescription, setRelationDescription] = useState(pageData.relation_description || '');
   const [photoUrl, setPhotoUrl] = useState(pageData.photo_url);
   const [uploading, setUploading] = useState(false);
+  const [imageSrc, setImageSrc] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const handleUploadClick = () => {

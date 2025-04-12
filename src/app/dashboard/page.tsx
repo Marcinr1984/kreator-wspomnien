@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [userName, setUserName] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [memorialPages, setMemorialPages] = useState<any[]>([])
+  const [activeTab, setActiveTab] = useState<'panel' | 'prosby' | 'zgloszenia'>('panel')
   const router = useRouter()
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export default function Dashboard() {
     }
 
     getUserAndMemorialPages()
+    setActiveTab('panel')
 
     return () => {
       if (subscription) {
@@ -77,6 +79,33 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen w-full bg-[#EDF2F7] p-0 m-0">
+      <nav className="w-full bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-6xl mx-auto px-6 flex items-center justify-center h-[75px] relative">
+          <div className="flex gap-14">
+            <button 
+              onClick={() => router.push('/dashboard')}
+              className={`relative text-base font-medium pb-1 mb-[-14px] ${activeTab === 'panel' ? 'text-cyan-600' : 'text-gray-600'}`}
+            >
+              Panel główny
+              {activeTab === 'panel' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
+            </button>
+            <button 
+              onClick={() => router.push('/dashboard/prosby')}
+              className={`relative text-base font-medium pb-1 mb-[-14px] ${activeTab === 'prosby' ? 'text-cyan-600' : 'text-gray-600'}`}
+            >
+              Prośby
+              {activeTab === 'prosby' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[200%] h-[2px] bg-cyan-600"></div>}
+            </button>
+            <button 
+              onClick={() => router.push('/dashboard/zgloszenia')}
+              className={`relative text-base font-medium pb-1 mb-[-14px] ${activeTab === 'zgloszenia' ? 'text-cyan-600' : 'text-gray-600'}`}
+            >
+              Zgłoszenia
+              {activeTab === 'zgloszenia' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
+            </button>
+          </div>
+        </div>
+      </nav>
       <StepFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
