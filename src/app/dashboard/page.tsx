@@ -3,9 +3,45 @@
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../utils/supabaseClient'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
+NProgress.configure({
+  showSpinner: false,
+  trickleSpeed: 150,
+  minimum: 0.15
+})
+
 import { Cog6ToothIcon, PlusIcon, UserCircleIcon, ArrowRightOnRectangleIcon, Squares2X2Icon, QuestionMarkCircleIcon, UsersIcon, HeartIcon, DocumentTextIcon, BriefcaseIcon, TagIcon, ChevronDownIcon } from '@heroicons/react/24/solid'
 import StepFormModal from '../../components/StepFormModal'
 import TopNavbar from '../../components/TopNavbar'
+
+const getUserAndMemorialPages = async (router: any, setUserName: any, setInitials: any, getMemorialPages: any, subscription: any) => {
+  const { data, error } = await supabase.auth.getUser()
+  if (error || !data?.user) {
+    router.push('/login')
+  } else {
+    const name = data.user.user_metadata?.first_name || data.user.user_metadata?.name || data.user.email
+    setUserName(name)
+
+    const first = data.user.user_metadata?.first_name || ''
+    const last = data.user.user_metadata?.last_name || ''
+    const initials = `${first.charAt(0)}${last.charAt(0)}`.toUpperCase()
+    setInitials(initials)
+  }
+  await getMemorialPages()
+
+  subscription = supabase
+    .channel('custom-all-channel')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'memorial_pages' },
+      async () => {
+        await getMemorialPages()
+      }
+    )
+    .subscribe()
+}
 
 export default function Dashboard() {
   const [userName, setUserName] = useState<string | null>(null)
@@ -16,62 +52,35 @@ export default function Dashboard() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  let subscription: any
+
+  const getMemorialPages = async () => {
+    const {
+      data: { user },
+      error: userError
+    } = await supabase.auth.getUser()
+
+    if (userError || !user) {
+      console.error('Błąd pobierania użytkownika:', userError)
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('memorial_pages')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Błąd pobierania stron pamięci:', error)
+    } else {
+      setMemorialPages(data)
+    }
+  }
 
   useEffect(() => {
-    let subscription: any
-
-    const getMemorialPages = async () => {
-      const {
-        data: { user },
-        error: userError
-      } = await supabase.auth.getUser()
-
-      if (userError || !user) {
-        console.error('Błąd pobierania użytkownika:', userError)
-        return
-      }
-
-      const { data, error } = await supabase
-        .from('memorial_pages')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Błąd pobierania stron pamięci:', error)
-      } else {
-        setMemorialPages(data)
-      }
-    }
-
-    const getUserAndMemorialPages = async () => {
-      const { data, error } = await supabase.auth.getUser()
-      if (error || !data?.user) {
-        router.push('/login')
-      } else {
-        const name = data.user.user_metadata?.first_name || data.user.user_metadata?.name || data.user.email
-        setUserName(name)
-
-        const first = data.user.user_metadata?.first_name || ''
-        const last = data.user.user_metadata?.last_name || ''
-        const initials = `${first.charAt(0)}${last.charAt(0)}`.toUpperCase()
-        setInitials(initials)
-      }
-      await getMemorialPages()
-
-      subscription = supabase
-        .channel('custom-all-channel')
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'memorial_pages' },
-          async () => {
-            await getMemorialPages()
-          }
-        )
-        .subscribe()
-    }
-
-    getUserAndMemorialPages()
+    NProgress.start()
+    getUserAndMemorialPages(router, setUserName, setInitials, getMemorialPages, subscription).finally(() => NProgress.done())
     setActiveTab('panel')
 
     return () => {

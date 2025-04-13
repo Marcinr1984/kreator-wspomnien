@@ -15,7 +15,8 @@ import {
   HeartIcon,
   DocumentTextIcon,
   BriefcaseIcon,
-  TagIcon
+  TagIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/solid'
 
 export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPage?: () => void }) {
@@ -62,17 +63,19 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
   }, [isMenuOpen])
 
   return (
-    // tu wklej cały <nav> ... </nav> z `page.tsx`
     <nav className="w-full bg-gray-900 text-white py-5 px-6">
         <div className="flex items-center">
           {/* Logo i wyszukiwarka */}
           <div className="flex items-center gap-4">
             <div className="text-white font-bold text-xl tracking-tight">❤️ DlaBliskich</div>
-            <input
-              type="text"
-              placeholder="Znajdź stronę pamięci lub osobę"
-              className="bg-gray-800 text-white placeholder-gray-400 rounded-md px-4 py-4 text-sm w-80 focus:outline-none focus:ring-2 focus:ring-cyan-600 ml-6"
-            />
+            <div className="relative ml-6">
+              <MagnifyingGlassIcon className="absolute left-3 top-[50%] -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
+              <input
+                type="text"
+                placeholder="Znajdź stronę pamięci lub osobę"
+                className="bg-[#1e2a38] text-white placeholder-gray-400 rounded-xl pl-10 pr-4 py-4 text-sm w-80 focus:outline-none focus:ring-2 focus:ring-cyan-600"
+              />
+            </div>
           </div>
 
           {/* Menu użytkownika */}
@@ -90,11 +93,23 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
             {isMenuOpen && (
               <div className="absolute right-0 mt-2 w-64 bg-white text-gray-800 rounded-xl shadow-xl z-50">
                 <ul className="py-2 text-sm">
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                  <li
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      router.push('/profil')
+                    }}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                  >
                     <UserCircleIcon className="w-5 h-5 text-cyan-500" />
                     Mój profil
                   </li>
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                  <li
+                    onClick={() => {
+                      setIsMenuOpen(false)
+                      router.push('/dashboard')
+                    }}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                  >
                     <Squares2X2Icon className="w-5 h-5 text-cyan-500" />
                     Panel główny
                   </li>
