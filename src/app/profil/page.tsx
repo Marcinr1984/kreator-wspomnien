@@ -27,7 +27,7 @@ export default function MemorialPage() {
   const [activeTab, setActiveTab] = useState('podglad')
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalDefaultTab, setModalDefaultTab] = useState('ustawienia');
-  const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [selectedSection, setSelectedSection] = useState<string>('profile');
   const [showEmailForm, setShowEmailForm] = useState(false);
   const [newEmail, setNewEmail] = useState('');
   const [confirmEmail, setConfirmEmail] = useState('');
@@ -193,7 +193,7 @@ export default function MemorialPage() {
                       selectedSection === 'keeper' ? 'bg-gray-100 text-cyan-500 font-semibold' : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    Keeper Plus
+                    Opiekun Plus
                   </button>
                 </li>
                 <li>
@@ -408,7 +408,7 @@ export default function MemorialPage() {
               )}
               {selectedSection === 'keeper' && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-2">Keeper Plus</h3>
+                  <h3 className="text-lg font-semibold mb-2">Opiekun Plus</h3>
                   <p className="text-gray-600">Informacje o planie Keeper Plus.</p>
                 </div>
               )}
@@ -416,11 +416,6 @@ export default function MemorialPage() {
                 <div>
                   <h3 className="text-lg font-semibold mb-2">Inne ustawienia</h3>
                   <p className="text-gray-600">Tutaj możesz edytować inne ustawienia profilu.</p>
-                </div>
-              )}
-              {!selectedSection && (
-                <div className="text-gray-600">
-                  Wybierz kategorię po lewej stronie, aby zobaczyć jej ustawienia.
                 </div>
               )}
             </div>
