@@ -107,7 +107,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-[#EDF2F7] p-0 m-0">
       {/* Pasek górny */}
-      <TopNavbar />
+      <TopNavbar onCreateMemorialPage={() => setIsModalOpen(true)} />
       <nav className="w-full bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-center h-[75px] relative">
           <div className="flex gap-14">

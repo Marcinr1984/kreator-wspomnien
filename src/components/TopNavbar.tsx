@@ -18,7 +18,7 @@ import {
   TagIcon
 } from '@heroicons/react/24/solid'
 
-export default function TopNavbar() {
+export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPage?: () => void }) {
   const [userName, setUserName] = useState<string | null>(null)
   const [initials, setInitials] = useState<string>('MR')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -111,7 +111,7 @@ export default function TopNavbar() {
                   <li
                     onClick={() => {
                       setIsMenuOpen(false)
-                      setIsModalOpen(true)
+                      onCreateMemorialPage?.()
                     }}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
                   >
@@ -163,9 +163,3 @@ export default function TopNavbar() {
       </nav>
   )
 }
-
-
-
-
-
-
