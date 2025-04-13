@@ -1,16 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../utils/supabaseClient'
-import { Cog6ToothIcon, PlusIcon, UserCircleIcon, ArrowRightOnRectangleIcon } from '@heroicons/react/24/solid'
+import { Cog6ToothIcon, PlusIcon, UserCircleIcon, ArrowRightOnRectangleIcon, Squares2X2Icon, QuestionMarkCircleIcon, UsersIcon, HeartIcon, DocumentTextIcon, BriefcaseIcon, TagIcon, ChevronDownIcon } from '@heroicons/react/24/solid'
 import StepFormModal from '../../components/StepFormModal'
+import TopNavbar from '../../components/TopNavbar'
 
 export default function Dashboard() {
   const [userName, setUserName] = useState<string | null>(null)
+  const [initials, setInitials] = useState<string>('MR')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [memorialPages, setMemorialPages] = useState<any[]>([])
   const [activeTab, setActiveTab] = useState<'panel' | 'prosby' | 'zgloszenia'>('panel')
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -47,6 +51,11 @@ export default function Dashboard() {
       } else {
         const name = data.user.user_metadata?.first_name || data.user.user_metadata?.name || data.user.email
         setUserName(name)
+
+        const first = data.user.user_metadata?.first_name || ''
+        const last = data.user.user_metadata?.last_name || ''
+        const initials = `${first.charAt(0)}${last.charAt(0)}`.toUpperCase()
+        setInitials(initials)
       }
       await getMemorialPages()
 
@@ -72,13 +81,33 @@ export default function Dashboard() {
     }
   }, [router])
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false)
+      }
+    }
+
+    if (isMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isMenuOpen])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push('/')
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#EDF2F7] p-0 m-0">
+    <div className="min-h-screen bg-[#EDF2F7] p-0 m-0">
+      {/* Pasek górny */}
+      <TopNavbar />
       <nav className="w-full bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-6 flex items-center justify-center h-[75px] relative">
           <div className="flex gap-14">
@@ -131,10 +160,6 @@ export default function Dashboard() {
               <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
             </div>
           </div>
-          <button onClick={handleLogout} className="text-sm text-red-500 hover:underline flex items-center gap-1">
-            <ArrowRightOnRectangleIcon className="w-5 h-5 text-red-500" />
-            Wyloguj się
-          </button>
         </div>
       </div>
 
