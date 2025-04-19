@@ -175,7 +175,10 @@ export default function Dashboard() {
       {/* Sekcja przycisków */}
       <div className="w-full bg-white rounded-md shadow-md shadow-gray-300/30 py-4 px-6 mb-6">
         <div className="max-w-6xl mx-auto flex flex-wrap gap-2 justify-end">
-          <button className="border border-gray-200 hover:border-cyan-400 transition-colors text-gray-700 rounded-full px-4 py-2 text-sm flex items-center gap-2">
+          <button
+            onClick={() => router.push('/profil')}
+            className="border border-gray-200 hover:border-cyan-400 transition-colors text-gray-700 rounded-full px-4 py-2 text-sm flex items-center gap-2"
+          >
             <Cog6ToothIcon className="w-5 h-5 text-cyan-600" />
             Ustawienia konta
           </button>
@@ -212,19 +215,24 @@ export default function Dashboard() {
               return (
                 <div
                   key={page?.id || i}
-                  className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square text-center text-sm text-gray-600 hover:bg-gray-100 cursor-pointer"
+                  className={`flex flex-col items-center justify-center border-2 ${page ? 'border-transparent' : 'border-dashed border-gray-300'} rounded-lg aspect-square text-center text-sm text-gray-600 cursor-pointer`}
                 >
                   {page ? (
                     <button
                       onClick={() => router.push(`/memorial/${page.id}`)}
                       className="flex flex-col items-center justify-center w-full h-full"
                     >
-                      <div className="bg-gray-100 p-0 rounded-lg flex items-center justify-center w-24 h-24 mb-2">
-                        {page.photo_url ? (
-                          <img src={page.photo_url} alt="miniatura" className="w-full h-full object-cover rounded-lg" />
-                        ) : (
-                          <span className="text-2xl text-gray-500">📘</span>
-                        )}
+                      <div className="relative w-32 h-32 mb-2">
+                        <div className="p-[6px] bg-white rounded-2xl shadow-md">
+                          <img
+                            src={page.photo_url || ''}
+                            alt="miniatura"
+                            className="w-full h-full object-cover rounded-xl"
+                          />
+                        </div>
+                        <div className="absolute bottom-[-10px] right-[-10px] bg-white border rounded-lg shadow w-10 h-10 flex items-center justify-center">
+                          <Cog6ToothIcon className="w-5 h-5 text-gray-600" />
+                        </div>
                       </div>
                       <div className="text-sm font-semibold text-gray-700 truncate w-full text-center">
                         {[page.first_name, page.last_name].filter(Boolean).join(' ') || 'Strona pamięci'}
