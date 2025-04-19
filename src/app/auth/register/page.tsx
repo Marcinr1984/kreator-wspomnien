@@ -43,7 +43,7 @@ export default function RegisterPage() {
   }
 
   return accountCreated ? (
-    <div className="h-screen w-full bg-[#EDF2F7] flex items-center justify-center overflow-hidden">
+    <div className="min-h-screen w-full bg-[#EDF2F7] flex items-center justify-center px-4 py-8 overflow-hidden">
       <div className="text-center bg-white p-8 rounded-lg shadow-md max-w-lg mx-auto">
         <h2 className="text-2xl font-semibold text-green-600 mb-4">Konto zostało utworzone!</h2>
         <p className="text-gray-700 mb-6">
@@ -58,16 +58,16 @@ export default function RegisterPage() {
       </div>
     </div>
   ) : (
-    <div className="h-screen w-full bg-[#EDF2F7] flex items-center justify-center overflow-hidden">
-      <div className="w-full max-w-3xl bg-white p-8 rounded-lg shadow-md">
-        <h1 className="text-3xl font-semibold text-center text-[#00bcd4] mb-2">
+    <div className="min-h-screen w-full bg-[#EDF2F7] flex items-center justify-center px-4 py-8 overflow-hidden">
+      <div className="w-full max-w-lg bg-white px-4 py-6 sm:px-8 sm:py-10 rounded-lg shadow-md">
+        <h1 className="text-2xl sm:text-3xl font-normal text-center text-[#00bcd4] mb-2">
           Utwórz swoje konto
         </h1>
         <p className="text-center text-base leading-relaxed text-gray-600 mb-8">
           Dołącz do DlaBliskich, aby zachować własne dziedzictwo, aby utworzyć stronę pamięci lub żywy pomnika!
         </p>
         <div className="w-full h-[2px] bg-[#00bcd4] mb-8" />
-        <form onSubmit={handleSubmit} className="space-y-4 max-w-[20rem] mx-auto">
+        <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-sm mx-auto">
           <div>
             <label className="block text-sm font-medium text-gray-700">
               Twoje imię <span className="text-red-500">*</span>
