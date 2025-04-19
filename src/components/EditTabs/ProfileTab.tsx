@@ -27,7 +27,7 @@ interface ProfileTabProps {
   setPhotoUrl: (value: string) => void;
   handleUploadClick: () => void;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  fileInputRef: React.RefObject<HTMLInputElement>;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
 }
 
 const ProfileTab: React.FC<ProfileTabProps> = ({
