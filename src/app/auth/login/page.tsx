@@ -32,9 +32,9 @@ export default function Login() {
   }
 
   return (
-  <div className="min-h-screen w-full bg-[#EDF2F7] flex items-center justify-center px-4 py-8 font-sans">
-      <div className="w-full max-w-lg bg-white px-4 py-6 sm:px-8 sm:py-10 rounded-lg shadow-md font-sans">
-        <h1 className="text-2xl sm:text-3xl font-medium text-center text-[#00bcd4] mb-2">
+  <div className="h-screen w-full bg-[#EDF2F7] flex items-center justify-center p-0 font-sans">
+      <div className="w-full max-w-3xl bg-white p-8 rounded-lg shadow-md font-sans">
+        <h1 className="text-3xl font-semiblod text-center text-[#00bcd4] mb-2">
           Zaloguj się
         </h1>
         <p className="text-center text-base leading-relaxed text-gray-600 mb-8">

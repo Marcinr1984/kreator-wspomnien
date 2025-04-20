@@ -20,7 +20,10 @@ export default function RootLayout({
   return (
     <html lang="pl">
       <body className={nunito.className}>
-        <SessionContextProvider supabaseClient={supabaseClient}>
+        <SessionContextProvider
+          supabaseClient={supabaseClient}
+          initialSession={null}
+        >
           {children}
         </SessionContextProvider>
       </body>

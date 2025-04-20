@@ -141,7 +141,27 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
       setIsSubmitting(false);
     } else {
       console.log('Strona pamięci zapisana:', data);
-      console.log("ID nowo utworzonej strony:", data?.[0]?.id);
+      const newMemorialId = data?.[0]?.id;
+      
+      if (newMemorialId) {
+        const { error: keeperError } = await supabase
+          .from('memorial_keepers')
+          .insert([
+            {
+              user_id: user.id,
+              memorial_id: newMemorialId,
+              role: 'wlasciciel',
+              added_by: user.id,
+            }
+          ]);
+    
+        if (keeperError) {
+          console.error('Błąd przy zapisie keepera:', keeperError);
+          alert('Błąd przy przypisaniu roli do użytkownika: ' + keeperError.message);
+          return;
+        }
+      }
+
       console.log("Zamykam modal...");
       onClose();
       console.log("Przekierowuję do:", `/memorial/${data?.[0]?.id}`);

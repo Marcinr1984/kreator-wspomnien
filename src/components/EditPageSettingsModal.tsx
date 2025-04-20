@@ -6,6 +6,7 @@ import ProfileTab from './EditTabs/ProfileTab';
 import ThemeTab from './EditTabs/ThemeTab';
 import IconTab from './EditTabs/IconTab';
 import PrivacyTab from './EditTabs/PrivacyTab';
+import KeeperAdminsTab from './EditTabs/KeeperAdminsTab';
 
 
 interface EditPageSettingsModalProps {
@@ -199,6 +200,13 @@ setUploading(false);
                       Prywatność
                       {activeTab === 'privacy' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[150%] h-[2px] bg-cyan-600"></div>}
                     </button>
+                    <button 
+                    onClick={() => handleTabChange('keepers')}
+                    className={`relative text-base font-medium py-2 ${activeTab === 'keepers' ? 'text-cyan-600' : 'text-gray-600'}`}
+                  >
+                    Opiekunowie profilu
+                    {activeTab === 'keepers' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[130%] h-[2px] bg-cyan-600"></div>}
+                  </button>
                   </nav>
                 </div>
 
@@ -239,6 +247,7 @@ setUploading(false);
                     {activeTab === 'theme' && <ThemeTab />}
                     {activeTab === 'icon' && <IconTab />}
                     {activeTab === 'privacy' && <PrivacyTab />}
+                    {activeTab === 'keepers' && <KeeperAdminsTab />}
                   </div>
                 </div>
 

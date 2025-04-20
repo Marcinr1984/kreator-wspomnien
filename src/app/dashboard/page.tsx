@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '../../utils/supabaseClient'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
+import KeeperPagesSection from '../../components/KeeperPagesSection'
 
 NProgress.configure({
   showSpinner: false,
@@ -240,13 +241,31 @@ export default function Dashboard() {
                       <div className="text-xs text-gray-400">{page.created_at?.slice(0, 10)}</div>
                       <div
                         onClick={async (e) => {
-                          e.stopPropagation()
-                          const { error } = await supabase.from('memorial_pages').delete().eq('id', page.id);
-                          if (error) {
-                            console.error('Błąd podczas usuwania strony pamięci:', error);
-                          } else {
-                            setMemorialPages(memorialPages.filter(p => p.id !== page.id));
+                          e.stopPropagation();
+                          
+                          // Najpierw usuń powiązania w memorial_keepers
+                          const { error: keeperDeleteError } = await supabase
+                            .from('memorial_keepers')
+                            .delete()
+                            .eq('memorial_id', page.id);
+                          
+                          if (keeperDeleteError) {
+                            console.error('Błąd podczas usuwania opiekunów:', keeperDeleteError);
+                            return;
                           }
+                          
+                          // Potem usuń stronę pamięci
+                          const { error: deletePageError } = await supabase
+                            .from('memorial_pages')
+                            .delete()
+                            .eq('id', page.id);
+                          
+                          if (deletePageError) {
+                            console.error('Błąd podczas usuwania strony pamięci:', deletePageError);
+                            return;
+                          }
+                          
+                          setMemorialPages(memorialPages.filter(p => p.id !== page.id));
                         }}
                         className="mt-2 text-xs text-red-500 hover:underline cursor-pointer"
                       >
@@ -267,6 +286,8 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      <KeeperPagesSection />
     </div>
   )
 }

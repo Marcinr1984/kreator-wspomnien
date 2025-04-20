@@ -1,13 +1,78 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import TopNavbar from '../../../components/TopNavbar'
+import { supabase } from '../../../utils/supabaseClient'
 
 export default function ProsbyPage() {
   const router = useRouter()
   const pathname = usePathname()
   const isActive = (path: string) => pathname === path
+  const [invites, setInvites] = useState<any[]>([])
+  // Handler for accepting an invite
+  const handleAccept = async (invite: any) => {
+    // 1. Mark the invite as accepted
+    const { error: err1 } = await supabase
+      .from('memorial_invites')
+      .update({ status: 'zaakceptowane' })
+      .eq('id', invite.id)
+    if (err1) {
+      console.error('❌ Błąd podczas akceptacji zaproszenia:', err1)
+      return
+    }
+
+    // 2. Add the user as a keeper
+    const { error: err2 } = await supabase
+      .from('memorial_keepers')
+      .insert({
+        user_id: invite.user_id,
+        memorial_id: invite.memorial_id,
+        role: invite.role,
+        added_by: invite.added_by
+      })
+    if (err2) {
+      console.error('❌ Błąd przy dodawaniu opiekuna:', err2)
+      return
+    }
+
+    // 3. Remove the accepted invite from state
+    setInvites(prev => prev.filter(i => i.id !== invite.id))
+  }
+
+  useEffect(() => {
+    const fetchInvites = async () => {
+      const {
+        data: { user },
+        error: userError
+      } = await supabase.auth.getUser()
+
+      if (userError) {
+        console.error("❌ Błąd pobierania użytkownika:", userError)
+        return
+      }
+
+      if (!user || !user.id) {
+        console.warn("⚠️ Brak użytkownika lub jego ID")
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('memorial_invites')
+        .select('*, memorial_pages(id,first_name,last_name)')
+        .eq('user_id', user.id)
+        .eq('status', 'oczekuje')
+      console.log("🧠 Zalogowany user ID:", user.id)
+      console.log("📦 Otrzymane zaproszenia:", data)
+      console.log("❌ Błąd:", error)
+      if (error) {
+        console.error("❌ Błąd pobierania zaproszeń:", error)
+      }
+      if (!error) setInvites(data)
+    }
+
+    fetchInvites()
+  }, [])
 
   return (
     <>
@@ -48,26 +113,47 @@ export default function ProsbyPage() {
           </div>
           <div className="space-y-4">
             <p className="text-base font-semibold mt-1 ml-3">Typy próśb</p>
-            {["Prośba o treść", "Prośba od DlaBliskich", "Prośba o stronę pamięci", "Prośba o hasło", "Prośba o link", "Prośba o relację"].map(label => (
+            {["Prośba o zostanie opiekunem"].map(label => (
               <div key={label} className="flex items-center gap-2 ml-3">
-                <input type="radio" name="requestType" className="accent-gray-400" />
+                <input type="radio" name="requestType" className="accent-gray-400" defaultChecked />
                 <label className="text-sm">{label}</label>
               </div>
             ))}
           </div>
         </div>
 
-        {/* PRAWA KOLUMNA - PUSTA LISTA */}
+        {/* PRAWA KOLUMNA - LISTA PROŚB */}
         <div className="flex-1 bg-white py-10 px-10 rounded-md shadow-xs border">
-          <h2 className="text-xl font-semibold text-gray-800 mb-8">Prośby</h2>
-          <div className="flex flex-col items-center justify-center text-center">
-            <div className="w-24 h-24 mb-6 bg-gray-100 rounded-lg flex items-center justify-center">
-              <span className="text-4xl">🏁</span>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Brak próśb</h3>
-            <p className="text-sm text-gray-500 max-w-md">
-              Twoja kolejka próśb jest pusta. Gdy ktoś poprosi o zostanie opiekunem lub dostęp do Twojej strony pamięci, zobaczysz to tutaj.
-            </p>
+          <h2 className="text-xl font-semibold text-gray-800 mb-8">Prośby o zostanie opiekunem</h2>
+          <div className="space-y-6">
+            {invites.length === 0 ? (
+              <div>
+                <p className="text-gray-500">Brak oczekujących zaproszeń.</p>
+                <pre className="text-xs text-gray-400 mt-4">{JSON.stringify(invites, null, 2)}</pre>
+              </div>
+            ) : (
+              invites.map(invite => (
+                <div key={invite.id} className="border border-gray-300 rounded-lg p-4 shadow-sm">
+                  <h3 className="text-base font-semibold mb-1">Zaproszenie</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Zostałeś zaproszony do roli <span className="font-medium">{invite.role}</span> na stronie pamięci: 
+                    <span className="font-medium text-gray-800"> `{invite.memorial_pages?.first_name} ${invite.memorial_pages?.last_name}`</span>
+                  </p>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Od: <span className="font-medium text-gray-800">{invite.added_by}</span>
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleAccept(invite)}
+                      className="px-4 py-2 bg-cyan-600 text-white text-sm rounded hover:bg-cyan-700"
+                    >
+                      Akceptuj
+                    </button>
+                    <button className="px-4 py-2 border text-sm rounded hover:bg-gray-100">Odrzuć</button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
