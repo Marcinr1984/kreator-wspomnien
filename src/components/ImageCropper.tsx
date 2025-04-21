@@ -16,10 +16,10 @@ export interface ImageCropperHandle {
 const ImageCropper = forwardRef<ImageCropperHandle, ImageCropperProps>(({ imageUrl }, ref) => {
   const [crop, setCrop] = useState<PixelCrop & { aspect?: number }>({
     unit: 'px',
-    x: 15,
-    y: 15,
-    width: 70,
-    height: 70,
+    x: 0,
+    y: 0,
+    width: 200,
+    height: 200,
     aspect: 1,
   });
   const [zoom, setZoom] = useState(1);
@@ -28,6 +28,25 @@ const ImageCropper = forwardRef<ImageCropperHandle, ImageCropperProps>(({ imageU
   useImperativeHandle(ref, () => ({
     getCroppedImage,
   }));
+
+  const handleImageLoad = () => {
+    if (!imgRef.current) return;
+
+    const image = imgRef.current;
+    const cropWidth = 200;
+    const cropHeight = 200;
+    const x = (image.width - cropWidth) / 2;
+    const y = (image.height - cropHeight) / 2;
+
+    setCrop({
+      unit: 'px',
+      x: Math.max(0, x),
+      y: Math.max(0, y),
+      width: cropWidth,
+      height: cropHeight,
+      aspect: 1,
+    });
+  };
 
   const getCroppedImage = async () => {
     if (!imgRef.current || !crop.width || !crop.height) return null;
@@ -96,6 +115,7 @@ const ImageCropper = forwardRef<ImageCropperHandle, ImageCropperProps>(({ imageU
           alt="Edytuj zdjęcie"
           className="max-h-[400px] object-contain"
           style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
+          onLoad={handleImageLoad}
         />
       </ReactCrop>
     </div>
