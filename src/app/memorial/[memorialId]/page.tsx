@@ -5,9 +5,6 @@ import EditPageSettingsModal from '../../../components/EditPageSettingsModal';
 import { LockClosedIcon } from '@heroicons/react/24/solid'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../utils/supabaseClient'
-import PamiecTab from '../../../components/MemorialTab/PamiecTab';
-import PamiatkiTab from '../../../components/MemorialTab/PamiatkiTab';
-import BliscyTab from '../../../components/MemorialTab/BliscyTab';
 
 export default function MemorialPage() {
   const params = useParams()
@@ -20,7 +17,7 @@ export default function MemorialPage() {
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [repositionMode, setRepositionMode] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
-  const [activeTab, setActiveTab] = useState('pamiec')
+  const [activeTab, setActiveTab] = useState('podglad')
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalDefaultTab, setModalDefaultTab] = useState('ustawienia');
 
@@ -414,19 +411,37 @@ export default function MemorialPage() {
       </button>
       <button 
         onClick={() => setActiveTab('bliscy')}
-        className={`relative text-base font-medium py-2 ${activeTab === 'bliscy' ? 'text-cyan-600' : 'text-gray-600'}`}
+        className={`relative text-base font-medium py-2 ${activeTab === '' ? 'text-cyan-600' : 'text-gray-600'}`}
       >
         Bliscy
-        {activeTab === 'bliscy' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
+        {activeTab === 'udostepnij' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
       </button>
     </nav>
   </div>
 
   {/* Zawartość zakładek */}
   <div className="pt-6">
-    {activeTab === 'pamiec' && <PamiecTab />}
-    {activeTab === 'pamiatki' && <PamiatkiTab />}
-    {activeTab === 'bliscy' && <BliscyTab />}
+    {activeTab === 'pamiec' && (
+      <div>
+        <h2 className="text-xl font-semibold">Pamięć</h2>
+        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "pamiec".</p>
+      </div>
+    )}
+
+    {activeTab === 'pamiatki' && (
+      <div>
+        <h2 className="text-xl font-semibold">Pamiątki</h2>
+        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "pamiatki".</p>
+        
+      </div>
+    )}
+
+    {activeTab === 'bliscy' && (
+      <div>
+        <h2 className="text-xl font-semibold">Bliscy</h2>
+        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "bliscy".</p>
+      </div>
+    )}
   </div>
 </div>
 

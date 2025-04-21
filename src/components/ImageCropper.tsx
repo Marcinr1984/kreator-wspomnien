@@ -6,6 +6,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 
 interface ImageCropperProps {
   imageUrl: string;
+  onCropComplete: (blob: Blob) => void;
 }
 
 export interface ImageCropperHandle {

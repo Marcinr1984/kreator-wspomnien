@@ -1,4 +1,3 @@
-'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { supabase } from '../utils/supabaseClient';
@@ -131,9 +130,20 @@ setUploading(false);
   if (!isOpen) return null;
 
   return (
-    <Transition show={isOpen} appear as={React.Fragment}>
+    <Transition appear show={isOpen} as="div">
       <Dialog as="div" className="relative z-50" onClose={closeModal}>
-        <div className="fixed inset-0 bg-black bg-opacity-25" />
+        <Transition.Child
+          as="div"
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-25" />
+        </Transition.Child>
+
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <Transition.Child
@@ -194,7 +204,7 @@ setUploading(false);
                     onClick={() => handleTabChange('keepers')}
                     className={`relative text-base font-medium py-2 ${activeTab === 'keepers' ? 'text-cyan-600' : 'text-gray-600'}`}
                   >
-                    Opiekunowie strony
+                    Opiekunowie profilu
                     {activeTab === 'keepers' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[130%] h-[2px] bg-cyan-600"></div>}
                   </button>
                   </nav>
@@ -231,8 +241,6 @@ setUploading(false);
                         handleUploadClick={handleUploadClick}
                         handleFileChange={handleFileChange}
                         fileInputRef={fileInputRef}
-                        memorialId={memorialId}  {/* Przekazanie memorialId */}
-                        supabase={supabase}
                       />
                     )}
                     
