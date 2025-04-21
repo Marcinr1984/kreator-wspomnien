@@ -242,6 +242,7 @@ setUploading(false);
                         handleUploadClick={handleUploadClick}
                         handleFileChange={handleFileChange}
                         fileInputRef={fileInputRef}
+                        memorialId={memorialId}  {/* Przekazanie memorialId */}
                         supabase={supabase}
                       />
                     )}
