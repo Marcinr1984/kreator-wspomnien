@@ -1,6 +1,4 @@
 {
   "/memorial/[memorialId]/page": "app/memorial/[memorialId]/page.js",
-  "/auth/login/page": "app/auth/login/page.js",
-  "/auth/register/page": "app/auth/register/page.js",
   "/dashboard/page": "app/dashboard/page.js"
 }

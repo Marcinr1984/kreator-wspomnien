@@ -10,6 +10,7 @@ export default function MemorialPage() {
   const params = useParams()
   const memorialId = params.memorialId
   console.log('Parametr memorialId:', memorialId)
+  const [keeperCount, setKeeperCount] = useState(1)
 
   const [pageData, setPageData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -59,6 +60,29 @@ export default function MemorialPage() {
       fetchMemorial()
     }
   }, [parsedId])
+
+  useEffect(() => {
+    const fetchKeeperCount = async () => {
+      console.log('🔍 Wysyłam zapytanie o keeperów z full_memorial_keepers dla memorial_id:', parsedId);
+ 
+      const { data, error } = await supabase
+        .from('full_memorial_keepers')
+        .select('user_id')
+        .eq('memorial_id', parsedId);
+ 
+      if (!error && Array.isArray(data)) {
+        console.log('✅ Keeperzy z widoku:', data);
+        console.log('👥 Liczba keeperów:', data.length);
+        setKeeperCount(data.length);
+      } else {
+        console.error('❌ Błąd zliczania opiekunów:', error);
+      }
+    };
+ 
+    if (!isNaN(parsedId)) {
+      fetchKeeperCount();
+    }
+  }, [parsedId]);
 
   useEffect(() => {
     if (pageData?.banner_position && typeof pageData.banner_position === 'string') {
@@ -315,7 +339,7 @@ export default function MemorialPage() {
 </div>
               <div className="bg-gray-100 rounded-xl p-4 shadow-sm w-[370px] mt-[220px] mb-[20px] transition-all duration-300 hover:ring-2 hover:ring-cyan-500">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-base font-medium text-gray-700">Opiekunowie pamięci (1)</span>
+                  <span className="text-base font-medium text-gray-700">Opiekunowie pamięci ({keeperCount})</span>
                   <a href="#" className="text-sm text-black hover:underline flex items-center gap-1">
                     Zobacz więcej
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-cyan-500" viewBox="0 0 20 20" fill="currentColor">
@@ -426,6 +450,7 @@ export default function MemorialPage() {
             onRelationsChange={handleRelationsChange}
             defaultTab={modalDefaultTab}
           />
+          
       </div>
     </div>
   )
