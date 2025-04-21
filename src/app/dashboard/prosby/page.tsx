@@ -129,7 +129,6 @@ export default function ProsbyPage() {
             {invites.length === 0 ? (
               <div>
                 <p className="text-gray-500">Brak oczekujących zaproszeń.</p>
-                <pre className="text-xs text-gray-400 mt-4">{JSON.stringify(invites, null, 2)}</pre>
               </div>
             ) : (
               invites.map(invite => (

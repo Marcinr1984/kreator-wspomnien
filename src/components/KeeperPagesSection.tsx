@@ -4,16 +4,20 @@ import { UserCircleIcon } from '@heroicons/react/24/outline';
 import { useState, useEffect } from 'react';
 import { supabase } from '../utils/supabaseClient';
 import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 
 type MemorialPage = {
   id: number;
   first_name: string;
   last_name: string;
   user_id: string;
+  photo_url: string | null;
 };
 
 export default function KeeperPagesSection() {
   const [keeperPages, setKeeperPages] = useState<MemorialPage[]>([]);
+  const [hasPages, setHasPages] = useState(false);
+  const router = useRouter();
 
   const fetchKeeperPages = async (user: any) => {
     console.log('👤 Użytkownik (z subskrypcji lub sesji):', user);
@@ -31,6 +35,7 @@ export default function KeeperPagesSection() {
     if (!keeperLinks || keeperLinks.length === 0) {
       console.warn('⚠️ Brak przypisanych stron jako opiekun');
       setKeeperPages([]);
+      setHasPages(false);
       return;
     }
 
@@ -39,7 +44,7 @@ export default function KeeperPagesSection() {
 
     const { data: pages, error: pagesError } = await supabase
       .from('memorial_pages')
-      .select('id, first_name, last_name, user_id')
+      .select('id, first_name, last_name, user_id, photo_url')
       .in('id', memorialIds);
 
     console.log('📄 pages [data]:', pages);
@@ -49,10 +54,12 @@ export default function KeeperPagesSection() {
     if (!pages || pages.length === 0) {
       console.warn('⚠️ Brak danych stron do wyświetlenia');
       setKeeperPages([]);
+      setHasPages(false);
       return;
     }
 
     setKeeperPages(pages ?? []);
+    setHasPages(true);
   };
 
   useEffect(() => {
@@ -79,11 +86,13 @@ export default function KeeperPagesSection() {
     };
   }, []);
 
+  if (!hasPages) return null;
+
   return (
     <div className="max-w-6xl mx-auto bg-white rounded-md shadow-md shadow-gray-300/30 pt-6 px-6 pb-10 mt-8">
       <div className="rounded-lg">
         <div className="flex items-center mb-6">
-          <h2 className="text-lg font-semibold mb-4">Opiekun stron</h2>
+          <h2 className="text-lg font-semibold mb-2">Opiekun stron</h2>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
           {keeperPages.length === 0 && (
@@ -93,14 +102,24 @@ export default function KeeperPagesSection() {
           {keeperPages.length > 0 && keeperPages.map(page => (
             <div
               key={page.id}
-              className="flex flex-col items-center justify-center border rounded-lg aspect-square text-center text-sm text-gray-600 cursor-pointer"
+              onClick={() => router.push(`/memorial/${page.id}`)}
+              className="bg-white rounded-2xl text-center px-6 pt-6 pb-2 relative cursor-pointer"
             >
-              <div className="bg-gray-100 p-6 rounded-lg flex items-center justify-center w-24 h-24 mb-2">
-                <UserCircleIcon className="w-6 h-6 text-cyan-500" />
+              <div className="w-[130px] h-[130px] rounded-xl overflow-hidden mx-auto mb-5 bg-gray-100 flex items-center justify-center border-[6px] border-white shadow">
+                {page.photo_url ? (
+                  <img
+                    src={page.photo_url}
+                    alt={`${page.first_name} ${page.last_name}`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <UserCircleIcon className="w-10 h-10 text-cyan-500" />
+                )}
               </div>
-              <div className="text-sm text-gray-800 font-medium">
+              <div className="text-sm font-semibold text-zinc-900 leading-none">
                 {page.first_name} {page.last_name}
               </div>
+             
             </div>
           ))}
         </div>
