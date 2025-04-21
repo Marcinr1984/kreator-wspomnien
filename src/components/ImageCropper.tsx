@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useImperativeHandle, forwardRef } from 'react';
-import ReactCrop, { Crop, PercentCrop } from 'react-image-crop';
+import ReactCrop, { Crop, PercentCrop, PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
 
@@ -14,8 +14,8 @@ export interface ImageCropperHandle {
 }
 
 const ImageCropper = forwardRef<ImageCropperHandle, ImageCropperProps>(({ imageUrl }, ref) => {
-  const [crop, setCrop] = useState<PercentCrop & { aspect?: number }>({
-    unit: '%',
+  const [crop, setCrop] = useState<PixelCrop & { aspect?: number }>({
+    unit: 'px',
     x: 15,
     y: 15,
     width: 70,
