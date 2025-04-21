@@ -106,3 +106,19 @@ html, body {
     margin-bottom: 1.5rem;
   }
 }
+
+
+/* Styl niestandardowy dla ramki kadrowania react-image-crop */
+.reactCrop .ReactCrop__crop-selection {
+  border: 2px solid #3b82f6 !important; /* Niebieska ramka */
+  box-shadow: 0 0 0 1px #3b82f6 !important;
+}
+
+.reactCrop .ReactCrop__drag-handle {
+  background-color: #3b82f6 !important;
+}
+
+.reactCrop .ReactCrop__grid {
+  stroke: #3b82f6 !important;
+  stroke-dasharray: 4 !important;
+}

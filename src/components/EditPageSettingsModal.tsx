@@ -242,6 +242,7 @@ setUploading(false);
                         handleUploadClick={handleUploadClick}
                         handleFileChange={handleFileChange}
                         fileInputRef={fileInputRef}
+                        supabase={supabase}
                       />
                     )}
                     

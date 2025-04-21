@@ -1,5 +1,7 @@
 'use client';
 import React from 'react';
+import { useState, useRef, useEffect } from 'react';
+import ImageCropper from '../ImageCropper';
 
 interface ProfileTabProps {
   firstName: string;
@@ -29,6 +31,8 @@ interface ProfileTabProps {
   handleUploadClick: () => void;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
+  memorialId: number;
+  supabase: any;
 }
 
 const ProfileTab: React.FC<ProfileTabProps> = ({
@@ -45,8 +49,32 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
   relationDescription, setRelationDescription,
   photoUrl, setPhotoUrl,
   handleUploadClick, handleFileChange,
-  fileInputRef
+  fileInputRef,
+  memorialId,
+  supabase
 }) => {
+  const cropperRef = useRef<any>(null);
+  const [isCropping, setIsCropping] = useState(false);
+  const [editablePhotoUrl, setEditablePhotoUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAndConvert = async () => {
+      try {
+        const res = await fetch(photoUrl, { mode: 'cors' });
+        const blob = await res.blob();
+        const localUrl = URL.createObjectURL(blob);
+        setEditablePhotoUrl(localUrl);
+      } catch (e) {
+        console.error("Nie udało się pobrać zdjęcia:", e);
+      }
+    };
+
+    if (photoUrl && !photoUrl.startsWith('blob:')) {
+      fetchAndConvert();
+    } else {
+      setEditablePhotoUrl(photoUrl);
+    }
+  }, [photoUrl]);
   return (
     <div className="flex w-full gap-4 flex-nowrap">
                         {/* Lewa kolumna – formularz */}
@@ -217,82 +245,142 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                             </div>
 
                             {/* Podgląd zdjęcia - zwiększony */}
-                            <div className="mt-4 w-full flex justify-center">
-                            <div className="w-80 h-80 border-4 border-gray-100 shadow-md flex items-center justify-center rounded-2xl overflow-hidden">
-                                {photoUrl ? (
+                            <div className="w-80 h-80 border-4 border-gray-100 shadow-md flex items-center justify-center rounded-2xl overflow-hidden relative">
+                              {isCropping && photoUrl ? (
+                              <ImageCropper
+                                  ref={cropperRef}
+                                  imageUrl={editablePhotoUrl || ''}
+                                  onCropComplete={(blob) => {
+                                    const newUrl = URL.createObjectURL(blob);
+                                    setPhotoUrl(newUrl);
+                                    setIsCropping(false);
+                                  }}
+                                />
+                              ) : photoUrl ? (
                                 <img src={photoUrl} alt="Zdjęcie" className="w-full h-full object-cover" />
-                                ) : (
+                              ) : (
                                 <span className="text-gray-400">Brak zdjęcia</span>
-                                )}
-                            </div>
+                              )}
                             </div>
 
+                            
                             {/* Przyciski akcji */}
-                            <div className="flex flex-wrap gap-2 mt-4">
-  {/* Edit */}
-  <button className="flex items-center gap-2 border border-gray-200 px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-4 w-4 text-gray-500"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
+    {isCropping ? (
+  <div className="flex flex-wrap gap-2 mt-4">
+    <button
+      onClick={handleUploadClick}
+      className="flex items-center gap-2 border border-gray-300 text-black px-4 py-2 text-sm rounded-md bg-white hover:border-[#0594B0]"
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M15.232 5.232l3.536 3.536M2.5 21.5l4.621-1.157a2 2 0 00.947-.547l12.487-12.487a2 2 0 000-2.828l-3.536-3.536a2 2 0 00-2.828 0L1.535 13.432a2 2 0 00-.547.947L-.17 19.379a.5.5 0 00.61.61l2.06-.515z"
-      />
-    </svg>
-    Edytuj
-  </button>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4 text-[#0594B0]"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      Prześlij nowe zdjęcie
+    </button>
+    <button
+      onClick={async () => {
+        if (cropperRef.current?.getCroppedImage) {
+          try {
+            const blob = await cropperRef.current.getCroppedImage();
+            if (blob) {
+              const file = new File([blob], `profile-photo-${Date.now()}.jpeg`, { type: 'image/jpeg' });
+              const dt = new DataTransfer();
+              dt.items.add(file);
+              if (fileInputRef.current) {
+                fileInputRef.current.files = dt.files;
+                handleFileChange({ target: fileInputRef.current } as any);
+              }
+            }
+          } catch (e) {
+            console.error('Błąd przycinania zdjęcia:', e);
+          }
+        }
+        setIsCropping(false);
+      }}
+      className="bg-[#0594B0] text-white font-semibold px-6 py-2 rounded-md hover:bg-[#007A99]"
+    >
+      Zapisz
+    </button>
+    <button
+      onClick={() => setIsCropping(false)}
+      className="bg-[#0594B0] text-white font-semibold px-6 py-2 rounded-md hover:bg-[#007A99]"
+    >
+      Anuluj
+    </button>
+  </div>
+  ) : (
+  <div className="flex flex-wrap gap-2 mt-4">
+    <button
+      onClick={() => setIsCropping(true)}
+      className="flex items-center gap-2 border border-gray-300 text-black px-4 py-2 text-sm rounded-md bg-white hover:border-[#0594B0]"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4 text-[#0594B0]"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15.232 5.232l3.536 3.536M2.5 21.5l4.621-1.157a2 2 0 00.947-.547l12.487-12.487a2 2 0 000-2.828l-3.536-3.536a2 2 0 00-2.828 0L1.535 13.432a2 2 0 00-.547.947L-.17 19.379a.5.5 0 00.61.61l2.06-.515z"
+        />
+      </svg>
+      Edytuj
+    </button>
 
-  {/* Upload new photo */}
-  <button
-    onClick={handleUploadClick}
-    className="flex items-center gap-2 border border-gray-200 px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-4 w-4 text-gray-500"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
+    <button
+      onClick={handleUploadClick}
+      className="flex items-center gap-2 border border-gray-300 text-black px-4 py-2 text-sm rounded-md bg-white hover:border-[#0594B0]"
     >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-    </svg>
-    Prześlij nowe zdjęcie
-  </button>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4 text-[#0594B0]"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+      </svg>
+      Prześlij nowe zdjęcie
+    </button>
 
-  {/* Choose from Mementos */}
-  <button className="flex items-center gap-2 border border-gray-200 px-4 py-2 text-sm text-gray-700 rounded-md hover:bg-gray-100">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-4 w-4 text-gray-500"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"
-      />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M8 11l2 2 4-4" />
-    </svg>
-    Wybierz z pamiątek
-  </button>
-</div>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              ref={fileInputRef}
-                              hidden
-                              onChange={handleFileChange}
-                            />
+    <button className="flex items-center gap-2 border border-gray-300 text-black px-4 py-2 text-sm rounded-md bg-white hover:border-[#0594B0]">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-4 w-4 text-[#0594B0]"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M3 5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"
+        />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8 11l2 2 4-4" />
+      </svg>
+      Wybierz z pamiątek
+    </button>
+  </div>
+)}
+<input
+  type="file"
+  accept="image/*"
+  ref={fileInputRef}
+  hidden
+  onChange={handleFileChange}
+/>
 
                             {/* Informacja o bibliotece obrazów */}
                             <p className="mt-4 text-sm text-gray-600 text-center">
