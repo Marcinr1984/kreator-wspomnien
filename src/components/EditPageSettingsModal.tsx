@@ -205,7 +205,7 @@ setUploading(false);
                     onClick={() => handleTabChange('keepers')}
                     className={`relative text-base font-medium py-2 ${activeTab === 'keepers' ? 'text-cyan-600' : 'text-gray-600'}`}
                   >
-                    Opiekunowie profilu
+                    Opiekunowie strony
                     {activeTab === 'keepers' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[130%] h-[2px] bg-cyan-600"></div>}
                   </button>
                   </nav>

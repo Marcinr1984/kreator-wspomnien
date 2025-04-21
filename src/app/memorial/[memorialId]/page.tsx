@@ -5,6 +5,9 @@ import EditPageSettingsModal from '../../../components/EditPageSettingsModal';
 import { LockClosedIcon } from '@heroicons/react/24/solid'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../utils/supabaseClient'
+import PamiecTab from '../../../components/MemorialTab/PamiecTab';
+import PamiatkiTab from '../../../components/MemorialTab/PamiatkiTab';
+import BliscyTab from '../../../components/MemorialTab/BliscyTab';
 
 export default function MemorialPage() {
   const params = useParams()
@@ -17,7 +20,7 @@ export default function MemorialPage() {
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [repositionMode, setRepositionMode] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
-  const [activeTab, setActiveTab] = useState('podglad')
+  const [activeTab, setActiveTab] = useState('pamiec')
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalDefaultTab, setModalDefaultTab] = useState('ustawienia');
 
@@ -337,7 +340,14 @@ export default function MemorialPage() {
 </button>
 </div>
 </div>
-              <div className="bg-gray-100 rounded-xl p-4 shadow-sm w-[370px] mt-[220px] mb-[20px] transition-all duration-300 hover:ring-2 hover:ring-cyan-500">
+              <button
+                onClick={() => {
+                  setModalDefaultTab('keepers');
+                  openModal();
+                }}
+                className="bg-gray-100 rounded-xl p-4 shadow-sm w-[370px] mt-[220px] mb-[20px] transition-all duration-300 hover:ring-2 hover:ring-cyan-500 text-left"
+                type="button"
+              >
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-base font-medium text-gray-700">Opiekunowie pamięci ({keeperCount})</span>
                   <a href="#" className="text-sm text-black hover:underline flex items-center gap-1">
@@ -356,7 +366,7 @@ export default function MemorialPage() {
                     <p className="text-xs text-gray-500">{pageData.relation}</p>
                   </div>
                 </div>
-              </div>
+              </button>
             </div>
 
             {/* Prawa kolumna */}
@@ -389,52 +399,34 @@ export default function MemorialPage() {
   <div className="-mx-6 border-b border-gray-200 bg-white py-4 px-6">
     <nav className="flex justify-center items-center space-x-10">
       <button 
-        onClick={() => setActiveTab('podglad')}
-        className={`relative text-base font-medium py-2 ${activeTab === 'podglad' ? 'text-cyan-600' : 'text-gray-600'}`}
+        onClick={() => setActiveTab('pamiec')}
+        className={`relative text-base font-medium py-2 ${activeTab === 'pamiec' ? 'text-cyan-600' : 'text-gray-600'}`}
       >
-        Podgląd
-        {activeTab === 'podglad' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
+        Pamięć
+        {activeTab === 'pamiec' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
       </button>
       <button 
-        onClick={() => setActiveTab('ustawienia')}
-        className={`relative text-base font-medium py-2 ${activeTab === 'ustawienia' ? 'text-cyan-600' : 'text-gray-600'}`}
+        onClick={() => setActiveTab('pamiatki')}
+        className={`relative text-base font-medium py-2 ${activeTab === 'pamiatki' ? 'text-cyan-600' : 'text-gray-600'}`}
       >
-        Ustawienia strony
-        {activeTab === 'ustawienia' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[130%] h-[2px] bg-cyan-600"></div>}
+        Pamiątki
+        {activeTab === 'pamiatki' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[150%] h-[2px] bg-cyan-600"></div>}
       </button>
       <button 
-        onClick={() => setActiveTab('udostepnij')}
-        className={`relative text-base font-medium py-2 ${activeTab === 'udostepnij' ? 'text-cyan-600' : 'text-gray-600'}`}
+        onClick={() => setActiveTab('bliscy')}
+        className={`relative text-base font-medium py-2 ${activeTab === 'bliscy' ? 'text-cyan-600' : 'text-gray-600'}`}
       >
-        Udostępnij
-        {activeTab === 'udostepnij' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[140%] h-[2px] bg-cyan-600"></div>}
+        Bliscy
+        {activeTab === 'bliscy' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
       </button>
     </nav>
   </div>
 
   {/* Zawartość zakładek */}
   <div className="pt-6">
-    {activeTab === 'podglad' && (
-      <div>
-        <h2 className="text-xl font-semibold">Podgląd</h2>
-        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Podgląd".</p>
-      </div>
-    )}
-
-    {activeTab === 'ustawienia' && (
-      <div>
-        <h2 className="text-xl font-semibold">Ustawienia strony</h2>
-        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Ustawienia strony".</p>
-        
-      </div>
-    )}
-
-    {activeTab === 'udostepnij' && (
-      <div>
-        <h2 className="text-xl font-semibold">Udostępnij</h2>
-        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "Udostępnij".</p>
-      </div>
-    )}
+    {activeTab === 'pamiec' && <PamiecTab />}
+    {activeTab === 'pamiatki' && <PamiatkiTab />}
+    {activeTab === 'bliscy' && <BliscyTab />}
   </div>
 </div>
 
