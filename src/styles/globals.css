@@ -6,6 +6,7 @@ html, body {
 }
 @tailwind base;
 @tailwind components;
+@tailwind utilities;
 
 
 /* Formularz responsywny */
@@ -18,107 +19,11 @@ html, body {
     max-width: 95%;
   }
   
-  .w-full {
-    width: 100%;
-  }
-
-  .space-y-4 {
-    margin-bottom: 20px;
-  }
-
-  .p-6 {
-    padding: 1.5rem;
-  }
-
-  .text-3xl {
-    font-size: 2rem;
-  }
-
-  .text-xl {
-    font-size: 1.25rem;
-  }
-
-  .text-sm {
-    font-size: 0.875rem;
-  }
-
-  .text-center {
-    text-align: center;
-  }
-
-  .text-gray-700 {
-    color: #4a5568;
-  }
-
-  .w-full {
-    width: 100%;
-  }
-
-  .my-4 {
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .mt-6 {
-    margin-top: 1.5rem;
-  }
-
-  .mt-2 {
-    margin-top: 0.5rem;
-  }
-  
 }
 
 /* Reszta stylów dla różnych rozdzielczości */
 @media screen and (max-width: 768px) {
-  .w-full {
-    width: 100%;
-  }
-
   .max-w-6xl {
     max-width: 100%;
   }
-
-  .p-8 {
-    padding: 1.25rem;
-  }
-
-  .font-semibold {
-    font-weight: 600;
-  }
-
-  .my-4 {
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-  }
-
-  .space-x-0.5 {
-    margin-right: 0.5rem;
-    margin-left: 0.5rem;
-  }
-
-  .mx-0.5 {
-    margin-left: 0.5rem;
-    margin-right: 0.5rem;
-  }
-
-  .space-y-4 {
-    margin-bottom: 1.5rem;
-  }
-}
-
-
-/* Styl niestandardowy dla ramki kadrowania react-image-crop */
-.reactCrop .ReactCrop__crop-selection {
-  border: 2px solid #3b82f6 !important; /* Niebieska ramka */
-  box-shadow: 0 0 0 1px #3b82f6 !important;
-}
-
-.reactCrop .ReactCrop__drag-handle {
-  background-color: #3b82f6 !important;
-}
-
-.reactCrop .ReactCrop__grid {
-  stroke: #3b82f6 !important;
-  stroke-dasharray: 4 !important;
 }

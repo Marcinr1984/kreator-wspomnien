@@ -161,12 +161,14 @@ export default function Dashboard() {
         }}
       />
       {/* Sekcja nagłówka */}
+      {/* 📱 Mobile: flex items-center space-x-4 */}
+      {/* 🖥 Desktop (sm+): sm:w-12 sm:h-12 for icon, sm:text-2xl for text */}
       <div className="w-full bg-white rounded-md shadow-md shadow-gray-300/30 py-4 px-6 mb-0">
         <div className="max-w-6xl mx-auto flex items-start justify-between">
           <div className="flex items-center space-x-4">
-            <UserCircleIcon className="w-12 h-12 text-cyan-600" />
+            <UserCircleIcon className="w-10 h-10 sm:w-12 sm:h-12 text-cyan-600" />
             <div>
-              <p className="font-semibold text-2xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
+              <p className="font-semibold text-xl sm:text-2xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
               <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
             </div>
           </div>
@@ -174,22 +176,24 @@ export default function Dashboard() {
       </div>
 
       {/* Sekcja przycisków */}
+      {/* 📱 Mobile: flex flex-col justify-center items-center gap-4 */}
+      {/* 🖥 Desktop (md+): md:flex-row md:justify-end */}
       <div className="w-full bg-white rounded-md shadow-md shadow-gray-300/30 py-4 px-6 mb-6">
-        <div className="max-w-6xl mx-auto flex flex-wrap gap-2 justify-end">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:justify-end justify-center items-center gap-4">
           <button
             onClick={() => router.push('/profil')}
-            className="border border-gray-200 hover:border-cyan-400 transition-colors text-gray-700 rounded-full px-4 py-2 text-sm flex items-center gap-2"
+            className="border border-gray-200 hover:border-cyan-400 transition-colors text-gray-700 rounded-full px-4 py-3 text-sm flex items-center justify-center gap-2 w-full md:w-auto"
           >
             <Cog6ToothIcon className="w-5 h-5 text-cyan-600" />
             Ustawienia konta
           </button>
-          <button className="border border-gray-200 hover:border-cyan-400 transition-colors text-gray-700 rounded-full px-4 py-2 text-sm flex items-center gap-2">
+          <button className="border border-gray-200 hover:border-cyan-400 transition-colors text-gray-700 rounded-full px-4 py-3 text-sm flex items-center justify-center gap-2 w-full md:w-auto">
             <PlusIcon className="w-5 h-5 text-cyan-500" />
             Stwórz mój żywy pomnik
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="text-gray-700 text-sm flex items-center gap-2"
+            className="text-gray-700 text-sm flex items-center justify-center gap-2 w-full md:w-auto py-3"
           >
             <PlusIcon className="w-5 h-5 text-cyan-500" />
             Utwórz stronę pamięci
@@ -198,6 +202,8 @@ export default function Dashboard() {
       </div>
 
       {/* Sekcja pamięci */}
+      {/* 📱 Mobile: grid grid-cols-1 gap-4 */}
+      {/* 🖥 Desktop (sm+): sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 */}
       <div className="max-w-6xl mx-auto bg-white rounded-md shadow-md shadow-gray-300/30 pt-6 px-6 pb-10">
         <div className="rounded-lg">
           <div className="flex items-center justify-between mb-6">
@@ -207,10 +213,10 @@ export default function Dashboard() {
               className="text-gray-700 text-sm flex items-center gap-2"
             >
               <PlusIcon className="w-5 h-5 text-cyan-500" />
-              Utwórz stronę pamięci
+              <span className="hidden sm:inline">Utwórz stronę pamięci</span>
             </button>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {Array.from({ length: 5 }).map((_, i) => {
               const page = memorialPages[i]
               return (
