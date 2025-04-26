@@ -2,9 +2,20 @@
 
 import { useEffect, useRef, useState } from 'react'
 import EditPageSettingsModal from '../../../components/EditPageSettingsModal';
-import { LockClosedIcon } from '@heroicons/react/24/solid'
+import {
+  LockClosedIcon,
+  PlusIcon,
+  PhotoIcon,
+  VideoCameraIcon,
+  GlobeAltIcon,
+  DocumentTextIcon,
+  Squares2X2Icon
+} from '@heroicons/react/24/solid'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../utils/supabaseClient'
+import PamiecTab from '../../../components/MemorialTab/PamiecTab';
+import PamiatkiTab from '../../../components/MemorialTab/PamiatkiTab';
+import BliscyTab from '../../../components/MemorialTab/BliscyTab';
 
 export default function MemorialPage() {
   const params = useParams()
@@ -17,7 +28,23 @@ export default function MemorialPage() {
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [repositionMode, setRepositionMode] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
-  const [activeTab, setActiveTab] = useState('podglad')
+  const [activeTab, setActiveTab] = useState('pamiec')
+  const [isEditing, setIsEditing] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  // Dropdown ref for outside click
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalDefaultTab, setModalDefaultTab] = useState('ustawienia');
 
@@ -393,54 +420,109 @@ export default function MemorialPage() {
  
 
   {/* Nawigacja z przyciskami – rozciągnięta na całą szerokość dzięki -mx-6 i px-6 */}
-  <div className="-mx-6 border-b border-gray-200 bg-white py-4 px-6">
-    <nav className="flex justify-center items-center space-x-10">
-      <button 
-        onClick={() => setActiveTab('pamiec')}
-        className={`relative text-base font-medium py-2 ${activeTab === 'pamiec' ? 'text-cyan-600' : 'text-gray-600'}`}
-      >
-        Pamięć
-        {activeTab === 'pamiec' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
-      </button>
-      <button 
-        onClick={() => setActiveTab('pamiatki')}
-        className={`relative text-base font-medium py-2 ${activeTab === 'pamiatki' ? 'text-cyan-600' : 'text-gray-600'}`}
-      >
-        Pamiątki
-        {activeTab === 'pamiatki' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[150%] h-[2px] bg-cyan-600"></div>}
-      </button>
-      <button 
-        onClick={() => setActiveTab('bliscy')}
-        className={`relative text-base font-medium py-2 ${activeTab === '' ? 'text-cyan-600' : 'text-gray-600'}`}
-      >
-        Bliscy
-        {activeTab === 'udostepnij' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
-      </button>
-    </nav>
+  <div className={`-mx-6 ${!isEditing ? 'border-b border-gray-200' : ''} ${isEditing ? 'bg-gray-100' : 'bg-white'} py-4 px-6`}>
+    {!isEditing ? (
+      <nav className="flex justify-center items-center space-x-10">
+        <button 
+          onClick={() => setActiveTab('pamiec')}
+          className={`relative text-base font-medium py-2 ${activeTab === 'pamiec' ? 'text-cyan-600' : 'text-gray-600'}`}
+        >
+          Pamięć
+          {activeTab === 'pamiec' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
+        </button>
+        <button 
+          onClick={() => setActiveTab('pamiatki')}
+          className={`relative text-base font-medium py-2 ${activeTab === 'pamiatki' ? 'text-cyan-600' : 'text-gray-600'}`}
+        >
+          Pamiątki
+          {activeTab === 'pamiatki' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[150%] h-[2px] bg-cyan-600"></div>}
+        </button>
+        <button 
+          onClick={() => setActiveTab('bliscy')}
+          className={`relative text-base font-medium py-2 ${activeTab === 'bliscy' ? 'text-cyan-600' : 'text-gray-600'}`}
+        >
+          Bliscy
+          {activeTab === 'bliscy' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
+        </button>
+      </nav>
+    ) : (
+      <div className="flex justify-between items-center bg-gray-100 h-12 px-6 rounded-md">
+        <div className="relative inline-block text-left">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="bg-cyan-600 hover:bg-cyan-700 text-white font-medium text-sm py-3 px-6 rounded-xl min-w-[250px] flex justify-between items-center w-full"
+          >
+            <span>Dodaj pamiątki</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`h-4 w-4 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {isDropdownOpen && (
+            <div ref={dropdownRef} className="absolute mt-2 w-full bg-white rounded-xl shadow-lg z-50 pb-4">
+              <div className="px-4 py-2 text-gray-400 text-xs font-semibold">PRZEŚLIJ ZDJĘCIA I FILMY</div>
+              <div className="flex flex-col">
+                <button className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 flex items-center gap-2">
+                  <PlusIcon className="h-5 w-5 text-cyan-500" />
+                  Dodaj pliki
+                </button>
+              </div>
+
+              <div className="px-4 py-2 text-gray-400 text-xs font-semibold">UTWÓRZ HISTORIE</div>
+              <div className="flex flex-col">
+                <button className="w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 flex items-center gap-2">
+                  <PhotoIcon className="h-5 w-5 text-cyan-500" />
+                  Dodaj zdjęcia
+                </button>
+                <button className="w-full text-left px-4 py-2 mt-1.5 text-gray-800 hover:bg-gray-100 flex items-center gap-2">
+                  <VideoCameraIcon className="h-5 w-5 text-cyan-500" />
+                  Dodaj film
+                </button>
+                <button className="w-full text-left px-4 py-2 mt-1.5 text-gray-800 hover:bg-gray-100 flex items-center gap-2">
+                  <GlobeAltIcon className="h-5 w-5 text-cyan-500" />
+                  Dodaj stronę
+                </button>
+                <button className="w-full text-left px-4 py-2 mt-1.5 text-gray-800 hover:bg-gray-100 flex items-center gap-2">
+                  <DocumentTextIcon className="h-5 w-5 text-cyan-500" />
+                  Dodaj dokument
+                </button>
+                <button className="w-full text-left px-4 py-2 mt-1.5 text-gray-800 hover:bg-gray-100 flex items-center gap-2">
+                  <Squares2X2Icon className="h-5 w-5 text-cyan-500" />
+                  Dodaj album
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center space-x-4">
+          <label className="text-sm font-semibold text-gray-700">Zezwól odwiedzającym na pobieranie pamiątek?</label>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" value="" className="sr-only peer" />
+            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-cyan-600 transition-colors duration-300"></div>
+            <div className="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-all duration-300 peer-checked:translate-x-5"></div>
+          </label>
+        </div>
+      </div>
+    )}
   </div>
 
   {/* Zawartość zakładek */}
   <div className="pt-6">
     {activeTab === 'pamiec' && (
-      <div>
-        <h2 className="text-xl font-semibold">Pamięć</h2>
-        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "pamiec".</p>
-      </div>
+      <PamiecTab />
     )}
 
     {activeTab === 'pamiatki' && (
-      <div>
-        <h2 className="text-xl font-semibold">Pamiątki</h2>
-        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "pamiatki".</p>
-        
-      </div>
+      <PamiatkiTab setIsEditing={setIsEditing} />
     )}
 
     {activeTab === 'bliscy' && (
-      <div>
-        <h2 className="text-xl font-semibold">Bliscy</h2>
-        <p className="text-gray-700 mt-2">Tutaj znajduje się treść dla zakładki "bliscy".</p>
-      </div>
+      <BliscyTab />
     )}
   </div>
 </div>
