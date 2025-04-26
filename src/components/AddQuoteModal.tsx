@@ -1,0 +1,120 @@
+'use client'
+
+import { useState } from 'react'
+import { supabase } from '../utils/supabaseClient'
+import { Dialog } from '@headlessui/react'
+import { PlusIcon } from '@heroicons/react/24/solid'
+
+interface AddQuoteModalProps {
+  isOpen: boolean
+  onClose: () => void
+  memorialId: string | number
+}
+
+export default function AddQuoteModal({ isOpen, onClose, memorialId }: AddQuoteModalProps) {
+  const [quote, setQuote] = useState('')
+  const [author, setAuthor] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSave = async () => {
+    if (!quote.trim()) {
+      alert('Proszę wpisać cytat.')
+      return
+    }
+    setLoading(true)
+
+    const parsedId = typeof memorialId === 'string' ? parseInt(memorialId) : memorialId
+
+    const { error } = await supabase.from('memorial_mementos').insert({
+      memorial_id: parsedId,
+      type: 'quote',
+      content: {
+        quote,
+        author,
+      },
+    })
+    setLoading(false)
+    if (error) {
+      alert('Wystąpił błąd podczas zapisywania.')
+      console.error(error)
+    } else {
+      onClose()
+    }
+  }
+
+  return (
+    <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <Dialog.Panel className="w-[1000px] h-[650px] transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all flex flex-col">
+          <div className="w-full bg-black text-white px-6 py-4 flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="bg-cyan-600 w-8 h-8 flex items-center justify-center rounded-full text-white text-xl font-bold">
+                +
+              </div>
+              <span className="text-white font-medium">Dodaj cytat</span>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-black bg-white rounded-full px-4 py-1 text-sm font-medium hover:bg-gray-200"
+            >
+              Zamknij
+            </button>
+          </div>
+          <div className="flex flex-1 p-8 gap-8">
+            {/* Left side - Form */}
+            <div className="w-1/2">
+              <div className="w-full mb-6">
+                <h3 className="text-lg font-semibold mb-1">Add a Quote Story</h3>
+                <p className="text-gray-600 text-sm">
+                  A Quote Story can bring a loved one's favorite verses, aphorisms, book passages, or frequent sayings to life.
+                </p>
+              </div>
+              <div className="border p-6 rounded-xl bg-gray-50 space-y-6">
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Wprowadź cytat *</label>
+                  <input
+                    type="text"
+                    value={quote}
+                    onChange={(e) => setQuote(e.target.value)}
+                    className="w-full border rounded-lg p-3 text-sm"
+                    placeholder="Wpisz cytat"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Autor cytatu</label>
+                  <input
+                    type="text"
+                    value={author}
+                    onChange={(e) => setAuthor(e.target.value)}
+                    className="w-full border rounded-lg p-3 text-sm"
+                    placeholder="Wpisz autora (opcjonalnie)"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Right side - Live Preview */}
+            <div className="w-1/2 flex flex-col items-center">
+              <h4 className="text-gray-400 text-sm mb-2 uppercase">Preview</h4>
+              <div className="w-full border border-dashed border-cyan-400 rounded-lg p-8 flex flex-col items-center justify-center text-center text-gray-500">
+                <div className="text-cyan-500 text-4xl mb-4">“</div>
+                <div className="text-lg italic mb-4">{quote || "Twój tekst pojawi się tutaj"}</div>
+                <div className="border-t border-cyan-400 w-1/2 mb-2"></div>
+                <div className="text-sm text-gray-400">{author || "- Autor -"}</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 px-6 py-4 flex justify-end">
+            <button
+              onClick={handleSave}
+              className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
+            >
+              {loading ? 'Zapisywanie...' : 'Zapisz'}
+            </button>
+          </div>
+        </Dialog.Panel>
+      </div>
+    </Dialog>
+  )
+}
