@@ -518,7 +518,7 @@ export default function MemorialPage() {
     )}
 
     {activeTab === 'pamiatki' && (
-      <PamiatkiTab setIsEditing={setIsEditing} />
+      <PamiatkiTab setIsEditing={setIsEditing} memorialId={parsedId} />
     )}
 
     {activeTab === 'bliscy' && (
