@@ -4,7 +4,8 @@ import {
   ChatBubbleLeftEllipsisIcon,
   StarIcon,
   BookmarkIcon,
-  EyeIcon
+  EyeIcon,
+  TrashIcon
 } from '@heroicons/react/24/solid';
 import React, { useState, useEffect } from 'react';
 import AddQuoteModal from '../../components/AddQuoteModal';
@@ -19,6 +20,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
   const [localEditing, setLocalEditing] = useState(false);
   const [isAddQuoteModalOpen, setIsAddQuoteModalOpen] = useState(false);
   const [mementos, setMementos] = useState<any[]>([]);
+  const [editingMemento, setEditingMemento] = useState<any | null>(null);
 
   const fetchMementos = async () => {
     if (!memorialId) {
@@ -56,6 +58,27 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
     setIsEditing(false);
   };
 
+  const handleEditMemento = (memento: any) => {
+    setEditingMemento(memento);
+    setIsAddQuoteModalOpen(true);
+  };
+
+  const handleDeleteMemento = async (id: number) => {
+    const confirmDelete = window.confirm('Czy na pewno chcesz usunąć ten cytat?');
+    if (!confirmDelete) return;
+
+    const { error } = await supabase
+      .from('memorial_mementos')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      console.error('Błąd podczas usuwania pamiątki:', error.message);
+    } else {
+      await fetchMementos();
+    }
+  };
+
   return (
     <div className="p-4">
       {!localEditing ? (
@@ -85,49 +108,75 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
           <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg text-center mt-20">
             <h2 className="text-lg font-semibold mb-10">Opowiedz nam o życiu tej osoby</h2>
             <div className="flex flex-wrap gap-4 justify-center mb-8">
-              <button className="border border-gray-300 py-2 px-3 rounded-full hover:bg-gray-100 flex items-center gap-2 justify-center text-sm font-medium">
+              <button className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium">
                 <PlusIcon className="w-5 h-5 text-cyan-500" />
                 Dodaj mapę
               </button>
-              <button className="border border-gray-300 py-2 px-3 rounded-full hover:bg-gray-100 flex items-center gap-2 justify-center text-sm font-medium">
+              <button className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium">
                 <PlusIcon className="w-5 h-5 text-cyan-500" />
                 Dodaj tytuł lub tekst
               </button>
               <button
-                onClick={() => setIsAddQuoteModalOpen(true)}
-                className="border border-gray-300 py-2 px-3 rounded-full hover:bg-gray-100 flex items-center gap-2 justify-center text-sm font-medium"
+                onClick={() => {
+                  setEditingMemento(null);
+                  setIsAddQuoteModalOpen(true);
+                }}
+                className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium"
               >
                 <PlusIcon className="w-5 h-5 text-cyan-500" />
                 Dodaj cytat
               </button>
-              <button className="border border-gray-300 py-2 px-3 rounded-full hover:bg-gray-100 flex items-center gap-2 justify-center text-sm font-medium">
+              <button className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium">
                 <PlusIcon className="w-5 h-5 text-cyan-500" />
                 Dodaj ważne momenty
               </button>
-              <button className="border border-gray-300 py-2 px-3 rounded-full hover:bg-gray-100 flex items-center gap-2 justify-center text-sm font-medium">
+              <button className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium">
                 <PlusIcon className="w-5 h-5 text-cyan-500" />
                 Dodaj wspomnienie
               </button>
             </div>
-            <div className="flex flex-wrap gap-4 justify-center mt-8">
-              {mementos.map((memento) => (
-                <div key={memento.id} className="border-2 border-dashed border-cyan-400 rounded-xl p-6 w-[400px] flex flex-col items-center relative">
-                  <div className="text-cyan-500 text-4xl mb-4">“</div>
-                  <div className="text-center text-lg italic mb-2">{memento.content?.quote}</div>
-                  <div className="border-t border-cyan-400 w-1/2 my-2"></div>
-                  <div className="text-sm text-gray-500">- {memento.content?.author}</div>
-                </div>
-              ))}
-            </div>
           </div>
+
+          <div className="flex flex-col items-center justify-center mt-28 w-full">
+            {mementos.map((memento) => (
+              <div key={memento.id} className="relative border-2 border-dashed border-gray-300 p-8 rounded-xl shadow-sm mb-6 w-full">
+                <div className="absolute top-4 right-4 flex gap-2">
+                  <button
+                    onClick={() => handleDeleteMemento(memento.id)}
+                    className="flex items-center justify-center rounded-full border border-gray-300 w-10 h-10 hover:border-cyan-500"
+                    title="Usuń"
+                  >
+                    <TrashIcon className="h-5 w-5 text-cyan-500" />
+                  </button>
+                  <button
+                    onClick={() => handleEditMemento(memento)}
+                    className="flex items-center gap-2 border border-gray-300 rounded-full py-1.5 px-4 hover:border-cyan-500 text-sm font-medium"
+                    title="Edytuj cytat"
+                  >
+                    <PencilSquareIcon className="h-5 w-5 text-cyan-500" />
+                    <span className="text-gray-800">Edytuj cytat</span>
+                  </button>
+                </div>
+                <div className="relative flex flex-col items-center mt-8">
+                  <div className="text-cyan-500 text-[180px] leading-none absolute top-0">“</div>
+                  <div className="pt-[90px] text-center text-4xl italic">{memento.content?.quote}</div>
+                </div>
+                <div className="border-t-2 border-cyan-400 w-1/5 my-6 mx-auto"></div>
+                <div className="text-lg text-gray-500 text-center mb-8">- {memento.content?.author}</div>
+              </div>
+            ))}
+          </div>
+
           {isAddQuoteModalOpen && (
             <AddQuoteModal
               isOpen={isAddQuoteModalOpen}
               onClose={async () => {
                 setIsAddQuoteModalOpen(false);
+                setEditingMemento(null);
                 await fetchMementos();
               }}
               memorialId={memorialId}
+              editingQuote={editingMemento}
             />
           )}
         </>

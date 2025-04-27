@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../utils/supabaseClient'
 import { Dialog } from '@headlessui/react'
 import { PlusIcon } from '@heroicons/react/24/solid'
@@ -9,12 +9,23 @@ interface AddQuoteModalProps {
   isOpen: boolean
   onClose: () => void
   memorialId: string | number
+  editingQuote?: any | null;
 }
 
-export default function AddQuoteModal({ isOpen, onClose, memorialId }: AddQuoteModalProps) {
+export default function AddQuoteModal({ isOpen, onClose, memorialId, editingQuote }: AddQuoteModalProps) {
   const [quote, setQuote] = useState('')
   const [author, setAuthor] = useState('')
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (editingQuote) {
+      setQuote(editingQuote.content.quote || '');
+      setAuthor(editingQuote.content.author || '');
+    } else {
+      setQuote('');
+      setAuthor('');
+    }
+  }, [editingQuote, isOpen]);
 
   const handleSave = async () => {
     if (!quote.trim()) {
@@ -23,23 +34,34 @@ export default function AddQuoteModal({ isOpen, onClose, memorialId }: AddQuoteM
     }
     setLoading(true)
 
-    const parsedId = typeof memorialId === 'string' ? parseInt(memorialId) : memorialId
+    if (editingQuote) {
+      const { error } = await supabase
+        .from('memorial_mementos')
+        .update({ content: { quote, author } })
+        .eq('id', editingQuote.id);
 
-    const { error } = await supabase.from('memorial_mementos').insert({
-      memorial_id: parsedId,
-      type: 'quote',
-      content: {
-        quote,
-        author,
-      },
-    })
-    setLoading(false)
-    if (error) {
-      alert('Wystąpił błąd podczas zapisywania.')
-      console.error(error)
+      if (error) {
+        alert('Wystąpił błąd podczas aktualizacji.');
+        console.error(error);
+      } else {
+        onClose();
+      }
     } else {
-      onClose()
+      const parsedId = typeof memorialId === 'string' ? parseInt(memorialId) : memorialId;
+      const { error } = await supabase.from('memorial_mementos').insert({
+        memorial_id: parsedId,
+        type: 'quote',
+        content: { quote, author },
+      });
+
+      if (error) {
+        alert('Wystąpił błąd podczas zapisywania.');
+        console.error(error);
+      } else {
+        onClose();
+      }
     }
+    setLoading(false);
   }
 
   return (
@@ -110,7 +132,7 @@ export default function AddQuoteModal({ isOpen, onClose, memorialId }: AddQuoteM
               className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading}
             >
-              {loading ? 'Zapisywanie...' : 'Zapisz'}
+              {loading ? 'Zapisywanie...' : editingQuote ? 'Zapisz zmiany' : 'Zapisz'}
             </button>
           </div>
         </Dialog.Panel>
