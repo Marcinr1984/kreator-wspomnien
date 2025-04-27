@@ -75,9 +75,10 @@ export default function AddQuoteModal({ isOpen, onClose, memorialId, editingQuot
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <Dialog.Panel className="w-[1100px] h-[620px] flex flex-col overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
+    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
+      <div className="fixed inset-0 bg-black bg-opacity-40 transition-opacity" aria-hidden="true" />
+      <div className="fixed inset-0 flex items-center justify-center p-4">
+        <Dialog.Panel className="z-50 w-[1100px] h-[620px] flex flex-col overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
           <div className="w-full bg-black text-white px-6 py-4 flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="bg-cyan-600 w-8 h-8 flex items-center justify-center rounded-full text-white text-xl font-bold">

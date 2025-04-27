@@ -10,6 +10,7 @@ import {
 import React, { useState, useEffect } from 'react';
 import AddQuoteModal from '../../components/AddQuoteModal';
 import AddTextModal from '../../components/AddTextModal';
+import AddMapModal from '../../components/AddMapModal';
 import { supabase } from '../../utils/supabaseClient';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -24,6 +25,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
   const [localEditing, setLocalEditing] = useState(false);
   const [isAddQuoteModalOpen, setIsAddQuoteModalOpen] = useState(false);
   const [isAddTextModalOpen, setIsAddTextModalOpen] = useState(false);
+  const [isAddMapModalOpen, setIsAddMapModalOpen] = useState(false);
   const [mementos, setMementos] = useState<any[]>([]);
   const [editingMemento, setEditingMemento] = useState<any | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -254,7 +256,10 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
         <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg text-center mt-20">
           <h2 className="text-lg font-semibold mb-10">Opowiedz nam o życiu tej osoby</h2>
           <div className="flex flex-wrap gap-4 justify-center mb-8">
-            <button className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium">
+            <button
+              onClick={() => setIsAddMapModalOpen(true)}
+              className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium"
+            >
               <PlusIcon className="w-5 h-5 text-cyan-500" />
               Dodaj mapę
             </button>
@@ -404,6 +409,18 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
           }}
           memorialId={memorialId}
           editingText={editingMemento} // Przekazujemy dane do edycji tytułu/tekstu
+        />
+      )}
+
+      {/* Modal dla mapy */}
+      {isAddMapModalOpen && (
+        <AddMapModal
+          isOpen={isAddMapModalOpen}
+          onClose={async () => {
+            setIsAddMapModalOpen(false);
+            await fetchMementos();
+          }}
+          memorialId={memorialId}
         />
       )}
     </div>
