@@ -6,7 +6,7 @@ import { Dialog } from '@headlessui/react'
 
 interface AddTextModalProps {
   isOpen: boolean
-  onClose: () => void
+  onClose: (newText?: any) => void
   memorialId: string | number
   editingText?: any | null; // Zmieniamy editingQuote na editingText
 }
