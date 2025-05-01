@@ -18,7 +18,7 @@ import { Dialog } from '@headlessui/react'
 
 interface AddMapModalProps {
   isOpen: boolean
-  onClose: () => void
+  onClose: (newMap?: any) => void
   memorialId: string | number
   editingMap?: any | null;
 }
