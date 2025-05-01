@@ -7,7 +7,7 @@ import { PlusIcon } from '@heroicons/react/24/solid'
 
 interface AddQuoteModalProps {
   isOpen: boolean
-  onClose: () => void
+  onClose: (newQuote?: any) => void
   memorialId: string | number
   editingQuote?: any | null;
 }
