@@ -31,7 +31,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
   const [mementos, setMementos] = useState<any[]>([]);
   const [editingMemento, setEditingMemento] = useState<any | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [mementoToDelete, setMementoToDelete] = useState<number | null>(null);
+  const [mementoToDelete, setMementoToDelete] = useState<number | string | null>(null);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
 
   const fetchMementos = async () => {
