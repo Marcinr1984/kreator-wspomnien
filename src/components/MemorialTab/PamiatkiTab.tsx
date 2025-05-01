@@ -8,6 +8,8 @@ import {
   TrashIcon
 } from '@heroicons/react/24/solid';
 import React, { useState, useEffect } from 'react';
+import Map, { Marker } from 'react-map-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import AddQuoteModal from '../../components/AddQuoteModal';
 import AddTextModal from '../../components/AddTextModal';
 import AddMapModal from '../../components/AddMapModal';
@@ -45,11 +47,33 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
       .in('type', ['quote', 'text'])  // Pobieramy zarówno cytaty, jak i teksty
       .order('sort_order', { ascending: true });
 
-    if (error) {
-      console.error('Błąd pobierania pamiątek:', error.message);
-    } else {
-      setMementos(data || []);
+    // Nowość: Pobieranie lokalizacji z memorial_maps
+    const { data: mapsData, error: mapsError } = await supabase
+      .from('memorial_maps')
+      .select('*')
+      .eq('memorial_id', memorialId)
+      .order('sort_order', { ascending: true });
+
+    if (mapsError) {
+      console.error('Błąd pobierania lokalizacji:', mapsError.message);
     }
+
+    const mapsAsMementos = (mapsData || []).map((map) => ({
+      id: `map-${map.id}`,
+      type: 'map',
+      sort_order: map.sort_order,
+      content: {
+        title: map.title,
+        story: map.story,
+        address: map.address,
+        lat: map.lat,
+        lng: map.lng,
+      },
+    }));
+
+    const allMementos = [...(data || []), ...mapsAsMementos];
+    // Sortujemy allMementos po sort_order i ustawiamy do state
+    setMementos(allMementos.sort((a, b) => a.sort_order - b.sort_order));
   };
 
   useEffect(() => {
@@ -74,13 +98,25 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
     }));
 
     for (const update of updates) {
-      const { error } = await supabase
-        .from('memorial_mementos')
-        .update({ sort_order: update.sort_order })
-        .eq('id', update.id);
+      if (typeof update.id === 'string' && update.id.startsWith('map-')) {
+        const mapId = update.id.replace('map-', '');
+        const { error } = await supabase
+          .from('memorial_maps')
+          .update({ sort_order: update.sort_order })
+          .eq('id', mapId);
 
-      if (error) {
-        console.error('Błąd aktualizacji sort_order:', error.message);
+        if (error) {
+          console.error('Błąd aktualizacji sort_order dla mapy:', error.message);
+        }
+      } else {
+        const { error } = await supabase
+          .from('memorial_mementos')
+          .update({ sort_order: update.sort_order })
+          .eq('id', update.id);
+
+        if (error) {
+          console.error('Błąd aktualizacji sort_order:', error.message);
+        }
       }
     }
 
@@ -91,7 +127,6 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
   const handleEditMemento = (memento: any) => {
     setEditingMemento(memento);
 
-    // Sprawdzenie, czy jest to cytat czy tytuł/tekst
     if (memento.type === 'quote') {
       setIsAddQuoteModalOpen(true);
     } else if (memento.type === 'text') {
@@ -99,7 +134,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
     }
   };
 
-  const handleDeleteMemento = async (id: number) => {
+  const handleDeleteMemento = async (id: any) => {
     setMementoToDelete(id);
     setIsDeleteModalOpen(true);
   };
@@ -154,8 +189,32 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
             <div className="relative flex flex-col items-center mt-8">
               <div className="text-cyan-500 text-[180px] leading-none absolute top-0">“</div>
               <div className="pt-[90px] text-center text-3xl italic">{memento.content?.quote}</div>
-              <div className="border-t-2 border-cyan-400 w-1/5 my-6 mx-auto"></div> {/* Niebieska linia tylko przy cytatach */}
-              <div className="text-lg text-gray-500 text-center mb-8">- {memento.content?.author}</div> {/* Autor tylko w cytatach */}
+              <div className="border-t-2 border-cyan-400 w-1/5 my-6 mx-auto"></div>
+              <div className="text-lg text-gray-500 text-center mb-8">- {memento.content?.author}</div>
+            </div>
+          ) : memento.type === 'map' ? (
+            <div className="relative flex flex-col items-center mt-8">
+              <div className="text-center text-2xl font-bold text-gray-900 break-words w-full max-w-[350px]">
+                {memento.content?.title}
+              </div>
+              <div className="text-lg text-black mt-2 w-full max-w-[350px] text-center">
+                {memento.content?.story}
+              </div>
+              <div className="text-sm text-gray-500 mt-2 text-center">{memento.content?.address}</div>
+              <div className="w-full h-[400px] mt-4 rounded-lg overflow-hidden">
+                <Map
+                  initialViewState={{
+                    latitude: memento.content?.lat,
+                    longitude: memento.content?.lng,
+                    zoom: 17
+                  }}
+                  style={{ width: '100%', height: '100%' }}
+                  mapStyle="mapbox://styles/mapbox/streets-v11"
+                  mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                >
+                  <Marker latitude={memento.content?.lat} longitude={memento.content?.lng} />
+                </Map>
+              </div>
             </div>
           ) : (
             // Renderowanie tytułu i tekstu
@@ -199,6 +258,20 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
                 >
                   <PencilSquareIcon className="h-5 w-5 text-cyan-500" />
                   <span className="text-gray-800">Edytuj tytuł/tekst</span>
+                </button>
+              )}
+              {/* Przycisk edytuj lokalizację */}
+              {memento.type === 'map' && (
+                <button
+                  onClick={() => {
+                    setEditingMemento(memento);
+                    setIsAddMapModalOpen(true);
+                  }}
+                  className="flex items-center gap-2 border border-gray-300 rounded-full py-1.5 px-4 hover:border-cyan-500 text-sm font-medium"
+                  title="Edytuj lokalizację"
+                >
+                  <PencilSquareIcon className="h-5 w-5 text-cyan-500" />
+                  <span className="text-gray-800">Edytuj lokalizację</span>
                 </button>
               )}
             </div>
@@ -264,7 +337,10 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
               Dodaj mapę
             </button>
             <button
-              onClick={() => setIsAddTextModalOpen(true)}
+              onClick={() => {
+                setEditingMemento(null);
+                setIsAddTextModalOpen(true);
+              }}
               className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium"
             >
               <PlusIcon className="w-5 h-5 text-cyan-500" />
@@ -292,10 +368,13 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
         </div>
       )}
 
-      {/* Cytaty i teksty */}
+      {/* Cytaty, teksty i mapy */}
       {localEditing ? (
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={mementos.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+          <SortableContext
+            items={mementos.map((m) => m.id)}
+            strategy={verticalListSortingStrategy}
+          >
             <div className="flex flex-col items-center justify-center mt-28 w-full">
               {mementos.map((memento) => (
                 <SortableMementoItem
@@ -363,14 +442,25 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
               <button
                 onClick={async () => {
                   if (mementoToDelete !== null) {
-                    const { error } = await supabase
-                      .from('memorial_mementos')
-                      .delete()
-                      .eq('id', mementoToDelete);
-                    if (error) {
-                      console.error('Błąd podczas usuwania pamiątki:', error.message);
+                    // Obsługa usuwania mapy (jeśli mementoToDelete jest stringiem i zaczyna się od "map-")
+                    if (typeof mementoToDelete === 'string' && mementoToDelete.startsWith('map-')) {
+                      const mapId = mementoToDelete.replace('map-', '');
+                      const { error } = await supabase.from('memorial_maps').delete().eq('id', mapId);
+                      if (error) {
+                        console.error('Błąd usuwania mapy:', error.message);
+                      } else {
+                        await fetchMementos();
+                      }
                     } else {
-                      await fetchMementos();
+                      const { error } = await supabase
+                        .from('memorial_mementos')
+                        .delete()
+                        .eq('id', mementoToDelete);
+                      if (error) {
+                        console.error('Błąd podczas usuwania pamiątki:', error.message);
+                      } else {
+                        await fetchMementos();
+                      }
                     }
                   }
                   setIsDeleteModalOpen(false);
@@ -389,10 +479,18 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
       {isAddQuoteModalOpen && (
         <AddQuoteModal
           isOpen={isAddQuoteModalOpen}
-          onClose={async () => {
+          onClose={async (newQuote) => {
             setIsAddQuoteModalOpen(false);
             setEditingMemento(null);  // Wyczyszczenie danych po zamknięciu modalu
-            await fetchMementos();
+            if (newQuote && !editingMemento) {
+              // Dodajemy nowy cytat na początek z sort_order: 0
+              setMementos((prev) => [
+                { ...newQuote, sort_order: 0 },
+                ...prev,
+              ]);
+            } else {
+              await fetchMementos();
+            }
           }}
           memorialId={memorialId}
           editingQuote={editingMemento} // Przekazujemy dane do edycji cytatu
@@ -403,12 +501,20 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
       {isAddTextModalOpen && (
         <AddTextModal
           isOpen={isAddTextModalOpen}
-          onClose={async () => {
+          onClose={async (newText) => {
+            console.log("📥 Modal zamknięty, odświeżam dane...");
             setIsAddTextModalOpen(false);
-            await fetchMementos();
+            if (newText && !editingMemento) {
+              setMementos((prev) => [
+                { ...newText, sort_order: 0 },
+                ...prev,
+              ]);
+            } else {
+              await fetchMementos();
+            }
           }}
           memorialId={memorialId}
-          editingText={editingMemento} // Przekazujemy dane do edycji tytułu/tekstu
+          editingText={editingMemento}
         />
       )}
 
@@ -416,11 +522,19 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
       {isAddMapModalOpen && (
         <AddMapModal
           isOpen={isAddMapModalOpen}
-          onClose={async () => {
+          onClose={async (newMap) => {
             setIsAddMapModalOpen(false);
-            await fetchMementos();
+            if (newMap) {
+              setMementos((prev) => [
+                { ...newMap, sort_order: 0 },
+                ...prev,
+              ]);
+            } else {
+              await fetchMementos();
+            }
           }}
           memorialId={memorialId}
+          editingMap={editingMemento}
         />
       )}
     </div>

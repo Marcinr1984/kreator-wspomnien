@@ -29,18 +29,33 @@ export default function AddTextModal({ isOpen, onClose, memorialId, editingText 
       alert('Proszę wpisać tytuł lub tekst.');
       return;
     }
+
     setLoading(true);
-
     const parsedId = typeof memorialId === 'string' ? parseInt(memorialId) : memorialId;
+    console.log('🔍 Rozpoczynam zapis:', { title, text, editingText, memorialId: parsedId });
 
-    // Używamy update zamiast upsert do edycji istniejącego wpisu
-    const { error } = await supabase
-      .from('memorial_mementos')
-      .update({
-        content: { title, text },
-      })
-      .eq('memorial_id', parsedId)
-      .eq('type', 'text');
+    let error = null;
+
+    if (editingText) {
+      const res = await supabase
+        .from('memorial_mementos')
+        .update({
+          content: { title, text },
+        })
+        .eq('id', editingText.id);
+      error = res.error;
+      console.log('✅ Odpowiedź z Supabase (update):', res);
+    } else {
+      const res = await supabase
+        .from('memorial_mementos')
+        .insert({
+          memorial_id: parsedId,
+          type: 'text',
+          content: { title, text },
+        });
+      error = res.error;
+      console.log('✅ Odpowiedź z Supabase (insert):', res);
+    }
 
     if (error) {
       alert('Wystąpił błąd podczas zapisywania.');
@@ -48,8 +63,9 @@ export default function AddTextModal({ isOpen, onClose, memorialId, editingText 
     } else {
       onClose();
     }
+
     setLoading(false);
-  }
+  };
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
