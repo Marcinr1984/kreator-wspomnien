@@ -33,6 +33,9 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [mementoToDelete, setMementoToDelete] = useState<number | string | null>(null);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
+  // Stan interaktywności i pełnego ekranu mapy
+  const [isMapInteractive, setIsMapInteractive] = useState(false);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
 
   const fetchMementos = async () => {
     if (!memorialId) {
@@ -201,20 +204,74 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
                 {memento.content?.story}
               </div>
               <div className="text-sm text-gray-500 mt-2 text-center">{memento.content?.address}</div>
-              <div className="w-full h-[400px] mt-4 rounded-lg overflow-hidden">
-                <Map
-                  initialViewState={{
-                    latitude: memento.content?.lat,
-                    longitude: memento.content?.lng,
-                    zoom: 17
-                  }}
-                  style={{ width: '100%', height: '100%' }}
-                  mapStyle="mapbox://styles/mapbox/streets-v11"
-                  mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                >
-                  <Marker latitude={memento.content?.lat} longitude={memento.content?.lng} />
-                </Map>
-              </div>
+              {/* Renderowanie mapy: pełny ekran lub normalny */}
+              {isMapFullscreen ? (
+                <div className="fixed inset-0 z-50 bg-white">
+                  <Map
+                    initialViewState={{
+                      latitude: memento.content?.lat,
+                      longitude: memento.content?.lng,
+                      zoom: 17
+                    }}
+                    mapStyle="mapbox://styles/mapbox/streets-v11"
+                    mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                    style={{ width: '100%', height: '100%' }}
+                    scrollZoom
+                    dragPan
+                    dragRotate
+                    doubleClickZoom
+                    touchZoomRotate
+                  >
+                    <Marker latitude={memento.content?.lat} longitude={memento.content?.lng} />
+                  </Map>
+                  <button
+                    onClick={() => {
+                      setIsMapInteractive(false);
+                      setIsMapFullscreen(false);
+                    }}
+                    className="absolute top-4 right-4 z-10 bg-white p-2 rounded-full shadow-lg"
+                  >
+                    <svg className="w-6 h-6 text-cyan-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M4.293 15.707a1 1 0 010-1.414L7.586 11H6a1 1 0 110-2h4a1 1 0 011 1v4a1 1 0 11-2 0v-1.586l-3.293 3.293a1 1 0 01-1.414 0zM15.707 4.293a1 1 0 010 1.414L12.414 9H14a1 1 0 110 2h-4a1 1 0 01-1-1V6a1 1 0 112 0v1.586l3.293-3.293a1 1 0 011.414 0z" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="w-full h-[400px] mt-4 rounded-lg overflow-hidden relative">
+                  <Map
+                    initialViewState={{
+                      latitude: memento.content?.lat,
+                      longitude: memento.content?.lng,
+                      zoom: 17
+                    }}
+                    mapStyle="mapbox://styles/mapbox/streets-v11"
+                    mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                    style={{ width: '100%', height: '100%' }}
+                    scrollZoom={false}
+                    dragPan={false}
+                    dragRotate={false}
+                    doubleClickZoom={false}
+                    touchZoomRotate={false}
+                  >
+                    <Marker latitude={memento.content?.lat} longitude={memento.content?.lng} />
+                  </Map>
+                  {/* Przycisk pełnoekranowy */}
+                  {!localEditing && (
+                    <button
+                      onClick={() => {
+                        setIsMapInteractive(true);
+                        setIsMapFullscreen(true);
+                      }}
+                      className="absolute top-2 right-2 z-10 bg-white p-2 rounded-lg shadow-md"
+                      title="Pokaż na pełnym ekranie"
+                    >
+                      <svg className="w-6 h-6 text-cyan-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.293 9.293a1 1 0 011.414 0L15 12.586V11a1 1 0 112 0v4a1 1 0 01-1 1h-4a1 1 0 110-2h1.586l-3.293-3.293a1 1 0 010-1.414zM9.707 10.707a1 1 0 01-1.414 0L5 7.414V9a1 1 0 11-2 0V5a1 1 0 011-1h4a1 1 0 110 2H6.414l3.293 3.293a1 1 0 010 1.414z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             // Renderowanie tytułu i tekstu
@@ -330,7 +387,10 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
           <h2 className="text-lg font-semibold mb-10">Opowiedz nam o życiu tej osoby</h2>
           <div className="flex flex-wrap gap-4 justify-center mb-8">
             <button
-              onClick={() => setIsAddMapModalOpen(true)}
+              onClick={() => {
+                setEditingMemento(null);
+                setIsAddMapModalOpen(true);
+              }}
               className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium"
             >
               <PlusIcon className="w-5 h-5 text-cyan-500" />
@@ -376,29 +436,33 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
             strategy={verticalListSortingStrategy}
           >
             <div className="flex flex-col items-center justify-center mt-28 w-full">
-              {mementos.map((memento) => (
-                <SortableMementoItem
-                  key={memento.id}
-                  memento={memento}
-                  localEditing={localEditing}
-                  handleDeleteMemento={handleDeleteMemento}
-                  handleEditMemento={handleEditMemento}
-                />
-              ))}
+              {mementos
+                .filter((memento) => memento?.type && memento?.content) // zapobiega renderowaniu pustych map
+                .map((memento) => (
+                  <SortableMementoItem
+                    key={memento.id}
+                    memento={memento}
+                    localEditing={localEditing}
+                    handleDeleteMemento={handleDeleteMemento}
+                    handleEditMemento={handleEditMemento}
+                  />
+                ))}
             </div>
           </SortableContext>
         </DndContext>
       ) : (
         <div className="flex flex-col items-center justify-center mt-28 w-full">
-          {mementos.map((memento) => (
-            <SortableMementoItem
-              key={memento.id}
-              memento={memento}
-              localEditing={localEditing}
-              handleDeleteMemento={handleDeleteMemento}
-              handleEditMemento={handleEditMemento}
-            />
-          ))}
+          {mementos
+            .filter((memento) => memento?.type && memento?.content) // zapobiega renderowaniu pustych map
+            .map((memento) => (
+              <SortableMementoItem
+                key={memento.id}
+                memento={memento}
+                localEditing={localEditing}
+                handleDeleteMemento={handleDeleteMemento}
+                handleEditMemento={handleEditMemento}
+              />
+            ))}
         </div>
       )}
 
@@ -524,7 +588,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
           isOpen={isAddMapModalOpen}
           onClose={async (newMap) => {
             setIsAddMapModalOpen(false);
-            if (newMap) {
+            if (newMap && !editingMemento) {
               setMementos((prev) => [
                 { ...newMap, sort_order: 0 },
                 ...prev,
@@ -532,6 +596,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
             } else {
               await fetchMementos();
             }
+            setEditingMemento(null);
           }}
           memorialId={memorialId}
           editingMap={editingMemento}

@@ -598,6 +598,12 @@ video {
 .top-\[64px\] {
   top: 64px;
 }
+.right-2 {
+  right: 0.5rem;
+}
+.top-2 {
+  top: 0.5rem;
+}
 .z-0 {
   z-index: 0;
 }
@@ -826,9 +832,6 @@ video {
 .h-6 {
   height: 1.5rem;
 }
-.h-64 {
-  height: 16rem;
-}
 .h-8 {
   height: 2rem;
 }
@@ -850,6 +853,9 @@ video {
 .h-\[360px\] {
   height: 360px;
 }
+.h-\[400px\] {
+  height: 400px;
+}
 .h-\[620px\] {
   height: 620px;
 }
@@ -870,9 +876,6 @@ video {
 }
 .h-screen {
   height: 100vh;
-}
-.h-\[400px\] {
-  height: 400px;
 }
 .max-h-60 {
   max-height: 15rem;

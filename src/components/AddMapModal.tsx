@@ -64,12 +64,14 @@ useEffect(() => {
         if (data.features && data.features.length > 0) {
           const [lng, lat] = data.features[0].center;
           setCoordinates({ lat, lng });
-          mapRef.current?.flyTo({
-            center: [lng, lat],
-            zoom: 14,
-            duration: 2000,
-            essential: true,
-          });
+          if (mapRef.current && mapRef.current.flyTo) {
+            mapRef.current.flyTo({
+              center: [lng, lat],
+              zoom: 14,
+              duration: 2000,
+              essential: true,
+            });
+          }
         }
       } catch (e) {
         setCoordinates(null);
@@ -112,7 +114,11 @@ useEffect(() => {
       fetchCoordinates();
       fetchSuggestions();
     }, 600);
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      setCoordinates(null);
+      setAddressSuggestions([]);
+    };
   }, [mapAddress]);
 
   const handleSave = async () => {
@@ -126,9 +132,9 @@ useEffect(() => {
 
     // Przygotowanie struktury danych (bez zapisu)
     const content = {
-      mapTitle,
-      mapStory,
-      mapAddress,
+      title: mapTitle,
+      story: mapStory,
+      address: mapAddress,
     };
 
     // Tutaj można dodać zapis do bazy danych, gdy będzie gotowy
@@ -175,7 +181,17 @@ useEffect(() => {
     }
 
     setLoading(false);
-    onClose();
+    onClose({
+      id: `map-${Date.now()}`,
+      type: 'map',
+      content: {
+        title: mapTitle,
+        story: mapStory,
+        address: mapAddress,
+        lat: coordinates?.lat,
+        lng: coordinates?.lng,
+      },
+    });
   }
 
   return (
