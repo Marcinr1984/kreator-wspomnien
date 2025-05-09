@@ -7,7 +7,8 @@ import {
   EyeIcon,
   TrashIcon
 } from '@heroicons/react/24/solid';
-import React, { useState, useEffect } from 'react';
+import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/outline';
+import React, { useState, useEffect, useRef } from 'react';
 import Map, { Marker } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import AddQuoteModal from '../../components/AddQuoteModal';
@@ -36,6 +37,20 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
   // Stan interaktywności i pełnego ekranu mapy
   const [isMapInteractive, setIsMapInteractive] = useState(false);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  // Nowy stan: czy przeglądarka jest w trybie pełnoekranowym
+  const [isBrowserFullscreen, setIsBrowserFullscreen] = useState(false);
+  // Ref do mapy w trybie pełnoekranowym
+  const mapRef = useRef<any>(null);
+
+  // Nasłuchuj zmiany pełnego ekranu i ustawiaj isBrowserFullscreen
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const fullscreen = !!document.fullscreenElement;
+      setIsBrowserFullscreen(fullscreen);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   const fetchMementos = async () => {
     if (!memorialId) {
@@ -207,7 +222,50 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
               {/* Renderowanie mapy: pełny ekran lub normalny */}
               {isMapFullscreen ? (
                 <div className="fixed inset-0 z-50 bg-white">
+                  {/* Zamknij pełny ekran - przycisk X w lewym górnym rogu */}
+                  <button
+                    onClick={() => {
+                      if (document.fullscreenElement && document.exitFullscreen) {
+                        document.exitFullscreen().finally(() => {
+                          setIsMapFullscreen(false);
+                        });
+                      } else {
+                        setIsMapFullscreen(false);
+                      }
+                    }}
+                    className="absolute top-4 left-4 z-10 bg-white p-2 rounded-lg shadow-lg"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                  {/* Przyciski zoom + i - przeniesione pod przycisk zamykania pełnego ekranu */}
+                  <div className="absolute top-[72px] right-4 z-10 flex flex-col rounded-xl overflow-hidden border border-gray-200 shadow-md bg-white">
+                    <button
+                      onClick={() => {
+                        const zoom = mapRef.current?.getZoom();
+                        if (zoom !== undefined) {
+                          mapRef.current?.zoomTo(zoom + 1);
+                        }
+                      }}
+                      className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
+                    >
+                      <span className="text-cyan-500 text-2xl">+</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        const zoom = mapRef.current?.getZoom();
+                        if (zoom !== undefined) {
+                          mapRef.current?.zoomTo(zoom - 1);
+                        }
+                      }}
+                      className="w-10 h-10 flex items-center justify-center hover:bg-gray-100"
+                    >
+                      <span className="text-cyan-500 text-2xl">−</span>
+                    </button>
+                  </div>
                   <Map
+                    ref={mapRef}
                     initialViewState={{
                       latitude: memento.content?.lat,
                       longitude: memento.content?.lng,
@@ -224,16 +282,22 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
                   >
                     <Marker latitude={memento.content?.lat} longitude={memento.content?.lng} />
                   </Map>
+                  {/* Przycisk w prawym górnym rogu do obsługi pełnego ekranu przeglądarki */}
                   <button
                     onClick={() => {
-                      setIsMapInteractive(false);
-                      setIsMapFullscreen(false);
+                      if (!document.fullscreenElement) {
+                        document.documentElement.requestFullscreen?.();
+                      } else {
+                        document.exitFullscreen?.();
+                      }
                     }}
-                    className="absolute top-4 right-4 z-10 bg-white p-2 rounded-full shadow-lg"
+                    className="absolute top-4 right-4 z-10 bg-white p-2 rounded-lg shadow-lg"
                   >
-                    <svg className="w-6 h-6 text-cyan-500" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M4.293 15.707a1 1 0 010-1.414L7.586 11H6a1 1 0 110-2h4a1 1 0 011 1v4a1 1 0 11-2 0v-1.586l-3.293 3.293a1 1 0 01-1.414 0zM15.707 4.293a1 1 0 010 1.414L12.414 9H14a1 1 0 110 2h-4a1 1 0 01-1-1V6a1 1 0 112 0v1.586l3.293-3.293a1 1 0 011.414 0z" />
-                    </svg>
+                    {isBrowserFullscreen ? (
+                      <ArrowsPointingInIcon className="w-6 h-6 text-cyan-500" />
+                    ) : (
+                      <ArrowsPointingOutIcon className="w-6 h-6 text-cyan-500" />
+                    )}
                   </button>
                 </div>
               ) : (
@@ -259,15 +323,12 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
                   {!localEditing && (
                     <button
                       onClick={() => {
-                        setIsMapInteractive(true);
                         setIsMapFullscreen(true);
                       }}
-                      className="absolute top-2 right-2 z-10 bg-white p-2 rounded-lg shadow-md"
+                      className="absolute top-4 right-4 z-10 bg-white p-2 rounded-lg shadow-md"
                       title="Pokaż na pełnym ekranie"
                     >
-                      <svg className="w-6 h-6 text-cyan-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10.293 9.293a1 1 0 011.414 0L15 12.586V11a1 1 0 112 0v4a1 1 0 01-1 1h-4a1 1 0 110-2h1.586l-3.293-3.293a1 1 0 010-1.414zM9.707 10.707a1 1 0 01-1.414 0L5 7.414V9a1 1 0 11-2 0V5a1 1 0 011-1h4a1 1 0 110 2H6.414l3.293 3.293a1 1 0 010 1.414z" />
-                      </svg>
+                      <ArrowsPointingOutIcon className="w-6 h-6 text-cyan-500" />
                     </button>
                   )}
                 </div>
