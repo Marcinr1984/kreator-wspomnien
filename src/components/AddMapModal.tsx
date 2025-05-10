@@ -30,8 +30,8 @@ export default function AddMapModal({ isOpen, onClose, memorialId, editingMap }:
   const [loading, setLoading] = useState(false)
   const [coordinates, setCoordinates] = useState<{ lat: number; lng: number } | null>(null);
   const [viewState, setViewState] = useState({
-    longitude: 19.9449799, // Krakow domyślna
-    latitude: 50.0646501,
+    latitude: 50.7284, //domyslny dzierzoniow
+    longitude: 16.6517,
     zoom: 10,
   });
   const [addressSuggestions, setAddressSuggestions] = useState<string[]>([]);
@@ -303,8 +303,8 @@ useEffect(() => {
                     reuseMaps={true}
                     mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
                     initialViewState={{
-                      latitude: 50.0646501,
-                      longitude: 19.9449799,
+                        latitude: 50.7284,
+                        longitude: 16.6517,
                       zoom: 10,
                     }}
                     mapStyle="mapbox://styles/mapbox/streets-v11"

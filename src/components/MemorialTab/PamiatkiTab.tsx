@@ -14,6 +14,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import AddQuoteModal from '../../components/AddQuoteModal';
 import AddTextModal from '../../components/AddTextModal';
 import AddMapModal from '../../components/AddMapModal';
+import AddPhotoModal from '../../components/AddPhotoModal';
 import { supabase } from '../../utils/supabaseClient';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -29,6 +30,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
   const [isAddQuoteModalOpen, setIsAddQuoteModalOpen] = useState(false);
   const [isAddTextModalOpen, setIsAddTextModalOpen] = useState(false);
   const [isAddMapModalOpen, setIsAddMapModalOpen] = useState(false);
+  const [isAddPhotoModalOpen, setIsAddPhotoModalOpen] = useState(false);
   const [mementos, setMementos] = useState<any[]>([]);
   const [editingMemento, setEditingMemento] = useState<any | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -62,7 +64,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
       .from('memorial_mementos')
       .select('*')
       .eq('memorial_id', memorialId)
-      .in('type', ['quote', 'text'])  // Pobieramy zarówno cytaty, jak i teksty
+      .in('type', ['quote', 'text', 'photo'])  // Pobieramy cytaty, teksty i zdjęcia
       .order('sort_order', { ascending: true });
 
     // Nowość: Pobieranie lokalizacji z memorial_maps
@@ -149,6 +151,8 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
       setIsAddQuoteModalOpen(true);
     } else if (memento.type === 'text') {
       setIsAddTextModalOpen(true);
+    } else if (memento.type === 'photo') {
+      setIsAddPhotoModalOpen(true);
     }
   };
 
@@ -202,7 +206,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
             </div>
           )}
 
-          {/* Renderowanie cytatu */}
+          {/* Renderowanie cytatu, mapy, tekstu, zdjęcia */}
           {memento.type === 'quote' ? (
             <div className="relative flex flex-col items-center mt-8">
               <div className="text-cyan-500 text-[180px] leading-none absolute top-0">“</div>
@@ -334,6 +338,35 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
                 </div>
               )}
             </div>
+          ) : memento.type === 'photo' ? (
+            <div className="relative flex flex-col items-center mt-8">
+              <div
+                className={`w-full flex flex-col md:flex-row gap-4 items-center justify-between ${
+                  memento.content?.layout === 'right' ? 'md:flex-row-reverse' : ''
+                }`}
+              >
+                {memento.content?.image_url && (
+                  <div className="w-full md:w-[300px] rounded-xl overflow-hidden shadow">
+                    <img
+                      src={memento.content.image_url}
+                      alt={memento.content.title || 'Zdjęcie'}
+                      className="w-full max-h-[300px] object-cover"
+                    />
+                  </div>
+                )}
+                <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-start text-center md:text-left px-4">
+                  <div className="text-sm text-gray-500 mb-1">
+                    {memento.content?.date}
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900 mb-2">
+                    {memento.content?.title}
+                  </div>
+                  <div className="text-base text-gray-700 whitespace-pre-wrap">
+                    {memento.content?.description}
+                  </div>
+                </div>
+              </div>
+            </div>
           ) : (
             // Renderowanie tytułu i tekstu
             <div className="relative flex flex-col items-center mt-8">
@@ -390,6 +423,20 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
                 >
                   <PencilSquareIcon className="h-5 w-5 text-cyan-500" />
                   <span className="text-gray-800">Edytuj lokalizację</span>
+                </button>
+              )}
+              {/* Przycisk edytuj zdjęcie */}
+              {memento.type === 'photo' && (
+                <button
+                  onClick={() => {
+                    setEditingMemento(memento);
+                    setIsAddPhotoModalOpen(true);
+                  }}
+                  className="flex items-center gap-2 border border-gray-300 rounded-full py-1.5 px-4 hover:border-cyan-500 text-sm font-medium"
+                  title="Edytuj zdjęcie"
+                >
+                  <PencilSquareIcon className="h-5 w-5 text-cyan-500" />
+                  <span className="text-gray-800">Edytuj zdjęcie</span>
                 </button>
               )}
             </div>
@@ -477,13 +524,19 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
               <PlusIcon className="w-5 h-5 text-cyan-500" />
               Dodaj cytat
             </button>
-            <button className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium">
+            <button
+              onClick={() => {
+                setEditingMemento(null);
+                setIsAddPhotoModalOpen(true);
+              }}
+              className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium"
+            >
               <PlusIcon className="w-5 h-5 text-cyan-500" />
-              Dodaj ważne momenty
+              Dodaj zdjęcia
             </button>
             <button className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium">
               <PlusIcon className="w-5 h-5 text-cyan-500" />
-              Dodaj wspomnienie
+              Dodaj film
             </button>
           </div>
         </div>
@@ -576,7 +629,45 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
                       } else {
                         await fetchMementos();
                       }
-                    } else {
+                    } else if (typeof mementoToDelete !== 'string') {
+                      // Najpierw pobierz dane pamiątki, żeby sprawdzić czy to zdjęcie i usunąć je ze storage
+                      const { data: mementoData } = await supabase
+                        .from('memorial_mementos')
+                        .select('*')
+                        .eq('id', mementoToDelete)
+                        .single();
+
+                      // Nowy kod usuwania zdjęcia ze storage:
+                      if (mementoData?.type === 'photo' && mementoData?.content?.image_url) {
+                        const imageUrl = mementoData.content.image_url;
+
+                        try {
+                          const url = new URL(imageUrl);
+                          const path = url.pathname.split('/storage/v1/object/public/memorial-photos/')[1];
+                          console.log('Ścieżka do usunięcia:', JSON.stringify(path));
+                          if (!path || !path.includes('68/')) {
+                            console.warn('⚠️ Ścieżka zdjęcia wygląda podejrzanie, nie usuwam:', path);
+                            return;
+                          }
+                          if (!path) {
+                            console.warn('⚠️ Nie udało się wyciągnąć ścieżki zdjęcia ze storage!');
+                          } else {
+                            const { error: storageError } = await supabase
+                              .storage
+                              .from('memorial-photos')
+                              .remove([path]);
+
+                            if (storageError) {
+                              console.error('❌ Błąd usuwania pliku ze storage:', storageError.message);
+                            } else {
+                              console.log('✅ Usunięto plik ze storage:', path);
+                            }
+                          }
+                        } catch (e) {
+                          console.error('❌ Wyjątek podczas usuwania zdjęcia ze storage:', e);
+                        }
+                      }
+
                       const { error } = await supabase
                         .from('memorial_mementos')
                         .delete()
@@ -661,6 +752,26 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
           }}
           memorialId={memorialId}
           editingMap={editingMemento}
+        />
+      )}
+      {/* Modal dla zdjęć */}
+      {isAddPhotoModalOpen && (
+        <AddPhotoModal
+          isOpen={isAddPhotoModalOpen}
+          onClose={async (newPhoto) => {
+            setIsAddPhotoModalOpen(false);
+            if (newPhoto && !editingMemento) {
+              setMementos((prev) => [
+                { ...newPhoto, sort_order: 0 },
+                ...prev,
+              ]);
+            } else {
+              await fetchMementos();
+            }
+            setEditingMemento(null);
+          }}
+          memorialId={memorialId}
+          editingPhoto={editingMemento}
         />
       )}
     </div>
