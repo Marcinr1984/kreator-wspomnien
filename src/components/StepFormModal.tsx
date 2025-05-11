@@ -91,7 +91,7 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
     alert("Nie jesteś zalogowany. Nie można zapisać strony pamięci.");
     return;
   }
-  let photoUrl = '';
+  let photoUrl: string | null = null;
   if (photoFile) {
     const fileExt = photoFile.name.split('.').pop();
     const fileName = `${user.id}_${Date.now()}.${fileExt}`;
@@ -110,7 +110,7 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
       .from('memorial-photos')
       .getPublicUrl(fileName);
 
-    photoUrl = publicUrlData?.publicUrl || '';
+    photoUrl = publicUrlData?.publicUrl || null;
   }
 
   const allData = {

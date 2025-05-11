@@ -24,6 +24,7 @@ export default function MemorialPage() {
   const [keeperCount, setKeeperCount] = useState(1)
 
   const [pageData, setPageData] = useState<any>(null)
+  const [photoLoading, setPhotoLoading] = useState(false);
   const [loading, setLoading] = useState(true)
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [repositionMode, setRepositionMode] = useState(false)
@@ -330,11 +331,28 @@ export default function MemorialPage() {
     openModal();
   }}
 >
-  <img
-    src={pageData.photo_url}
-    alt="Zdjęcie"
-    className="w-[360px] h-[360px] object-cover rounded-2xl transition duration-300 ease-in-out"
-  />
+  {photoLoading ? (
+    <div className="w-[360px] h-[360px] flex items-center justify-center bg-gray-100 rounded-2xl">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-cyan-500 border-solid"></div>
+    </div>
+  ) : pageData.photo_url ? (
+    <img
+      src={pageData.photo_url}
+      alt="Zdjęcie"
+      className="w-[360px] h-[360px] object-cover rounded-2xl transition duration-300 ease-in-out"
+    />
+  ) : (
+    <div className="w-[360px] h-[360px] bg-gray-100 flex items-center justify-center rounded-2xl">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-28 h-28 text-gray-400">
+        <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5
+          1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18
+          3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0
+          0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0
+          1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375
+          0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+      </svg>
+    </div>
+  )}
   {/* Overlay – zaczynamy od opacity-0, a przy hover przechodzi do półprzezroczystości */}
   <div className="absolute inset-0 bg-black opacity-0 rounded-2xl transition duration-300 ease-in-out group-hover:opacity-30"></div>
   {/* Przycisk – domyślnie ukryty (opacity-0), pojawia się przy najechaniu */}
@@ -538,6 +556,11 @@ export default function MemorialPage() {
             pageData={pageData} 
             onRelationsChange={handleRelationsChange}
             defaultTab={modalDefaultTab}
+            onUpdate={(newPhotoUrl) => {
+              setPhotoLoading(true);
+              setPageData((prev: any) => ({ ...prev, photo_url: newPhotoUrl }));
+              setTimeout(() => setPhotoLoading(false), 1000);
+            }}
           />
           
       </div>

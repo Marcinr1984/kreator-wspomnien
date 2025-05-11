@@ -71,22 +71,20 @@ export default function AddPhotoModal({ isOpen, onClose, memorialId, editingPhot
     if (!title.trim()) return;
 
     let image_url = null;
-
-    // Jeśli edytujemy istniejące zdjęcie i nadpisujemy je nowym, usuń stare
+    let filePath = null;
     if (editingPhoto?.content?.image_path && file) {
       const path = editingPhoto.content.image_path;
       const { error: deleteError } = await supabase
         .storage
         .from('memorial-photos')
         .remove([path]);
+
       if (deleteError) {
-        console.error('❌ Błąd usuwania starego zdjęcia:', deleteError.message);
-      } else {
-        console.log('✅ Usunięto stare zdjęcie:', path);
+        alert('Błąd podczas usuwania starego zdjęcia.');
+        console.error(deleteError);
+        return;
       }
     }
-
-    let filePath = null;
     if (file) {
       const fileExt = file.name.split('.').pop();
       const fileName = `${memorialId}/${Date.now()}.${fileExt}`;
@@ -149,6 +147,20 @@ export default function AddPhotoModal({ isOpen, onClose, memorialId, editingPhot
         alert('Błąd podczas zapisu do bazy.');
         console.error(error);
         return;
+      }
+    }
+
+    // Usuwanie starego pliku po udanym insert/update, jeśli dotyczy
+    if (editingPhoto?.content?.image_path && filePath && editingPhoto.content.image_path !== filePath) {
+      const { error: removeError } = await supabase
+        .storage
+        .from('memorial-photos')
+        .remove([editingPhoto.content.image_path]);
+
+      if (removeError) {
+        console.warn('Nie udało się usunąć starego pliku:', removeError);
+      } else {
+        console.log('Usunięto nieużywany plik:', editingPhoto.content.image_path);
       }
     }
 

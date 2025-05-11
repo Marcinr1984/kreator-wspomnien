@@ -7,19 +7,21 @@ import ThemeTab from './EditTabs/ThemeTab';
 import IconTab from './EditTabs/IconTab';
 import PrivacyTab from './EditTabs/PrivacyTab';
 import KeeperAdminsTab from './EditTabs/KeeperAdminsTab';
+import { useRouter } from 'next/navigation';
 
 
 interface EditPageSettingsModalProps {
-    isOpen: boolean;
-    closeModal: () => void;
-    memorialId: number;
-    pageData: any;
-    onRelationsChange?: (newRelations: string) => Promise<void>;
-    defaultTab?: string;
-  }
+  isOpen: boolean;
+  closeModal: () => void;
+  memorialId: number;
+  pageData: any;
+  onRelationsChange?: (newRelations: string) => Promise<void>;
+  defaultTab?: string;
+  onUpdate?: (newPhotoUrl: string) => void;
+}
   
 
-const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, closeModal, memorialId, pageData, defaultTab }) => {
+const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, closeModal, memorialId, pageData, defaultTab, onUpdate }) => {
     const [validationError, setValidationError] = useState('');
     const [firstName, setFirstName] = useState(pageData.first_name);
   const [middleName, setMiddleName] = useState(pageData.middle_name || '');
@@ -77,6 +79,7 @@ setUploading(false);
   };
   
   const [activeTab, setActiveTab] = useState(defaultTab || 'profile');
+  const router = useRouter();
   useEffect(() => {
     if (defaultTab) {
       setActiveTab(defaultTab);
@@ -119,6 +122,7 @@ setUploading(false);
       console.error('Błąd zapisu ustawień strony:', error);
     } else {
       console.log('Zmiany zapisane:', data);
+      onUpdate?.(photoUrl);
       closeModal();
     }
   };
