@@ -53,6 +53,30 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
   memorialId,
   supabase
 }) => {
+  // Expose supabase client globally for debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // expose supabase client globally for console debugging
+      (window as any).supabase = supabase;
+      console.log('⚙️ Supabase client attached to window.supabase');
+    }
+  }, [supabase]);
+
+  // Debug: list current files in memorial-photos bucket for this memorialId
+  useEffect(() => {
+    const listFiles = async () => {
+      try {
+        const { data, error } = await supabase
+          .storage
+          .from('memorial-photos')
+          .list(`${memorialId}`, { limit: 100 });
+        console.log('🗂️ Current bucket files (debug):', data, 'Error:', error);
+      } catch (e) {
+        console.error('Error listing bucket files (debug):', e);
+      }
+    };
+    listFiles();
+  }, [supabase, memorialId]);
   const cropperRef = useRef<any>(null);
   const [isCropping, setIsCropping] = useState(false);
   const [editablePhotoUrl, setEditablePhotoUrl] = useState<string | null>(null);
@@ -223,7 +247,64 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                             <div className="flex items-center justify-between w-80 mb-2">
                             <h3 className="text-lg font-semibold text-gray-700">Aktualne zdjęcie</h3>
                             <button
-                                onClick={() => setPhotoUrl('')}
+                                onClick={async () => {
+                                  try {
+                                    if (photoUrl) {
+                                      const bucketName = 'memorial-photos';
+                                      const url = new URL(photoUrl);
+                                      const match = url.pathname.match(/\/storage\/v1\/object\/public\/(.+)/);
+                                      const fullPath = match ? decodeURIComponent(match[1]) : '';
+                                      const pathInBucket = fullPath;
+                                      console.log('Final pathInBucket:', pathInBucket);
+
+                                      // Usuwanie pliku przez backendowy endpoint
+                                      const deleteRes = await fetch('/api/delete-image', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ path: pathInBucket })
+                                      });
+
+                                      let deleteResult = null;
+                                      try {
+                                        deleteResult = await deleteRes.json();
+                                      } catch (err) {
+                                        console.warn("Odpowiedź nie była w formacie JSON lub pusta:", err);
+                                        deleteResult = { status: deleteRes.status, statusText: deleteRes.statusText };
+                                      }
+                                      console.log('🧹 Delete API response:', deleteResult);
+
+                                      // Dodatkowo: wylistuj folder memorial-photos
+                                      const { data: currentFiles, error: listError } = await supabase
+                                        .storage
+                                        .from(bucketName)
+                                        .list('memorial-photos');
+                                      console.log('📦 Lista plików w memorial-photos:', currentFiles, '❗ Error:', listError);
+
+                                      // Update photo_url in the database with explicit returning
+                                      const { data: updatedPage, error: updateError, status, statusText } = await supabase
+                                        .from('memorial_pages')
+                                        .update({ photo_url: null }, { returning: 'representation' })
+                                        .eq('id', memorialId)
+                                        .select('id, photo_url')
+                                        .single();
+
+                                      console.log('Supabase update status:', status, statusText);
+                                      console.log('Supabase update response:', { updatedPage, updateError });
+
+                                      if (updateError) {
+                                        console.error('Błąd aktualizacji photo_url w bazie:', updateError);
+                                      } else if (!updatedPage) {
+                                        console.warn(`Brak zwróconego rekordu po update. Sprawdź RLS i uprawnienia.`);
+                                      } else {
+                                        console.log("Photo_url po update:", updatedPage.photo_url);
+                                        setPhotoUrl('');
+                                      }
+                                    }
+                                  } catch (err) {
+                                    console.error('Błąd przy usuwaniu zdjęcia:', err);
+                                  }
+                                  // Jeśli updateError pojawia się stale bez widocznych błędów, sprawdź reguły RLS w Supabase Studio dla tabeli memorial_pages.
+                                }}
                                 className="flex items-center text-black hover:underline"
                             >
                                 <svg
@@ -247,7 +328,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                             {/* Podgląd zdjęcia - zwiększony */}
                             <div className="w-80 h-80 border-4 border-gray-100 shadow-md flex items-center justify-center rounded-2xl overflow-hidden relative">
                               {isCropping && photoUrl ? (
-                              <ImageCropper
+                                <ImageCropper
                                   ref={cropperRef}
                                   imageUrl={editablePhotoUrl || ''}
                                   onCropComplete={(blob) => {
@@ -256,7 +337,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                                     setIsCropping(false);
                                   }}
                                 />
-                              ) : photoUrl ? (
+                              ) : (photoUrl && photoUrl !== '') ? (
                                 <img src={photoUrl} alt="Zdjęcie" className="w-full h-full object-cover" />
                               ) : (
                                 <div className="flex flex-col items-center justify-center text-gray-400">
@@ -299,7 +380,22 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
           try {
             const blob = await cropperRef.current.getCroppedImage();
             if (blob) {
-              const file = new File([blob], `profile-photo-${Date.now()}.jpeg`, { type: 'image/jpeg' });
+              // 🧹 Usuń stare zdjęcie ze storage jeśli istnieje (przed utworzeniem nowego pliku)
+              if (photoUrl) {
+                const bucketName = 'memorial-photos';
+                const url = new URL(photoUrl);
+                const match = url.pathname.match(/\/storage\/v1\/object\/public\/(.+)/);
+                const fullPath = match ? decodeURIComponent(match[1]) : '';
+                if (fullPath) {
+                  const { data: deleted, error: deleteError } = await supabase.storage.from(bucketName).remove([fullPath]);
+                  console.log('🧹 Usunięto stare zdjęcie (na zapis):', deleted, '❌', deleteError);
+                }
+              }
+              // Ustal nazwę pliku na podstawie obecnego photoUrl (jeśli istnieje), w przeciwnym razie domyślna
+              const filename = photoUrl
+                ? decodeURIComponent(new URL(photoUrl).pathname.split('/').pop() || '')
+                : `profile-photo-${memorialId}.jpeg`;
+              const file = new File([blob], filename, { type: 'image/jpeg' });
               const dt = new DataTransfer();
               dt.items.add(file);
               if (fileInputRef.current) {
