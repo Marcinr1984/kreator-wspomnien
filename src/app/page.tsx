@@ -13,6 +13,8 @@ export default function Home() {
 
     if (type === 'signup') {
       router.push('/callback' + window.location.hash)
+    } else {
+      router.push('/auth/login')
     }
   }, [router])
 

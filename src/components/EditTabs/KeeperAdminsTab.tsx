@@ -26,9 +26,17 @@ const KeeperAdminsTab: React.FC = () => {
       console.log("🔍 Wysyłam zapytanie o keeperów dla memorial_id:", parsedId);
 
       const { data, error } = await supabase
-        .from('full_memorial_keepers')
-        .select('user_id, memorial_id, role, first_name, last_name')
-                          .eq('memorial_id', Number(parsedId));
+        .from('memorial_keepers')
+        .select(`
+          user_id,
+          memorial_id,
+          role,
+          auth.users (
+            email,
+            raw_user_meta_data
+          )
+        `)
+        .eq('memorial_id', Number(parsedId));
 
       if (error) {
         console.error('❌ Błąd pobierania keeperów:', error);
@@ -65,9 +73,11 @@ const KeeperAdminsTab: React.FC = () => {
             .map((keeper, index) => (
               <div key={`owner-${index}`} className="bg-white border border-gray-300 p-4 rounded-lg shadow-sm mb-6">
                 <p className="font-medium">
-                  {keeper.first_name ? `${keeper.first_name} ${keeper.last_name || ''}` : keeper.user_id ?? 'Brak danych'}
+                  {keeper['auth.users']?.raw_user_meta_data?.first_name
+                    ? `${keeper['auth.users'].raw_user_meta_data.first_name} ${keeper['auth.users'].raw_user_meta_data.last_name || ''}`
+                    : keeper.user_id ?? 'Brak danych'}
                 </p>
-                <p className="text-sm text-gray-500">Właściciel</p>
+                <p className="text-sm text-gray-500 capitalize">{keeper.role}</p>
               </div>
             ))}
 
@@ -80,9 +90,11 @@ const KeeperAdminsTab: React.FC = () => {
                   <div key={`opiekun-${index}`} className="flex gap-4 mb-2">
                     <div className="flex-1 bg-white border border-gray-300 p-4 rounded-lg shadow-sm">
                       <p className="font-medium">
-                        {keeper.first_name ? `${keeper.first_name} ${keeper.last_name || ''}` : keeper.user_id ?? 'Brak danych'}
+                        {keeper['auth.users']?.raw_user_meta_data?.first_name
+                          ? `${keeper['auth.users'].raw_user_meta_data.first_name} ${keeper['auth.users'].raw_user_meta_data.last_name || ''}`
+                          : keeper.user_id ?? 'Brak danych'}
                       </p>
-                      <p className="text-sm text-gray-500">Opiekun</p>
+                      <p className="text-sm text-gray-500 capitalize">{keeper.role}</p>
                     </div>
                     {ownerId === currentUser?.id && (
                     <div className="w-[80px] flex flex-col justify-center items-center bg-white border border-gray-300 p-2 rounded-lg shadow-sm transition-colors duration-200 hover:border-cyan-600">
