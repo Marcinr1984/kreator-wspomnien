@@ -1,4 +1,4 @@
-// File: C:\Users\Serwis_MR\Desktop\kreator-wspomnien\src\app\auth\layout.tsx
+// File: /Users/marcinrundsztuk/Desktop/projekt/kreator-wspomnien-git-ready/src/app/auth/layout.tsx
 import * as entry from '../../../../src/app/auth/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

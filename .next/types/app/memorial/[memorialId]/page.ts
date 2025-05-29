@@ -1,4 +1,4 @@
-// File: C:\Users\Serwis_MR\Desktop\kreator-wspomnien\src\app\memorial\[memorialId]\page.tsx
+// File: /Users/marcinrundsztuk/Desktop/projekt/kreator-wspomnien-git-ready/src/app/memorial/[memorialId]/page.tsx
 import * as entry from '../../../../../src/app/memorial/[memorialId]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -88,32 +88,33 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
     if (isSaved) return;
     setIsSaved(true);
     if (!user?.id) {
-    alert("Nie jesteś zalogowany. Nie można zapisać strony pamięci.");
-    return;
-  }
-  let photoUrl: string | null = null;
-  if (photoFile) {
-    const fileExt = photoFile.name.split('.').pop();
-    const fileName = `${user.id}_${Date.now()}.${fileExt}`;
-    const { data: storageData, error: storageError } = await supabase
-      .storage
-      .from('memorial-photos')
-      .upload(fileName, photoFile);
-
-    if (storageError) {
-      alert("Błąd przy przesyłaniu zdjęcia: " + storageError.message);
+      alert("Nie jesteś zalogowany. Nie można zapisać strony pamięci.");
       return;
     }
+    let photoUrl: string | null = null;
+    if (photoFile) {
+      const fileExt = photoFile.name.split('.').pop();
+      const fileName = `${user.id}_${Date.now()}.${fileExt}`;
+      const { data: storageData, error: storageError } = await supabase
+        .storage
+        .from('memorial-photos')
+        .upload(fileName, photoFile);
 
-    const { data: publicUrlData } = supabase
-      .storage
-      .from('memorial-photos')
-      .getPublicUrl(fileName);
+      if (storageError) {
+        alert("Błąd przy przesyłaniu zdjęcia: " + storageError.message);
+        return;
+      }
 
-    photoUrl = publicUrlData?.publicUrl || null;
-  }
+      const { data: publicUrlData } = supabase
+        .storage
+        .from('memorial-photos')
+        .getPublicUrl(fileName);
 
-  const allData = {
+      photoUrl = publicUrlData?.publicUrl || null;
+    }
+
+    // 1. Wstawiamy rekord memorial_pages bez slug
+    const allData = {
       user_id: user?.id,
       first_name: step1Data.firstName,
       last_name: step1Data.lastName,
@@ -125,6 +126,7 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
       relation_description: step3Data.relationDescription,
       created_at: new Date().toISOString(),
       photo_url: photoUrl,
+      // slug dodamy po wygenerowaniu
     };
 
     console.log("Wysyłane dane:", allData);
@@ -139,36 +141,48 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
       alert("Błąd przy zapisie: " + error.message);
       setIsSaved(false);
       setIsSubmitting(false);
-    } else {
-      console.log('Strona pamięci zapisana:', data);
-      const newMemorialId = data?.[0]?.id;
-      
-      if (newMemorialId) {
-        const { error: keeperError } = await supabase
-          .from('memorial_keepers')
-          .insert([
-            {
-              user_id: user.id,
-              memorial_id: newMemorialId,
-              role: 'wlasciciel',
-              added_by: user.id,
-            }
-          ]);
-    
-        if (keeperError) {
-          console.error('Błąd przy zapisie keepera:', keeperError);
-          alert('Błąd przy przypisaniu roli do użytkownika: ' + keeperError.message);
-          return;
-        }
-      }
-
-      console.log("Zamykam modal...");
-      onClose();
-      console.log("Przekierowuję do:", `/memorial/${data?.[0]?.id}`);
-      setTimeout(() => {
-        window.location.href = `/memorial/${data?.[0]?.id}`;
-      }, 300);
+      return;
     }
+
+    // 2. Pobierz id, wygeneruj slug i zaktualizuj rekord
+    const newMemorialId = data?.[0]?.id;
+    const generatedSlug = newMemorialId
+      ? `${step1Data.firstName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${step1Data.lastName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${newMemorialId}`
+      : '';
+
+    if (newMemorialId && generatedSlug) {
+      await supabase
+        .from('memorial_pages')
+        .update({ slug: generatedSlug })
+        .eq('id', newMemorialId);
+    }
+
+    // 3. Dodaj keepera
+    if (newMemorialId) {
+      const { error: keeperError } = await supabase
+        .from('memorial_keepers')
+        .insert([
+          {
+            user_id: user.id,
+            memorial_id: newMemorialId,
+            role: 'wlasciciel',
+            added_by: user.id,
+          }
+        ]);
+
+      if (keeperError) {
+        console.error('Błąd przy zapisie keepera:', keeperError);
+        alert('Błąd przy przypisaniu roli do użytkownika: ' + keeperError.message);
+        return;
+      }
+    }
+
+    console.log("Zamykam modal...");
+    onClose();
+    console.log("Przekierowuję do:", `/memorial/${newMemorialId}`);
+    setTimeout(() => {
+      window.location.href = `/memorial/${newMemorialId}`;
+    }, 300);
   };
 
   return (

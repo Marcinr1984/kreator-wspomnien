@@ -1,4 +1,4 @@
-// File: C:\Users\Serwis_MR\Desktop\kreator-wspomnien\src\app\dashboard\page.tsx
+// File: /Users/marcinrundsztuk/Desktop/projekt/kreator-wspomnien-git-ready/src/app/dashboard/page.tsx
 import * as entry from '../../../../src/app/dashboard/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
