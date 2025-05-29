@@ -69,7 +69,7 @@ const PrivacyTab: React.FC<PrivacyTabProps> = ({ pageId, supabase, userId, slug 
         const { error: updateError } = await supabase
           .from('memorial_pages')
           .update({ is_public: false })
-          .in('id', userPages.map(p => p.id));
+          .in('id', userPages.map((p: { id: number }) => p.id));
 
         if (updateError) {
           console.error('❌ Błąd przy ustawianiu innych stron jako prywatne:', updateError);
