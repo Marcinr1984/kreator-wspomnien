@@ -257,6 +257,7 @@ setUploading(false);
                         pageId={memorialId}
                         supabase={supabase}
                         userId={pageData.user_id}
+                        slug={pageData.slug}
                       />
                     )}
                     {activeTab === 'keepers' && <KeeperAdminsTab />}
