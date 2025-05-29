@@ -252,7 +252,7 @@ setUploading(false);
                     
                     {activeTab === 'theme' && <ThemeTab />}
                     {activeTab === 'icon' && <IconTab />}
-                    {activeTab === 'privacy' && <PrivacyTab />}
+                    {activeTab === 'privacy' && <PrivacyTab pageId={memorialId} />}
                     {activeTab === 'keepers' && <KeeperAdminsTab />}
                   </div>
                 </div>
