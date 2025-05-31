@@ -23,7 +23,8 @@ import { CSS } from '@dnd-kit/utilities';
 interface PamiatkiTabProps {
   setIsEditing: (value: boolean) => void;
   memorialId: number;
-  isPublicView?: boolean; // <--- dodano opcjonalny parametr
+  isEditing?: boolean;
+  isPublicView?: boolean;
 }
 
 const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isPublicView = false }) => {
