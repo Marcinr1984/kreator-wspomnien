@@ -4,6 +4,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { useSession } from '@supabase/auth-helpers-react'
 import { Fragment, useState, useEffect } from 'react'
 import { supabase } from '../utils/supabaseClient';
+import slugify from 'slugify';
 
 interface StepFormModalProps {
   isOpen: boolean
@@ -114,6 +115,13 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
     }
 
     // 1. Wstawiamy rekord memorial_pages bez slug
+    const displayName = `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() || user.email || user.id;
+    let baseQRSlug = slugify(displayName, { lower: true, strict: true });
+
+    // Usunięto sprawdzanie i losowanie sufixu dla qr_slug; qr_slug jest zawsze generowany jako slugify(imie + nazwisko użytkownika)
+
+    const generatedQRSlug = baseQRSlug;
+
     const allData = {
       user_id: user?.id,
       first_name: step1Data.firstName,
@@ -126,6 +134,7 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
       relation_description: step3Data.relationDescription,
       created_at: new Date().toISOString(),
       photo_url: photoUrl,
+      qr_slug: generatedQRSlug,
       // slug dodamy po wygenerowaniu
     };
 
@@ -146,9 +155,8 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
 
     // 2. Pobierz id, wygeneruj slug i zaktualizuj rekord
     const newMemorialId = data?.[0]?.id;
-    const generatedSlug = newMemorialId
-      ? `${step1Data.firstName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${step1Data.lastName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${newMemorialId}`
-      : '';
+    const rawSlug = `${step1Data.firstName} ${step1Data.lastName} ${newMemorialId}`;
+    const generatedSlug = slugify(rawSlug, { lower: true, strict: true });
 
     if (newMemorialId && generatedSlug) {
       await supabase

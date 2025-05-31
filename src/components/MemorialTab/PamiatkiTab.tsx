@@ -23,9 +23,10 @@ import { CSS } from '@dnd-kit/utilities';
 interface PamiatkiTabProps {
   setIsEditing: (value: boolean) => void;
   memorialId: number;
+  isPublicView?: boolean; // <--- dodano opcjonalny parametr
 }
 
-const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) => {
+const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isPublicView = false }) => {
   const [localEditing, setLocalEditing] = useState(false);
   const [isAddQuoteModalOpen, setIsAddQuoteModalOpen] = useState(false);
   const [isAddTextModalOpen, setIsAddTextModalOpen] = useState(false);
@@ -464,22 +465,24 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId }) =
     <div className="p-4">
       {/* Przycisk Edytuj lub Zobacz */}
       <div className="flex justify-center mb-4">
-        {!localEditing ? (
-          <button
-            onClick={handleStartEdit}
-            className="bg-gray-900 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2 min-w-[350px]"
-          >
-            <PencilSquareIcon className="w-5 h-5 text-white" />
-            <span>Edytuj wspomnienia</span>
-          </button>
-        ) : (
-          <button
-            onClick={handleStopEdit}
-            className="bg-gray-900 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2 min-w-[350px]"
-          >
-            <EyeIcon className="w-5 h-5 text-white" />
-            <span>Zobacz wspomnienia</span>
-          </button>
+        {!isPublicView && (
+          !localEditing ? (
+            <button
+              onClick={handleStartEdit}
+              className="bg-gray-900 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2 min-w-[350px]"
+            >
+              <PencilSquareIcon className="w-5 h-5 text-white" />
+              <span>Edytuj wspomnienia</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleStopEdit}
+              className="bg-gray-900 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2 min-w-[350px]"
+            >
+              <EyeIcon className="w-5 h-5 text-white" />
+              <span>Zobacz wspomnienia</span>
+            </button>
+          )
         )}
       </div>
 
