@@ -1,5 +1,6 @@
 {
   "/memorial/[memorialId]/page": "app/memorial/[memorialId]/page.js",
   "/qr/[slug]/page": "app/qr/[slug]/page.js",
+  "/preview/[id]/page": "app/preview/[id]/page.js",
   "/dashboard/page": "app/dashboard/page.js"
 }

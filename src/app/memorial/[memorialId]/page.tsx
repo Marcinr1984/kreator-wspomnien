@@ -215,7 +215,16 @@ export default function MemorialPage() {
           />
           <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none z-10" />
           <div className="absolute top-[19.5rem] left-1/2 transform -translate-x-[calc(50%-290px)] z-30 flex gap-2">
-            <button className="bg-white px-4 py-2.5 rounded-md shadow-md hover:bg-gray-100 text-sm font-medium text-gray-800 pointer-events-auto flex items-center gap-2">
+            <button
+              onClick={() => {
+                const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+                const previewUrl = isLocalhost
+                  ? `http://localhost:3000/preview/${parsedId}`
+                  : `https://qr.dlabliskich.pl/preview/${parsedId}`;
+                window.open(previewUrl, '_blank');
+              }}
+              className="bg-white px-4 py-2.5 rounded-md shadow-md hover:bg-gray-100 text-sm font-medium text-gray-800 pointer-events-auto flex items-center gap-2"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-cyan-500" viewBox="0 0 20 20" fill="currentColor">
                 <path d="M10 2C6 2 2.73 5.11 1 10c1.73 4.89 5 8 9 8s7.27-3.11 9-8c-1.73-4.89-5-8-9-8zm0 12a4 4 0 110-8 4 4 0 010 8z" />
               </svg>
