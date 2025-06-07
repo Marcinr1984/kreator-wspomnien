@@ -230,12 +230,12 @@ export default function Dashboard() {
                       className="flex flex-col items-center justify-center w-full h-full"
                     >
                       <div className="relative w-32 h-32 mb-2">
-                        <div className="p-[6px] bg-white rounded-2xl shadow-md">
+                        <div className="p-[6px] bg-white rounded-2xl shadow-md aspect-square">
                           {page.photo_url ? (
                             <img
                               src={page.photo_url}
                               alt="miniatura"
-                              className="w-full h-full object-cover rounded-xl"
+                              className="w-full h-full object-cover aspect-square rounded-xl"
                             />
                           ) : (
                             <div className="w-full h-full aspect-square bg-gray-100 flex items-center justify-center rounded-xl">

@@ -23,6 +23,23 @@ export default function MemorialPage() {
   console.log('Parametr memorialId:', memorialId)
   const [keeperCount, setKeeperCount] = useState(1)
 
+  // Stan na bieżącego użytkownika
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (user) {
+        const fullName = user.user_metadata?.display_name ?? user.email;
+        setCurrentUser({ ...user, fullName });
+      } else {
+        console.error('Nie udało się pobrać użytkownika:', error);
+      }
+    };
+
+    getCurrentUser();
+  }, []);
+
   const [pageData, setPageData] = useState<any>(null)
   const [photoLoading, setPhotoLoading] = useState(false);
   const [loading, setLoading] = useState(true)
@@ -413,7 +430,7 @@ export default function MemorialPage() {
                     MR
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-800">Marcin rud <span className="text-xs text-gray-500">(ty)</span></p>
+                    <p className="text-sm font-medium text-gray-800">{currentUser?.fullName || 'Nieznany użytkownik'} <span className="text-xs text-gray-500">(ty)</span></p>
                     <p className="text-xs text-gray-500">{pageData.relation}</p>
                   </div>
                 </div>

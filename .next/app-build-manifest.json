@@ -6,11 +6,11 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/qr/[slug]/page": [
+    "/memorial/[memorialId]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/qr/[slug]/page.css",
-      "static/chunks/app/qr/[slug]/page.js"
+      "static/css/app/memorial/[memorialId]/page.css",
+      "static/chunks/app/memorial/[memorialId]/page.js"
     ],
     "/dashboard/page": [
       "static/chunks/webpack.js",
@@ -23,11 +23,10 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/layout.js"
     ],
-    "/memorial/[memorialId]/page": [
+    "/dashboard/prosby/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/memorial/[memorialId]/page.css",
-      "static/chunks/app/memorial/[memorialId]/page.js"
+      "static/chunks/app/dashboard/prosby/page.js"
     ],
     "/preview/[id]/page": [
       "static/chunks/webpack.js",
