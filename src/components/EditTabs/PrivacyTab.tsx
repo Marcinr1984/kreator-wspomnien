@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/solid';
 
 // Upewnij się, że userId jest wymagany jako prop
 interface PrivacyTabProps {
@@ -12,6 +13,7 @@ const PrivacyTab: React.FC<PrivacyTabProps> = ({ pageId, supabase, userId, slug 
   const [isPublic, setIsPublic] = useState(false);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchUidAndPrivacyStatus = async () => {
@@ -43,15 +45,11 @@ const PrivacyTab: React.FC<PrivacyTabProps> = ({ pageId, supabase, userId, slug 
     }
   }, [pageId]);
 
-  const handleToggle = async () => {
+  const performToggle = async () => {
     console.log('🔁 TOGGLE start:', { pageId, newStatus: !isPublic });
 
     try {
       if (!isPublic) {
-        const confirmed = window.confirm(
-          'Publikując tę stronę jako publiczną, wszystkie inne Twoje strony zostaną ustawione jako prywatne. Czy na pewno chcesz kontynuować?'
-        );
-        if (!confirmed) return;
         // Jeśli ustawiamy aktualną stronę jako publiczną – dezaktywuj inne strony tego użytkownika
         const { data: userPages, error: userPagesError } = await supabase
           .from('memorial_pages')
@@ -102,6 +100,14 @@ const PrivacyTab: React.FC<PrivacyTabProps> = ({ pageId, supabase, userId, slug 
     }
   };
 
+  const handleToggleClick = () => {
+    if (!isPublic) {
+      setIsConfirmModalOpen(true);
+    } else {
+      performToggle();
+    }
+  };
+
   return (
     <div className="w-full py-10 text-gray-700">
       <div className="max-w-xl mx-auto text-center">
@@ -111,7 +117,7 @@ const PrivacyTab: React.FC<PrivacyTabProps> = ({ pageId, supabase, userId, slug 
           Uwaga: publikując tę stronę jako publiczną, inne Twoje publiczne strony zostaną automatycznie ustawione jako prywatne.
         </p>
         <button
-          onClick={handleToggle}
+          onClick={handleToggleClick}
           className={`px-4 py-2 rounded font-semibold text-white transition-all ${
             isPublic ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'
           }`}
@@ -128,8 +134,52 @@ const PrivacyTab: React.FC<PrivacyTabProps> = ({ pageId, supabase, userId, slug 
           </span>
         </div>
       </div>
-    </div>
-  );
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="rounded-lg overflow-hidden max-w-xl w-full shadow-lg">
+            <div className="bg-white p-6 relative flex flex-col gap-4">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 bg-gray-100 rounded-full p-2">
+                  <ExclamationTriangleIcon className="w-4 h-4 text-yellow-500" />
+                </div>
+                <div className="flex-grow">
+                  <h2 className="text-lg font-bold">Czy na pewno chcesz udostępnić tę stronę publicznie?</h2>
+                </div>
+                <button
+                  onClick={() => setIsConfirmModalOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 absolute top-4 right-4"
+                  aria-label="Zamknij"
+                >
+                  <span>Zamknij</span>
+                  <span className="text-lg">×</span>
+                </button>
+              </div>
+              <div className="text-gray-600 text-left ml-0 mt-4">
+                Publikując tę stronę jako publiczną, wszystkie inne Twoje strony zostaną ustawione jako prywatne.
+              </div>
+            </div>
+            <div className="bg-gray-100 p-4 flex justify-end gap-4">
+              <button
+                onClick={() => setIsConfirmModalOpen(false)}
+                className="px-4 py-2 border rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              >
+                Anuluj
+              </button>
+              <button
+                onClick={() => {
+                  setIsConfirmModalOpen(false);
+                  performToggle();
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+              >
+                Udostępnij
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+  </div>
+ );
 };
 
 export default PrivacyTab;
