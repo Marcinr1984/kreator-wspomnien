@@ -104,7 +104,7 @@ export default function ProsbyPage() {
       console.log("🧾 invitesData:", invitesData)
 
       // Pobierz unikalne added_by
-      const uniqueUserIds = [...new Set(invitesData.map((i: Invite) => i.added_by))]
+      const uniqueUserIds = Array.from(new Set(invitesData.map((i: Invite) => i.added_by)))
       let addedByUsers: any[] = []
       if (uniqueUserIds.length > 0) {
         const { data: usersData } = await supabase
