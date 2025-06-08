@@ -12,22 +12,6 @@
       "static/css/app/memorial/[memorialId]/page.css",
       "static/chunks/app/memorial/[memorialId]/page.js"
     ],
-    "/dashboard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/dashboard/page.css",
-      "static/chunks/app/dashboard/page.js"
-    ],
-    "/dashboard/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/layout.js"
-    ],
-    "/dashboard/prosby/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/prosby/page.js"
-    ],
     "/preview/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",

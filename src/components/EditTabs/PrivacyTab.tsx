@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ExclamationTriangleIcon } from '@heroicons/react/24/solid';
+import { TrashIcon } from '@heroicons/react/24/solid';
 
 // Upewnij się, że userId jest wymagany jako prop
 interface PrivacyTabProps {
@@ -140,10 +140,10 @@ const PrivacyTab: React.FC<PrivacyTabProps> = ({ pageId, supabase, userId, slug 
             <div className="bg-white p-6 relative flex flex-col gap-4">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 bg-gray-100 rounded-full p-2">
-                  <ExclamationTriangleIcon className="w-4 h-4 text-yellow-500" />
+                  <TrashIcon className="w-4 h-4 text-red-500" />
                 </div>
                 <div className="flex-grow">
-                  <h2 className="text-lg font-bold">Czy na pewno chcesz udostępnić tę stronę publicznie?</h2>
+                  <h2 className="text-lg font-bold">Czy chcesz udostępnić tę stronę?</h2>
                 </div>
                 <button
                   onClick={() => setIsConfirmModalOpen(false)}
@@ -170,7 +170,7 @@ const PrivacyTab: React.FC<PrivacyTabProps> = ({ pageId, supabase, userId, slug 
                   setIsConfirmModalOpen(false);
                   performToggle();
                 }}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                className="px-4 py-2 bg-red-400 text-white rounded-md hover:bg-red-500"
               >
                 Udostępnij
               </button>
@@ -183,3 +183,4 @@ const PrivacyTab: React.FC<PrivacyTabProps> = ({ pageId, supabase, userId, slug 
 };
 
 export default PrivacyTab;
+
