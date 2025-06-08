@@ -83,7 +83,7 @@ export default function ProsbyPage() {
           created_at,
           memorial_id,
           added_by,
-          memorial_pages!invite_page_fkey (
+          memorial_pages:memorial_id (
             id,
             first_name,
             last_name
