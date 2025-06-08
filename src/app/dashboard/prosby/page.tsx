@@ -1,3 +1,17 @@
+type Invite = {
+  id: number;
+  user_id: string;
+  role: string;
+  status: string;
+  created_at: string;
+  memorial_id: number;
+  added_by: string;
+  memorial_pages?: {
+    id: number;
+    first_name: string;
+    last_name: string;
+  };
+};
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -56,19 +70,60 @@ export default function ProsbyPage() {
         console.warn("⚠️ Brak użytkownika lub jego ID")
         return
       }
+      console.log("🧠 Zalogowany user ID:", user?.id)
 
-      const { data, error } = await supabase
+      // Zapytanie do memorial_invites z dołączeniem danych memorial_pages (z aliasowaniem relacji)
+      const { data: rawInvitesData, error } = await supabase
         .from('memorial_invites')
-        .select('*, memorial_pages(id,first_name,last_name)')
+        .select(`
+          id,
+          user_id,
+          role,
+          status,
+          created_at,
+          memorial_id,
+          added_by,
+          memorial_pages!invite_page_fkey (
+            id,
+            first_name,
+            last_name
+          )
+        `)
         .eq('user_id', user.id)
         .eq('status', 'oczekuje')
-      console.log("🧠 Zalogowany user ID:", user.id)
-      console.log("📦 Otrzymane zaproszenia:", data)
-      console.log("❌ Błąd:", error)
-      if (error) {
-        console.error("❌ Błąd pobierania zaproszeń:", error)
+      console.log("📥 Zapytanie do memorial_invites (z relacją do memorial_pages)");
+      console.log("🧾 rawInvitesData:", rawInvitesData);
+      console.log("🐞 error:", error);
+      console.log("🧾 rawInvitesData:", rawInvitesData)
+      console.log("🐞 błąd pobierania zaproszeń:", error)
+
+      const invitesData = (rawInvitesData as Invite[]) || []
+      console.log("🧾 invitesData:", invitesData)
+
+      // Pobierz unikalne added_by
+      const uniqueUserIds = [...new Set(invitesData.map((i: Invite) => i.added_by))]
+      let addedByUsers: any[] = []
+      if (uniqueUserIds.length > 0) {
+        const { data: usersData } = await supabase
+          .from('public_users')
+          .select('id, first_name, last_name')
+          .in('id', uniqueUserIds)
+        addedByUsers = usersData || []
       }
-      if (!error) setInvites(data)
+
+      // Mapuj zaproszenia z nazwą użytkownika i danymi strony pamięci
+      const invitesWithNames = invitesData.map(invite => {
+        const addedByUser = addedByUsers.find(user => user.id === invite.added_by)
+        return {
+          ...invite,
+          added_by_name: addedByUser
+            ? `${addedByUser.first_name} ${addedByUser.last_name}`
+            : 'Nieznany użytkownik',
+          memorial_pages: invite.memorial_pages || null
+        }
+      })
+      console.log('📦 invitesWithNames:', invitesWithNames)
+      setInvites(invitesWithNames)
     }
 
     fetchInvites()
@@ -135,11 +190,14 @@ export default function ProsbyPage() {
                 <div key={invite.id} className="border border-gray-300 rounded-lg p-4 shadow-sm">
                   <h3 className="text-base font-semibold mb-1">Zaproszenie</h3>
                   <p className="text-sm text-gray-600 mb-4">
-                    Zostałeś zaproszony do roli <span className="font-medium">{invite.role}</span> na stronie pamięci: 
-                    <span className="font-medium text-gray-800"> `{invite.memorial_pages?.first_name} ${invite.memorial_pages?.last_name}`</span>
+                    Zostałeś zaproszony do roli <span className="font-medium">{invite.role}</span> na stronie pamięci:{" "}
+                    <span className="font-medium text-gray-800">
+                      {invite.memorial_pages?.first_name ?? ''} {invite.memorial_pages?.last_name ?? ''}
+                    </span>
                   </p>
+                  <pre className="text-xs text-gray-400">{JSON.stringify(invite.memorial_pages)}</pre>
                   <p className="text-sm text-gray-600 mb-4">
-                    Od: <span className="font-medium text-gray-800">{invite.added_by}</span>
+                    Od: <span className="font-medium text-gray-800">{invite.added_by_name}</span>
                   </p>
                   <div className="flex gap-3">
                     <button

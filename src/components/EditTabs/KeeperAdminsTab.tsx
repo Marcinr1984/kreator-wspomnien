@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState, useRef } from 'react';
 // import { TrashIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../utils/supabaseClient';
@@ -18,36 +19,33 @@ const KeeperAdminsTab: React.FC = () => {
   console.log('🍺 ownerId:', ownerId, '— currentUser.id:', currentUser?.id);
 
   useEffect(() => {
-    console.log('params:', params);
-    console.log('parsedId:', parsedId);
-    if (!parsedId || isNaN(parsedId) || !currentUser) return;
+    if (!parsedId || isNaN(parsedId)) return;
 
     const fetchKeepers = async () => {
-      console.log("🔍 Wysyłam zapytanie o keeperów dla memorial_id:", parsedId);
+      try {
+        const { data, error } = await supabase
+          .from('memorial_keepers')
+          .select(`
+            user_id,
+            role,
+            "auth"."users" (
+              email,
+              raw_user_meta_data
+            )
+          `)
+          .eq('memorial_id', parsedId)
+          .in('role', ['wlasciciel', 'opiekun']);
 
-      const { data, error } = await supabase
-        .from('memorial_keepers')
-        .select(`
-          user_id,
-          memorial_id,
-          role,
-          auth.users (
-            email,
-            raw_user_meta_data
-          )
-        `)
-        .eq('memorial_id', Number(parsedId));
-
-      if (error) {
-        console.error('❌ Błąd pobierania keeperów:', error);
-      } else {
-        console.log('✅ Keeperzy z bazy:', data);
-        setKeepers(data);
+        if (error) throw error;
+        setKeepers(data || []);
+        console.log('✅ Pobrani keeperzy:', data);
+      } catch (err) {
+        console.error('❌ Błąd pobierania keeperów:', err);
       }
     };
 
     fetchKeepers();
-  }, [params?.memorialId, currentUser]);
+  }, [parsedId]);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
