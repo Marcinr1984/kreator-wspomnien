@@ -1,22 +1,28 @@
 {
   "pages": {
-    "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
-    ],
     "/memorial/[memorialId]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/memorial/[memorialId]/page.css",
       "static/chunks/app/memorial/[memorialId]/page.js"
     ],
+    "/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
+    ],
     "/preview/[id]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/preview/[id]/page.css",
       "static/chunks/app/preview/[id]/page.js"
+    ],
+    "/qr/[slug]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/qr/[slug]/page.css",
+      "static/chunks/app/qr/[slug]/page.js"
     ]
   }
 }

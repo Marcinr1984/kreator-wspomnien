@@ -168,6 +168,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isP
     localEditing: boolean;
     handleDeleteMemento: (id: number) => void;
     handleEditMemento: (memento: any) => void;
+    isLast: boolean;
   }
 
   const SortableMementoItem: React.FC<SortableMementoItemProps> = ({
@@ -175,6 +176,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isP
     localEditing,
     handleDeleteMemento,
     handleEditMemento,
+    isLast,
   }) => {
     const {
       attributes,
@@ -194,9 +196,8 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isP
 
     return (
       <div ref={setNodeRef} style={style} className="w-full">
-        {!localEditing && <div className="border-t border-gray-300 w-full" />}
 
-        <div className={`relative p-8 shadow-sm w-full ${localEditing ? 'border-2 border-dashed border-gray-300 rounded-xl mb-6' : ''}`}>
+        <div className={`relative p-8 w-full ${localEditing ? 'border-2 border-dashed border-gray-300 rounded-xl mb-6' : ''}`}>
           {/* DRAG HANDLE ONLY IN EDIT MODE */}
           {localEditing && (
             <div className="absolute top-4 left-4 flex items-center" {...attributes} {...listeners}>
@@ -445,7 +446,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isP
           )}
         </div>
 
-        {!localEditing && <div className="border-b border-gray-300 w-full mb-6" />}
+        {!localEditing && !isLast && <div className="border-b border-gray-300 w-full my-6" />}
       </div>
     );
   };
@@ -555,14 +556,15 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isP
           >
             <div className="flex flex-col items-center justify-center mt-28 w-full">
               {mementos
-                .filter((memento) => memento?.type && memento?.content) // zapobiega renderowaniu pustych map
-                .map((memento) => (
+                .filter((memento) => memento?.type && memento?.content)
+                .map((memento, index) => (
                   <SortableMementoItem
                     key={memento.id}
                     memento={memento}
                     localEditing={localEditing}
                     handleDeleteMemento={handleDeleteMemento}
                     handleEditMemento={handleEditMemento}
+                    isLast={index === mementos.filter((m) => m?.type && m?.content).length - 1}
                   />
                 ))}
             </div>
@@ -571,14 +573,15 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isP
       ) : (
         <div className="flex flex-col items-center justify-center mt-28 w-full">
           {mementos
-            .filter((memento) => memento?.type && memento?.content) // zapobiega renderowaniu pustych map
-            .map((memento) => (
+            .filter((memento) => memento?.type && memento?.content)
+            .map((memento, index) => (
               <SortableMementoItem
                 key={memento.id}
                 memento={memento}
                 localEditing={localEditing}
                 handleDeleteMemento={handleDeleteMemento}
                 handleEditMemento={handleEditMemento}
+                isLast={index === mementos.filter((m) => m?.type && m?.content).length - 1}
               />
             ))}
         </div>
