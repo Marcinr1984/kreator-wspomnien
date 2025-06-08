@@ -97,7 +97,10 @@ export default function ProsbyPage() {
       console.log("🧾 rawInvitesData:", rawInvitesData)
       console.log("🐞 błąd pobierania zaproszeń:", error)
 
-      const invitesData = (rawInvitesData as Invite[]) || []
+      const invitesData = (rawInvitesData as any[])?.map(item => ({
+        ...item,
+        memorial_pages: Array.isArray(item.memorial_pages) ? item.memorial_pages[0] : item.memorial_pages
+      })) as Invite[] || []
       console.log("🧾 invitesData:", invitesData)
 
       // Pobierz unikalne added_by
