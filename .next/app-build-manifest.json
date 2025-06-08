@@ -1,28 +1,58 @@
 {
   "pages": {
-    "/memorial/[memorialId]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/memorial/[memorialId]/page.css",
-      "static/chunks/app/memorial/[memorialId]/page.js"
-    ],
     "/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/preview/[id]/page": [
+    "/dashboard/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/preview/[id]/page.css",
-      "static/chunks/app/preview/[id]/page.js"
+      "static/chunks/app/dashboard/layout.js"
+    ],
+    "/dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/dashboard/page.css",
+      "static/chunks/app/dashboard/page.js"
+    ],
+    "/memorial/[memorialId]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/memorial/[memorialId]/page.css",
+      "static/chunks/app/memorial/[memorialId]/page.js"
+    ],
+    "/auth/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/auth/login/page.js"
+    ],
+    "/auth/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/auth/layout.js"
     ],
     "/qr/[slug]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/css/app/qr/[slug]/page.css",
       "static/chunks/app/qr/[slug]/page.js"
+    ],
+    "/dashboard/prosby/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/prosby/page.js"
+    ],
+    "/dashboard/zgloszenia/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/dashboard/zgloszenia/page.js"
+    ],
+    "/profil/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/profil/page.js"
     ]
   }
 }

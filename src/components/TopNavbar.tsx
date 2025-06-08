@@ -149,7 +149,13 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
               </li>
               <hr className="my-1" />
               <p className="px-4 py-2 text-xs text-gray-500 uppercase">PAMIĄTKI</p>
-              <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+              <li
+                onClick={() => {
+                  setIsMenuOpen(false)
+                  router.push('/profil')
+                }}
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+              >
                 <UserCircleIcon className="w-5 h-5 text-cyan-500" />
                 {userName}
               </li>
@@ -166,8 +172,10 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
               <hr className="my-1" />
               <p className="px-4 py-2 text-xs text-gray-500 uppercase">DlaBliskich</p>
               <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-                <UsersIcon className="w-5 h-5 text-cyan-500" />
-                Jak to działa
+                <a href="https://www.dlabliskich.pl/jak-to-dziala" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full">
+                  <UsersIcon className="w-5 h-5 text-cyan-500" />
+                  Jak to działa
+                </a>
               </li>
               <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
                 <Squares2X2Icon className="w-5 h-5 text-cyan-500" />
@@ -182,12 +190,10 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
                 Wirtualne pogrzeby
               </li>
               <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-                <BriefcaseIcon className="w-5 h-5 text-cyan-500" />
-                Dla firm
-              </li>
-              <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-                <TagIcon className="w-5 h-5 text-cyan-500" />
-                Cennik
+                <a href="https://www.dlabliskich.pl/cennik" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full">
+                  <TagIcon className="w-5 h-5 text-cyan-500" />
+                  Cennik
+                </a>
               </li>
               <hr className="my-1" />
               <li
@@ -242,7 +248,13 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
             </li>
             <hr className="my-1" />
             <p className="px-4 py-2 text-xs text-gray-500 uppercase">PAMIĄTKI</p>
-            <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+            <li
+              onClick={() => {
+                setIsMobileMenuOpen(false)
+                router.push('/profil')
+              }}
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+            >
               <UserCircleIcon className="w-5 h-5 text-cyan-500" />
               {userName}
             </li>
@@ -259,8 +271,10 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
             <hr className="my-1" />
             <p className="px-4 py-2 text-xs text-gray-500 uppercase">DlaBliskich</p>
             <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-              <UsersIcon className="w-5 h-5 text-cyan-500" />
-              Jak to działa
+              <a href="https://www.dlabliskich.pl/jak-to-dziala" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full">
+                <UsersIcon className="w-5 h-5 text-cyan-500" />
+                Jak to działa
+              </a>
             </li>
             <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
               <Squares2X2Icon className="w-5 h-5 text-cyan-500" />
@@ -275,12 +289,10 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
               Wirtualne pogrzeby
             </li>
             <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-              <BriefcaseIcon className="w-5 h-5 text-cyan-500" />
-              Dla firm
-            </li>
-            <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-              <TagIcon className="w-5 h-5 text-cyan-500" />
-              Cennik
+              <a href="https://www.dlabliskich.pl/cennik" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 w-full">
+                <TagIcon className="w-5 h-5 text-cyan-500" />
+                Cennik
+              </a>
             </li>
             <hr className="my-1" />
             <li

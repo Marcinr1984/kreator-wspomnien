@@ -1,5 +1,7 @@
 {
-  "/qr/[slug]/page": "app/qr/[slug]/page.js",
+  "/profil/page": "app/profil/page.js",
   "/memorial/[memorialId]/page": "app/memorial/[memorialId]/page.js",
-  "/preview/[id]/page": "app/preview/[id]/page.js"
+  "/qr/[slug]/page": "app/qr/[slug]/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/prosby/page": "app/dashboard/prosby/page.js"
 }
