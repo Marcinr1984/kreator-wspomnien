@@ -6,6 +6,7 @@ import { supabase } from '../../utils/supabaseClient'
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 import KeeperPagesSection from '../../components/KeeperPagesSection'
+import type { RealtimeChannel } from '@supabase/supabase-js'
 
 NProgress.configure({
   showSpinner: false,
@@ -17,22 +18,23 @@ import { Cog6ToothIcon, PlusIcon, UserCircleIcon, ArrowRightOnRectangleIcon, Squ
 import StepFormModal from '../../components/StepFormModal'
 import TopNavbar from '../../components/TopNavbar'
 
-const getUserAndMemorialPages = async (router: any, setUserName: any, setInitials: any, getMemorialPages: any, subscription: any) => {
+const getUserAndMemorialPages = async (router: any, setUserName: any, setInitials: any, getMemorialPages: any): Promise<RealtimeChannel | null> => {
   const { data, error } = await supabase.auth.getUser()
   if (error || !data?.user) {
-    router.push('/login')
-  } else {
-    const name = data.user.user_metadata?.first_name || data.user.user_metadata?.name || data.user.email
-    setUserName(name)
-
-    const first = data.user.user_metadata?.first_name || ''
-    const last = data.user.user_metadata?.last_name || ''
-    const initials = `${first.charAt(0)}${last.charAt(0)}`.toUpperCase()
-    setInitials(initials)
+    router.push('/auth/login')
+    return null
   }
+
+  const name = data.user.user_metadata?.first_name || data.user.user_metadata?.name || data.user.email
+  setUserName(name)
+
+  const first = data.user.user_metadata?.first_name || ''
+  const last = data.user.user_metadata?.last_name || ''
+  const initials = `${first.charAt(0)}${last.charAt(0)}`.toUpperCase()
+  setInitials(initials)
   await getMemorialPages()
 
-  subscription = supabase
+  const channel = supabase
     .channel('custom-all-channel')
     .on(
       'postgres_changes',
@@ -42,6 +44,8 @@ const getUserAndMemorialPages = async (router: any, setUserName: any, setInitial
       }
     )
     .subscribe()
+
+  return channel
 }
 
 export default function Dashboard() {
@@ -52,8 +56,8 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<'panel' | 'prosby' | 'zgloszenia'>('panel')
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const subscriptionRef = useRef<RealtimeChannel | null>(null)
   const router = useRouter()
-  let subscription: any
 
   const getMemorialPages = async () => {
     const {
@@ -81,12 +85,22 @@ export default function Dashboard() {
 
   useEffect(() => {
     NProgress.start()
-    getUserAndMemorialPages(router, setUserName, setInitials, getMemorialPages, subscription).finally(() => NProgress.done())
+    let isMounted = true
+
+    getUserAndMemorialPages(router, setUserName, setInitials, getMemorialPages)
+      .then((channel) => {
+        if (isMounted && channel) {
+          subscriptionRef.current = channel
+        }
+      })
+      .finally(() => NProgress.done())
     setActiveTab('panel')
 
     return () => {
-      if (subscription) {
-        supabase.removeChannel(subscription)
+      isMounted = false
+      if (subscriptionRef.current) {
+        supabase.removeChannel(subscriptionRef.current)
+        subscriptionRef.current = null
       }
     }
   }, [router])

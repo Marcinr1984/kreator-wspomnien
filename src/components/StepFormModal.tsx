@@ -84,12 +84,14 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
   };
   
   const handleSave = async () => {
-    if (isSubmitting) return;
+    if (isSubmitting || isSaved) return;
     setIsSubmitting(true);
-    if (isSaved) return;
     setIsSaved(true);
+
     if (!user?.id) {
       alert("Nie jesteś zalogowany. Nie można zapisać strony pamięci.");
+      setIsSaved(false);
+      setIsSubmitting(false);
       return;
     }
     let photoUrl: string | null = null;
@@ -103,6 +105,8 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
 
       if (storageError) {
         alert("Błąd przy przesyłaniu zdjęcia: " + storageError.message);
+        setIsSaved(false);
+        setIsSubmitting(false);
         return;
       }
 
@@ -116,10 +120,7 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
 
     // 1. Wstawiamy rekord memorial_pages bez slug
     const displayName = `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim() || user.email || user.id;
-    let baseQRSlug = slugify(displayName, { lower: true, strict: true });
-
-    // Usunięto sprawdzanie i losowanie sufixu dla qr_slug; qr_slug jest zawsze generowany jako slugify(imie + nazwisko użytkownika)
-
+    const baseQRSlug = slugify(displayName, { lower: true, strict: true }) || `qr-${user.id}`;
     const generatedQRSlug = baseQRSlug;
 
     const allData = {
@@ -181,6 +182,8 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
       if (keeperError) {
         console.error('Błąd przy zapisie keepera:', keeperError);
         alert('Błąd przy przypisaniu roli do użytkownika: ' + keeperError.message);
+        setIsSaved(false);
+        setIsSubmitting(false);
         return;
       }
     }
@@ -191,6 +194,8 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
     setTimeout(() => {
       window.location.href = `/memorial/${newMemorialId}`;
     }, 300);
+    setIsSubmitting(false);
+    setIsSaved(false);
   };
 
   return (

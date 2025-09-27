@@ -32,7 +32,7 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
     const getUser = async () => {
       const { data, error } = await supabase.auth.getUser()
       if (error || !data?.user) {
-        router.push('/login')
+        router.push('/auth/login')
       } else {
         const name = data.user.user_metadata?.first_name || data.user.user_metadata?.name || data.user.email
         setUserName(name)
@@ -199,7 +199,7 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
               <li
                 onClick={async () => {
                   await supabase.auth.signOut()
-                  router.push('auth/login')
+                  router.push('/auth/login')
                 }}
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
               >
@@ -298,7 +298,7 @@ export default function TopNavbar({ onCreateMemorialPage }: { onCreateMemorialPa
             <li
               onClick={async () => {
                 await supabase.auth.signOut()
-                router.push('auth/login')
+                router.push('/auth/login')
               }}
               className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
             >
