@@ -1,10 +1,18 @@
 'use client'
 
-import { Dialog, Transition } from '@headlessui/react'
-import { useSession } from '@supabase/auth-helpers-react'
+import { Dialog, Listbox, Transition } from '@headlessui/react'
 import { Fragment, useState, useEffect } from 'react'
-import { supabase } from '../utils/supabaseClient';
-import slugify from 'slugify';
+import { supabase } from '../utils/supabaseClient'
+import slugify from 'slugify'
+import {
+  ArrowRightIcon,
+  CalendarDaysIcon,
+  CheckIcon,
+  IdentificationIcon,
+  PhotoIcon,
+  UserPlusIcon,
+  ChevronDownIcon
+} from '@heroicons/react/24/solid'
 
 interface StepFormModalProps {
   isOpen: boolean
@@ -13,20 +21,27 @@ interface StepFormModalProps {
 }
 
 export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModalProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [user, setUser] = useState<any>(null);
-  
+  const [currentStep, setCurrentStep] = useState(1)
+  const [user, setUser] = useState<any>(null)
+
   useEffect(() => {
     const getUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
+      const { data } = await supabase.auth.getUser()
       if (data?.user) {
-        setUser(data.user);
+        setUser(data.user)
       } else {
-        setUser(null);
+        setUser(null)
       }
-    };
-    getUser();
-  }, []);
+    }
+    getUser()
+  }, [])
+
+  const steps = [
+    { id: 1, label: 'Nazwa', icon: UserPlusIcon },
+    { id: 2, label: 'Daty', icon: CalendarDaysIcon },
+    { id: 3, label: 'Relacja', icon: IdentificationIcon },
+    { id: 4, label: 'Zdjęcie', icon: PhotoIcon }
+  ] as const
   const [step1Data, setStep1Data] = useState({
     firstName: '',
     lastName: '',
@@ -200,9 +215,9 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
+      <Dialog as="div" className="relative z-[70]" onClose={onClose}>
         <Transition.Child
-          as="div"
+          as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
           enterTo="opacity-100"
@@ -210,288 +225,356 @@ export default function StepFormModal({ isOpen, onClose, onSave }: StepFormModal
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-[#0b1426]/75 backdrop-blur-sm" />
         </Transition.Child>
 
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
+        <div className="fixed inset-0 overflow-y-auto px-4 py-10 sm:px-6">
+          <div className="flex min-h-full items-center justify-center">
             <Transition.Child
-              as="div"
+              as={Fragment}
               enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
+              enterFrom="opacity-0 translate-y-6 scale-95"
+              enterTo="opacity-100 translate-y-0 scale-100"
               leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0 translate-y-6 scale-95"
             >
-              <Dialog.Panel className="w-[850px] h-[650px] transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all flex flex-col">
-
-                <div className="w-full bg-black text-white px-6 py-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="bg-cyan-600 w-8 h-8 flex items-center justify-center rounded-full text-white text-xl font-bold">
-                      +
-                    </div>
-                    <span className="text-white font-medium">Tworzenie strony pamięci</span>
-                  </div>
-                  <button
-                    onClick={onClose}
-                    className="text-black bg-white rounded-full px-4 py-1 text-sm font-medium hover:bg-gray-200"
-                  >
-                    Zamknij
-                  </button>
-                </div>
-
-                <div className="w-full border-b border-gray-200 bg-white py-4">
-                  <nav className="flex justify-around items-center px-6">
-                    {[1, 2, 3, 4].map((step) => (
-                      <div key={step} className="flex flex-col items-center text-xs font-medium text-gray-500">
-                        <div
-                          className={`w-6 h-6 flex items-center justify-center rounded-full border-2 ${
-                            currentStep > step
-                              ? 'bg-cyan-600 border-cyan-600 text-white'
-                              : currentStep === step
-                              ? 'border-cyan-600 text-cyan-600'
-                              : 'border-gray-300 text-gray-400'
-                          }`}
-                        >
-                          {currentStep > step ? '✓' : step}
+              <Dialog.Panel className="relative w-full max-w-3xl overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_30px_80px_-40px_rgba(15,23,42,0.45)] backdrop-blur-xl">
+                <div className="relative bg-gradient-to-r from-cyan-500 via-sky-500 to-purple-500 px-6 py-6 text-white sm:px-8">
+                  <div className="flex flex-col gap-6">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/40 bg-white/20">
+                          <UserPlusIcon className="h-6 w-6" />
                         </div>
-                        <span className="mt-1">
-                          {step === 1 && 'Nazwa'}
-                          {step === 2 && 'Daty'}
-                          {step === 3 && 'Relacja'}
-                          {step === 4 && 'Zdjęcie'}
-                        </span>
+                        <div>
+                          <Dialog.Title className="text-2xl font-semibold sm:text-3xl">Tworzenie strony pamięci</Dialog.Title>
+                          <p className="mt-1 max-w-md text-sm text-white/85">
+                            Wypełnij kilka krótkich kroków, aby założyć miejsce pamięci bliskiej osoby i zaprosić rodzinę do współtworzenia wspomnień.
+                          </p>
+                        </div>
                       </div>
-                    ))}
-                  </nav>
+                      <button
+                        onClick={onClose}
+                        className="inline-flex items-center justify-center rounded-full border border-white/40 bg-white/20 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/30"
+                      >
+                        Zamknij
+                      </button>
+                    </div>
+
+                    <nav className="grid gap-3 sm:grid-cols-4">
+                      {steps.map((step) => {
+                        const Icon = step.icon
+                        const isActive = currentStep === step.id
+                        const isCompleted = currentStep > step.id
+                        return (
+                          <div
+                            key={step.id}
+                            className={`group flex items-center gap-3 rounded-2xl border px-4 py-3 transition ${
+                              isCompleted
+                                ? 'border-white/30 bg-white/25 text-white shadow-[0_12px_30px_-18px_rgba(255,255,255,0.7)]'
+                                : isActive
+                                ? 'border-white/30 bg-white/20 text-white'
+                                : 'border-white/10 bg-white/10 text-white/70'
+                            }`}
+                          >
+                            <span
+                              className={`flex h-9 w-9 items-center justify-center rounded-xl border ${
+                                isCompleted
+                                  ? 'border-white bg-white/10 text-white'
+                                  : isActive
+                                  ? 'border-white/60 bg-white/15 text-white'
+                                  : 'border-white/20 bg-white/10 text-white/70'
+                              }`}
+                            >
+                              {isCompleted ? <CheckIcon className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+                            </span>
+                            <div className="flex flex-col">
+                              <span className="text-xs uppercase tracking-[0.2em] text-white/60">Krok {step.id}</span>
+                              <span className="text-sm font-semibold leading-tight">{step.label}</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </nav>
+                  </div>
                 </div>
 
-                {currentStep === 1 && (
-                  <form className="flex-1 px-6 py-4 space-y-4">
-                    <h2 className="text-lg font-semibold mb-4">Dla kogo jest ta strona pamięci?</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Imię <span className="text-red-500">*</span>
+                <div className="space-y-8 bg-white px-6 py-6 sm:px-8 sm:py-8">
+                  {currentStep === 1 && (
+                    <form className="space-y-6" onSubmit={(event) => event.preventDefault()}>
+                      <header className="space-y-2">
+                        <h2 className="text-xl font-semibold text-slate-900">Dla kogo jest ta strona pamięci?</h2>
+                        <p className="text-sm text-slate-500">Te dane pomogą nam przygotować stronę i ułatwią znalezienie jej bliskim.</p>
+                      </header>
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <span className="flex items-center gap-1">Imię <span className="text-rose-500">*</span></span>
+                          <input
+                            type="text"
+                            value={step1Data.firstName}
+                            onChange={(e) => setStep1Data({ ...step1Data, firstName: e.target.value })}
+                            placeholder="Wpisz imię"
+                            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
+                          />
+                          {step1Errors.firstName && (
+                            <span className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">{step1Errors.firstName}</span>
+                          )}
                         </label>
-                        <input
-                          type="text"
-                          value={step1Data.firstName}
-                          onChange={(e) => setStep1Data({ ...step1Data, firstName: e.target.value })}
-                          className="mt-1 block w-full px-2 rounded-md border border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 sm:text-base h-12"
-                          placeholder="Wpisz imię"
-                        />
-                        {step1Errors.firstName && <p className="text-sm text-red-500">{step1Errors.firstName}</p>}
-                      </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Drugie imię</label>
-                        <input
-                          type="text"
-                          className="mt-1 block w-full px-2 rounded-md border border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 sm:text-base h-12"
-                          placeholder="Wpisz drugie imię"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Nazwisko <span className="text-red-500">*</span>
+                        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                          Drugie imię
+                          <input
+                            type="text"
+                            placeholder="Opcjonalnie"
+                            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
+                          />
                         </label>
-                        <input
-                          type="text"
-                          value={step1Data.lastName}
-                          onChange={(e) => setStep1Data({ ...step1Data, lastName: e.target.value })}
-                          className="mt-1 block w-full px-2 rounded-md border border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 sm:text-base h-12"
-                          placeholder="Wpisz nazwisko"
-                        />
-                        {step1Errors.lastName && <p className="text-sm text-red-500">{step1Errors.lastName}</p>}
-                      </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Tytuł (np. Jr, M.D.)</label>
-                        <input
-                          type="text"
-                          className="mt-1 block w-full px-2 rounded-md border border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 sm:text-base h-12"
-                          placeholder="Wpisz tytuł"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Pseudonim</label>
-                        <input
-                          type="text"
-                          className="mt-1 block w-full px-2 rounded-md border border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 sm:text-base h-12"
-                          placeholder="Wpisz pseudonim"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Używane do wspominania bliskiej osoby podczas uroczystości żałobnych</p>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">
-                          Zaimek <span className="text-red-500">*</span>
+                        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <span className="flex items-center gap-1">Nazwisko <span className="text-rose-500">*</span></span>
+                          <input
+                            type="text"
+                            value={step1Data.lastName}
+                            onChange={(e) => setStep1Data({ ...step1Data, lastName: e.target.value })}
+                            placeholder="Wpisz nazwisko"
+                            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
+                          />
+                          {step1Errors.lastName && (
+                            <span className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">{step1Errors.lastName}</span>
+                          )}
                         </label>
-                        <select
-                          value={step1Data.pronoun}
-                          onChange={(e) => setStep1Data({ ...step1Data, pronoun: e.target.value })}
-                          className="mt-1 block w-full px-2 rounded-md border border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 sm:text-base h-12"
-                        >
-                          <option value="">Wybierz zaimek</option>
-                          <option>on</option>
-                          <option>ona</option>
-                          <option>oni</option>
-                        </select>
-                        {step1Errors.pronoun && <p className="text-sm text-red-500">{step1Errors.pronoun}</p>}
-                        <p className="mt-1 text-xs text-gray-500">Nie wyświetlane – używane tylko dla Twoich powiadomień.</p>
+
+                        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                          Tytuł
+                          <input
+                            type="text"
+                            placeholder="Np. dr, prof., ks."
+                            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
+                          />
+                        </label>
+
+                        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-500 sm:col-span-2">
+                          Pseudonim
+                          <input
+                            type="text"
+                            placeholder="Znany przydomek lub czułe określenie"
+                            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
+                          />
+                          <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">Wyświetlane przy wspomnieniach i dedykacjach.</span>
+                        </label>
+
+                        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <span className="flex items-center gap-1">Zaimek <span className="text-rose-500">*</span></span>
+                          <Listbox value={step1Data.pronoun} onChange={(value) => setStep1Data({ ...step1Data, pronoun: value })}>
+                            <div className="relative">
+                              <Listbox.Button className="relative flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60">
+                                <span>{step1Data.pronoun || 'Wybierz zaimek'}</span>
+                                <ChevronDownIcon className="h-4 w-4 text-slate-400" />
+                              </Listbox.Button>
+                              <Transition
+                                as={Fragment}
+                                leave="transition ease-in duration-100"
+                                leaveFrom="opacity-100"
+                                leaveTo="opacity-0"
+                              >
+                                <Listbox.Options className="absolute z-10 mt-2 w-full rounded-2xl border border-slate-200 bg-white py-2 text-sm shadow-xl">
+                                  {['on', 'ona', 'oni'].map((option) => (
+                                    <Listbox.Option
+                                      key={option}
+                                      value={option}
+                                      className={({ active }) =>
+                                        `cursor-pointer px-4 py-2 transition ${
+                                          active ? 'bg-cyan-50 text-cyan-600' : 'text-slate-700'
+                                        }`
+                                      }
+                                    >
+                                      {option}
+                                    </Listbox.Option>
+                                  ))}
+                                </Listbox.Options>
+                              </Transition>
+                            </div>
+                          </Listbox>
+                          {step1Errors.pronoun && (
+                            <span className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">{step1Errors.pronoun}</span>
+                          )}
+                          <span className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">Tylko na potrzeby powiadomień.</span>
+                        </label>
                       </div>
-                    </div>
-                  </form>
-                )}
-                {currentStep === 2 && (
-                  <form className="flex-1 px-6 py-4 space-y-4">
-                    <div>
-                      <h2 className="text-lg font-semibold mb-4">Data urodzenia i śmierci</h2>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">
-                            Data urodzenia <span className="text-red-500">*</span>
-                          </label>
+                    </form>
+                  )}
+
+                  {currentStep === 2 && (
+                    <form className="space-y-6" onSubmit={(event) => event.preventDefault()}>
+                      <header className="space-y-2">
+                        <h2 className="text-xl font-semibold text-slate-900">Daty i status</h2>
+                        <p className="text-sm text-slate-500">Podpowiemy, jak przygotować historię życia i odpowiednio wyświetlimy informacje na stronie.</p>
+                      </header>
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <span className="flex items-center gap-1">Data urodzenia <span className="text-rose-500">*</span></span>
                           <input
                             type="date"
                             value={step2Data.birthDate}
                             onChange={(e) => setStep2Data({ ...step2Data, birthDate: e.target.value })}
-                            className="mt-1 block w-full px-2 rounded-md border border-gray-300 h-12"
+                            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
                           />
-                          {step2Errors.birthDate && <p className="text-sm text-red-500">{step2Errors.birthDate}</p>}
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">
-                            Data śmierci {step2Data.isDeceased && <span className="text-red-500">*</span>}
-                          </label>
+                          {step2Errors.birthDate && (
+                            <span className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">{step2Errors.birthDate}</span>
+                          )}
+                        </label>
+
+                        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <span className="flex items-center gap-1">Data śmierci {step2Data.isDeceased && <span className="text-rose-500">*</span>}</span>
                           <input
                             type="date"
                             value={step2Data.deathDate}
                             onChange={(e) => setStep2Data({ ...step2Data, deathDate: e.target.value })}
-                            className="mt-1 block w-full px-2 rounded-md border border-gray-300 h-12"
+                            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
                           />
-                          {step2Errors.deathDate && <p className="text-sm text-red-500">{step2Errors.deathDate}</p>}
-                        </div>
-                      </div>
-                      <div className="mt-4 flex items-center">
-                        <input
-                          type="checkbox"
-                          id="passed"
-                          checked={step2Data.isDeceased}
-                          onChange={(e) => setStep2Data({ ...step2Data, isDeceased: e.target.checked })}
-                          className="h-4 w-4 text-cyan-600 border-gray-300 rounded"
-                        />
-                        <label htmlFor="passed" className="ml-2 block text-sm text-gray-700">
-                          Osoba zmarła
+                          {step2Errors.deathDate && (
+                            <span className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">{step2Errors.deathDate}</span>
+                          )}
                         </label>
                       </div>
-                    </div>
-                  </form>
-                )}
-                {currentStep === 3 && (
-                  <form className="flex-1 px-6 py-4 space-y-4">
-                    <div>
-                      <h2 className="text-lg font-semibold mb-4">Twoja relacja z osobą</h2>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">
-                            Wybierz relację <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={step3Data.relation}
-                            onChange={(e) => setStep3Data({ ...step3Data, relation: e.target.value })}
-                            className="mt-1 block w-full px-2 rounded-md border border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-base h-12"
-                          >
-                            <option value="">Wybierz...</option>
-                            <option>Rodzic</option>
-                            <option>Dziecko</option>
-                            <option>Małżonek/partner</option>
-                            <option>Przyjaciel</option>
-                            <option>Inne</option>
-                          </select>
-                          {step3Errors.relation && <p className="text-sm text-red-500">{step3Errors.relation}</p>}
-                        </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">
-                            Opisz relację <span className="text-red-500">*</span>
-                          </label>
+                      <label className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-600 shadow-inner">
+                        <input
+                          type="checkbox"
+                          checked={step2Data.isDeceased}
+                          onChange={(e) => setStep2Data({ ...step2Data, isDeceased: e.target.checked })}
+                          className="h-4 w-4 rounded border-slate-300 text-cyan-600 focus:ring-cyan-500"
+                        />
+                        <span>Osoba zmarła</span>
+                      </label>
+                    </form>
+                  )}
+
+                  {currentStep === 3 && (
+                    <form className="space-y-6" onSubmit={(event) => event.preventDefault()}>
+                      <header className="space-y-2">
+                        <h2 className="text-xl font-semibold text-slate-900">Twoja relacja</h2>
+                        <p className="text-sm text-slate-500">Dzięki temu dopasujemy powiadomienia i rolę, którą otrzymasz na stronie pamięci.</p>
+                      </header>
+                      <div className="grid gap-5 sm:grid-cols-2">
+                        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <span className="flex items-center gap-1">Wybierz relację <span className="text-rose-500">*</span></span>
+                          <Listbox value={step3Data.relation} onChange={(value) => setStep3Data({ ...step3Data, relation: value })}>
+                            <div className="relative">
+                              <Listbox.Button className="relative flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60">
+                                <span>{step3Data.relation || 'Wybierz...'}</span>
+                                <ChevronDownIcon className="h-4 w-4 text-slate-400" />
+                              </Listbox.Button>
+                              <Transition
+                                as={Fragment}
+                                leave="transition ease-in duration-100"
+                                leaveFrom="opacity-100"
+                                leaveTo="opacity-0"
+                              >
+                                <Listbox.Options className="absolute z-10 mt-2 w-full rounded-2xl border border-slate-200 bg-white py-2 text-sm shadow-xl">
+                                  {['Rodzic', 'Dziecko', 'Małżonek/partner', 'Przyjaciel', 'Inne'].map((option) => (
+                                    <Listbox.Option
+                                      key={option}
+                                      value={option}
+                                      className={({ active }) =>
+                                        `cursor-pointer px-4 py-2 transition ${
+                                          active ? 'bg-cyan-50 text-cyan-600' : 'text-slate-700'
+                                        }`
+                                      }
+                                    >
+                                      {option}
+                                    </Listbox.Option>
+                                  ))}
+                                </Listbox.Options>
+                              </Transition>
+                            </div>
+                          </Listbox>
+                          {step3Errors.relation && (
+                            <span className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">{step3Errors.relation}</span>
+                          )}
+                        </label>
+
+                        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-slate-500">
+                          <span className="flex items-center gap-1">Opisz relację <span className="text-rose-500">*</span></span>
                           <input
                             type="text"
                             value={step3Data.relationDescription}
                             onChange={(e) => setStep3Data({ ...step3Data, relationDescription: e.target.value })}
-                            className="mt-1 block w-full px-2 rounded-md border border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-base h-12"
-                            placeholder="Wpisz krótki opis relacji"
+                            placeholder="Krótki opis relacji"
+                            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
                           />
-                          {step3Errors.relationDescription && <p className="text-sm text-red-500">{step3Errors.relationDescription}</p>}
-                        </div>
+                          {step3Errors.relationDescription && (
+                            <span className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-medium text-rose-600">{step3Errors.relationDescription}</span>
+                          )}
+                        </label>
                       </div>
-                    </div>
-                  </form>
-                )}
-                {currentStep === 4 && (
-                  <form className="flex-1 px-6 py-4 space-y-4">
-                    <div>
-                      <h2 className="text-lg font-semibold mb-4">Dodaj zdjęcie</h2>
-                    <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg py-10">
-                      <svg className="w-12 h-12 text-gray-400 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 12h4m-2-2v4m-8-6a4 4 0 100-8 4 4 0 000 8z" />
-                      </svg>
-                      <p className="text-sm text-gray-600 mb-1">Kliknij lub przeciągnij plik, aby przesłać</p>
-                      <p className="text-xs text-gray-400">PNG, JPG do 5MB</p>
-                      <input
-                        type="file"
-                        accept="image/png, image/jpeg"
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            setPhotoFile(e.target.files[0]);
-                          }
-                        }}
-                        className="mt-4"
-                      />
-                      {photoFile && (
-                        <p className="mt-2 text-sm text-gray-600">Wybrane zdjęcie: {photoFile.name}</p>
-                      )}
-                    </div>
-                    </div>
-                  </form>
-                )}
-
-                
-                <div className="px-6 py-4 flex justify-between border-t border-gray-200">
-                  {currentStep > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => setCurrentStep(currentStep - 1)}
-                      className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                    >
-                      Wstecz
-                    </button>
+                    </form>
                   )}
-                  {currentStep < 4 ? (
-                    <button
-                      type="button"
-                      onClick={handleNext}
-                      className="ml-auto inline-flex justify-center rounded-md border border-transparent bg-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-cyan-700"
-                    >
-                      Następny krok
-                    </button>
-                  ) : (
-                  <button
-                      type="button"
-                      onClick={handleSave}
-                      disabled={isSubmitting}
-                      className="ml-auto inline-flex justify-center rounded-md border border-transparent bg-cyan-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-cyan-700 disabled:opacity-50"
-                    >
-                      Zapisz
-                    </button>
+
+                  {currentStep === 4 && (
+                    <form className="space-y-6" onSubmit={(event) => event.preventDefault()}>
+                      <header className="space-y-2">
+                        <h2 className="text-xl font-semibold text-slate-900">Zdjęcie pamięci</h2>
+                        <p className="text-sm text-slate-500">Dodaj zdjęcie, które najlepiej oddaje charakter osoby. Możesz je zmienić w dowolnym momencie.</p>
+                      </header>
+                      <label className="flex flex-col items-center justify-center gap-4 rounded-[28px] border border-dashed border-slate-300 bg-slate-50/70 px-6 py-10 text-center text-slate-500">
+                        <PhotoIcon className="h-12 w-12 text-cyan-500" />
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold text-slate-700">Kliknij lub przeciągnij plik</p>
+                          <p className="text-xs text-slate-500">Obsługujemy PNG i JPG do 5 MB.</p>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/png, image/jpeg"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              setPhotoFile(e.target.files[0])
+                            }
+                          }}
+                          className="sr-only"
+                        />
+                        <span className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-600 shadow-sm">Wybierz plik</span>
+                        {photoFile && (
+                          <p className="text-xs text-slate-500">Wybrano: {photoFile.name}</p>
+                        )}
+                      </label>
+                    </form>
                   )}
                 </div>
 
+                <div className="flex flex-col gap-4 border-t border-slate-100 bg-white/95 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+                  <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Krok {currentStep} z 4</div>
+                  <div className="flex w-full gap-3 sm:w-auto">
+                    {currentStep > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep(currentStep - 1)}
+                        className="flex-1 rounded-full border border-slate-200 bg-white px-6 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 sm:flex-initial"
+                      >
+                        Wstecz
+                      </button>
+                    )}
+                    {currentStep < 4 ? (
+                      <button
+                        type="button"
+                        onClick={handleNext}
+                        className="flex-1 rounded-full bg-gradient-to-r from-cyan-500 via-sky-500 to-purple-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-cyan-500/30 transition hover:shadow-cyan-500/50 sm:flex-initial"
+                      >
+                        Następny krok <ArrowRightIcon className="ml-2 hidden h-4 w-4 sm:inline" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={isSubmitting}
+                        className="flex-1 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:shadow-emerald-500/50 disabled:cursor-not-allowed disabled:opacity-70 sm:flex-initial"
+                      >
+                        {isSubmitting ? 'Zapisywanie…' : 'Zapisz stronę'}
+                      </button>
+                    )}
+                  </div>
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
