@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type FormEvent, type SVGProps } from 'react'
+import { useState, type FormEvent, type SVGProps, type ReactElement } from 'react'
 import { useRouter } from 'next/navigation'
 import { useUser } from '@supabase/auth-helpers-react'
 import {
@@ -36,7 +36,7 @@ const sectionDescriptions: Record<string, string> = {
 
 const sectionOrder = ['profile', 'email', 'password', 'notifications', 'keeper', 'other'] as const
 
-const sectionIcons: Record<string, (props: SVGProps<SVGSVGElement>) => JSX.Element> = {
+const sectionIcons: Record<string, (props: SVGProps<SVGSVGElement>) => ReactElement> = {
   profile: (props) => <UserCircleIcon {...props} />,
   email: (props) => <EnvelopeIcon {...props} />,
   password: (props) => <LockClosedIcon {...props} />,
