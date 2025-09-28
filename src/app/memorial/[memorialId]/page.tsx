@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from 'react'
 import EditPageSettingsModal from '../../../components/EditPageSettingsModal';
 import {
   LockClosedIcon,
+  GlobeAltIcon,
   PlusIcon,
   PhotoIcon,
   VideoCameraIcon,
-  GlobeAltIcon,
   DocumentTextIcon,
   Squares2X2Icon
 } from '@heroicons/react/24/solid'
@@ -16,7 +16,6 @@ import { supabase } from '../../../utils/supabaseClient'
 import PamiecTab from '../../../components/MemorialTab/PamiecTab';
 import PamiatkiTab from '../../../components/MemorialTab/PamiatkiTab';
 import BliscyTab from '../../../components/MemorialTab/BliscyTab';
-
 export default function MemorialPage() {
   const params = useParams()
   const memorialId = params.memorialId
@@ -43,6 +42,8 @@ export default function MemorialPage() {
   const [pageData, setPageData] = useState<any>(null)
   const [photoLoading, setPhotoLoading] = useState(false);
   const [loading, setLoading] = useState(true)
+  const [isPublishing, setIsPublishing] = useState(false)
+  const [isPublishConfirmOpen, setIsPublishConfirmOpen] = useState(false)
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 50, y: 50 })
   const [repositionMode, setRepositionMode] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
@@ -187,6 +188,69 @@ export default function MemorialPage() {
       console.log('Relacja zaktualizowana:', response.data);
     }
   };
+
+  const performPublishToggle = async () => {
+    if (!pageData || isPublishing) return
+
+    const makePublic = !pageData.is_public
+    try {
+      setIsPublishing(true)
+
+      if (makePublic) {
+        const { data: otherPages, error: fetchError } = await supabase
+          .from('memorial_pages')
+          .select('id')
+          .eq('user_id', pageData.user_id)
+          .eq('is_public', true)
+          .neq('id', pageData.id)
+
+        if (fetchError) {
+          throw fetchError
+        }
+
+        if (otherPages && otherPages.length > 0) {
+          const { error: deactivateError } = await supabase
+            .from('memorial_pages')
+            .update({ is_public: false })
+            .in('id', otherPages.map((p: { id: number }) => p.id))
+
+          if (deactivateError) {
+            throw deactivateError
+          }
+        }
+      }
+
+      const { data: updatedPage, error: updateError } = await supabase
+        .from('memorial_pages')
+        .update({ is_public: makePublic })
+        .eq('id', pageData.id)
+        .select('id, is_public')
+        .maybeSingle()
+
+      if (updateError || !updatedPage) {
+        throw updateError || new Error('Brak danych po aktualizacji statusu publikacji.')
+      }
+
+      setPageData((prev: any) => ({ ...prev, is_public: updatedPage.is_public }))
+    } catch (error: any) {
+      console.error('❌ Błąd przy zmianie statusu publikacji:', error)
+      alert(`Nie udało się zaktualizować statusu publikacji: ${error?.message || 'spróbuj ponownie później.'}`)
+    } finally {
+      setIsPublishing(false)
+      setIsPublishConfirmOpen(false)
+    }
+  }
+
+  const togglePublishStatus = () => {
+    if (!pageData || isPublishing) return
+
+    if (!pageData.is_public) {
+      setIsPublishConfirmOpen(true)
+      return
+    }
+
+    performPublishToggle()
+  }
 
   if (loading) {
     return (
@@ -446,11 +510,50 @@ export default function MemorialPage() {
                 {pageData.birth_date} - {pageData.death_date || 'Obecnie'}
               </p>
               <div className="mt-32 flex justify-center">
-                <div className="flex items-center justify-center bg-gradient-to-r from-cyan-400 to-rose-400 text-white text-sm font-medium rounded-full px-6 py-4 w-fit shadow-md relative">
-                  <span className="mr-4">Opublikowano</span>
-                  <span className="opacity-70">Szkic</span>
-                  <span className="absolute -top-2 -right-2 bg-slate-800 p-1.5 rounded-full text-white text-xs border-4 border-white">
-                    <LockClosedIcon className="w-3 h-3" />
+                <div className="relative">
+                  <div className={`relative w-64 h-14 rounded-full bg-gradient-to-r from-cyan-400 via-sky-300 to-rose-400 p-[2px] transition-all duration-300 ease-out overflow-hidden ${
+                    isPublishing ? 'opacity-70' : 'hover:shadow-[0_6px_18px_rgba(13,148,136,0.16)]'
+                  }`}>
+                    <button
+                      type="button"
+                      onClick={togglePublishStatus}
+                      disabled={isPublishing}
+                      className="relative flex items-center justify-between w-full h-full rounded-full bg-white/6 backdrop-blur-[3px] overflow-hidden"
+                    >
+                      <span
+                        className="absolute rounded-full bg-white/40 backdrop-blur-[4px] transition-transform duration-300 ease-out"
+                        style={{
+                          top: '0.42rem',
+                          bottom: '0.42rem',
+                          width: 'calc(50% - 0.95rem)',
+                          left: '0.72rem',
+                          transform: pageData?.is_public
+                            ? 'translateX(calc(100% + 0.72rem))'
+                            : 'translateX(0)'
+                        }}
+                      />
+                      <span
+                        className={`relative z-10 flex-1 text-center text-sm font-medium tracking-wide transition-colors duration-300 px-3 ${
+                          pageData?.is_public ? 'text-white/85' : 'text-white'
+                        }`}
+                      >
+                        Szkic
+                      </span>
+                      <span
+                        className={`relative z-10 flex-1 text-center text-sm font-medium tracking-wide transition-colors duration-300 px-3 ${
+                          pageData?.is_public ? 'text-white' : 'text-white/85'
+                        }`}
+                      >
+                        Opublikowano
+                      </span>
+                    </button>
+                  </div>
+                  <span className="absolute -top-3 -right-3 flex items-center justify-center w-9 h-9 rounded-full bg-black text-white ring-[3px] ring-white shadow-md">
+                    {pageData?.is_public ? (
+                      <GlobeAltIcon className="w-3.5 h-3.5" />
+                    ) : (
+                      <LockClosedIcon className="w-3.5 h-3.5" />
+                    )}
                   </span>
                 </div>
               </div>
@@ -459,6 +562,48 @@ export default function MemorialPage() {
           </div>
           
         </div>
+        {isPublishConfirmOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="w-[520px] rounded-3xl overflow-hidden shadow-2xl">
+              <div className="bg-black text-white px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-cyan-600 w-9 h-9 rounded-full flex items-center justify-center">
+                    <LockClosedIcon className="w-4 h-4" />
+                  </div>
+                  <span className="font-medium">Udostępnij stronę</span>
+                </div>
+                <button
+                  onClick={() => setIsPublishConfirmOpen(false)}
+                  className="bg-white text-black text-sm font-medium rounded-full px-4 py-1 hover:bg-gray-200"
+                >
+                  Zamknij
+                </button>
+              </div>
+              <div className="bg-white px-8 py-6">
+                <h3 className="text-lg font-semibold text-gray-800">Czy na pewno chcesz udostępnić tę stronę publicznie?</h3>
+                <p className="text-sm text-gray-600 mt-3 leading-relaxed">
+                  Publikując tę stronę jako publiczną, wszystkie inne Twoje strony zostaną automatycznie ustawione jako prywatne.
+                  W każdej chwili możesz zmienić to ustawienie w zakładce „Prywatność”.
+                </p>
+              </div>
+              <div className="bg-gray-100 px-8 py-5 flex justify-end gap-4">
+                <button
+                  onClick={() => setIsPublishConfirmOpen(false)}
+                  className="px-5 py-2 text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50"
+                >
+                  Anuluj
+                </button>
+                <button
+                  onClick={performPublishToggle}
+                  className="px-6 py-2 bg-cyan-600 text-white font-medium rounded-xl hover:bg-cyan-700"
+                  disabled={isPublishing}
+                >
+                  Udostępnij
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 {/* Sekcja z przyciskami i treścią */}
 <div className="w-full mt-10 bg-white max-w-6xl mx-auto rounded-lg shadow-md p-6 pb-6 pt-0 overflow-hidden">
  
