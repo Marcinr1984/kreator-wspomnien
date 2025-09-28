@@ -19,8 +19,8 @@ export default function DashboardTabs({ activePath }: DashboardTabsProps) {
 
   return (
     <div className="bg-white shadow-sm border-b border-slate-200">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="flex items-center gap-10 h-[64px] text-sm">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-center md:justify-start gap-6 md:gap-10 h-[56px] md:h-[64px] text-sm">
           {tabs.map((tab) => {
             const isActive = current === tab.href
             return (
