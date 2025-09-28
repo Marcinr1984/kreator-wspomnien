@@ -14,16 +14,22 @@ type Invite = {
 };
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import React, { useEffect, useMemo, useState } from 'react'
 import TopNavbar from '../../../components/TopNavbar'
 import { supabase } from '../../../utils/supabaseClient'
+import { InboxArrowDownIcon, FunnelIcon, CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline'
+import DashboardTabs from '../../../components/DashboardTabs'
 
 export default function ProsbyPage() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const isActive = (path: string) => pathname === path
   const [invites, setInvites] = useState<any[]>([])
+  const stats = useMemo(() => {
+    const total = invites.length
+    const roles = invites.reduce<Record<string, number>>((acc, invite) => {
+      acc[invite.role] = (acc[invite.role] || 0) + 1
+      return acc
+    }, {})
+    return { total, roles }
+  }, [invites])
   // Handler for accepting an invite
   const handleAccept = async (invite: any) => {
     // 1. Mark the invite as accepted
@@ -133,90 +139,117 @@ export default function ProsbyPage() {
   }, [])
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-[#ecf2f6] via-[#eef5f9] to-[#dfe9f3] pb-16">
       <TopNavbar />
-      <nav className="w-full bg-white shadow-xs border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-6 flex items-center justify-center h-[75px] relative">
-          <div className="flex gap-14">
-            <button 
-              onClick={() => router.push('/dashboard')}
-              className={`relative text-base font-medium pb-1 mb-[-14px] ${isActive('/dashboard') ? 'text-cyan-600' : 'text-gray-600'}`}
-            >
-              Panel główny
-              {isActive('/dashboard') && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
-            </button>
-            <button 
-              onClick={() => router.push('/dashboard/prosby')}
-              className={`relative text-base font-medium pb-1 mb-[-14px] ${isActive('/dashboard/prosby') ? 'text-cyan-600' : 'text-gray-600'}`}
-            >
-              Prośby
-              {isActive('/dashboard/prosby') && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[200%] h-[2px] bg-cyan-600"></div>}
-            </button>
-            <button 
-              onClick={() => router.push('/dashboard/zgloszenia')}
-              className={`relative text-base font-medium pb-1 mb-[-14px] ${isActive('/dashboard/zgloszenia') ? 'text-cyan-600' : 'text-gray-600'}`}
-            >
-              Zgłoszenia
-              {isActive('/dashboard/zgloszenia') && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
-            </button>
+      <DashboardTabs activePath="/dashboard/prosby" />
+      <div className="page-fade space-y-6">
+      <div className="max-w-6xl mx-auto px-6 mt-6">
+        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-indigo-500 via-sky-500 to-cyan-500 text-white p-8 shadow-[0_30px_60px_-20px_rgba(29,78,216,0.35)]">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center shadow-lg">
+                <InboxArrowDownIcon className="w-10 h-10" />
+              </div>
+              <div>
+                <p className="uppercase text-xs tracking-widest text-white/70">Prośby</p>
+                <h1 className="text-3xl md:text-4xl font-semibold mt-1">Zaproszenia do opieki</h1>
+                <p className="text-sm md:text-base text-white/80 mt-2 max-w-xl">
+                  Poniżej znajdziesz wszystkie oczekujące zaproszenia na opiekuna stron pamięci. Zdecyduj, które z nich przyjąć i dołącz do wspólnego upamiętniania.
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full md:w-auto">
+              <div className="rounded-2xl bg-white/15 backdrop-blur px-5 py-4 text-left shadow-inner border border-white/10">
+                <p className="text-xs uppercase tracking-wide text-white/70">Łącznie próśb</p>
+                <p className="text-2xl font-semibold mt-1">{stats.total}</p>
+              </div>
+              <div className="rounded-2xl bg-white/15 backdrop-blur px-5 py-4 text-left shadow-inner border border-white/10">
+                <p className="text-xs uppercase tracking-wide text-white/70">Rodzaje ról</p>
+                <p className="text-sm text-white/80 mt-1 leading-snug">
+                  {Object.keys(stats.roles).length > 0
+                    ? Object.entries(stats.roles)
+                        .map(([role, count]) => `${role} (${count})`)
+                        .join(', ')
+                    : 'Brak danych'}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-      </nav>
-      <div className="max-w-6xl mx-auto py-10 px-6 flex gap-6 text-gray-700">
-        {/* LEWA KOLUMNA - FILTRY */}
-        <div className="w-1/3 bg-white p-6 rounded-md shadow-xs border">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold mt-3 ml-3">Filtry</h2>
-            <button className="text-sm text-cyan-600 hover:underline mr-3">Wyczyść wszystko</button>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 mt-6 grid grid-cols-1 lg:grid-cols-[320px_auto] gap-6">
+        <aside className="bg-white rounded-[28px] shadow-[0_20px_40px_-30px_rgba(15,82,109,0.4)] p-6 border border-slate-100 h-fit">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500">
+                <FunnelIcon className="w-5 h-5" />
+              </div>
+              <h2 className="text-lg font-semibold text-slate-800">Filtry</h2>
+            </div>
+            <button className="text-xs text-cyan-600 hover:underline">Wyczyść</button>
           </div>
           <div className="space-y-4">
-            <p className="text-base font-semibold mt-1 ml-3">Typy próśb</p>
-            {["Prośba o zostanie opiekunem"].map(label => (
-              <div key={label} className="flex items-center gap-2 ml-3">
-                <input type="radio" name="requestType" className="accent-gray-400" defaultChecked />
-                <label className="text-sm">{label}</label>
-              </div>
-            ))}
+            <p className="text-xs uppercase tracking-wide text-slate-400">Typ prośby</p>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 flex items-center gap-3">
+              <input type="radio" name="requestType" className="accent-cyan-500" defaultChecked />
+              <span className="text-sm text-slate-600">Prośba o zostanie opiekunem</span>
+            </div>
           </div>
-        </div>
+        </aside>
 
-        {/* PRAWA KOLUMNA - LISTA PROŚB */}
-        <div className="flex-1 bg-white py-10 px-10 rounded-md shadow-xs border">
-          <h2 className="text-xl font-semibold text-gray-800 mb-8">Prośby o zostanie opiekunem</h2>
-          <div className="space-y-6">
+        <section className="bg-white rounded-[28px] shadow-[0_25px_70px_-40px_rgba(15,82,109,0.3)] p-6 md:p-8 border border-slate-100">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl md:text-2xl font-semibold text-slate-800">Oczekujące zaproszenia</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Zareaguj na prośby i dołącz jako opiekun do nowych stron.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-5">
             {invites.length === 0 ? (
-              <div>
-                <p className="text-gray-500">Brak oczekujących zaproszeń.</p>
+              <div className="rounded-[24px] border border-slate-200 bg-slate-50 px-6 py-10 text-center text-slate-500">
+                <p>Brak oczekujących zaproszeń. Gdy ktoś zaprosi Cię do roli opiekuna, pojawi się tutaj.</p>
               </div>
             ) : (
-              invites.map(invite => (
-                <div key={invite.id} className="border border-gray-300 rounded-lg p-4 shadow-sm">
-                  <h3 className="text-base font-semibold mb-1">Zaproszenie</h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Zostałeś zaproszony do roli <span className="font-medium">{invite.role}</span> na stronie pamięci:{" "}
-                    <span className="font-medium text-gray-800">
-                      {invite.memorial_pages?.first_name ?? ''} {invite.memorial_pages?.last_name ?? ''}
-                    </span>
-                  </p>
-                  <pre className="text-xs text-gray-400">{JSON.stringify(invite.memorial_pages)}</pre>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Od: <span className="font-medium text-gray-800">{invite.added_by_name}</span>
-                  </p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => handleAccept(invite)}
-                      className="px-4 py-2 bg-cyan-600 text-white text-sm rounded hover:bg-cyan-700"
-                    >
-                      Akceptuj
-                    </button>
-                    <button className="px-4 py-2 border text-sm rounded hover:bg-gray-100">Odrzuć</button>
+              invites.map((invite) => (
+                <div
+                  key={invite.id}
+                  className="relative overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_20px_40px_-36px_rgba(15,82,109,0.35)] px-6 py-6"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-slate-500 uppercase tracking-widest">Zaproszenie do roli</p>
+                      <h3 className="text-lg font-semibold text-slate-800 mt-1">
+                        {invite.role} dla strony {invite.memorial_pages?.first_name} {invite.memorial_pages?.last_name}
+                      </h3>
+                      <p className="text-sm text-slate-500 mt-2">
+                        Wysłane przez <span className="font-medium text-slate-700">{invite.added_by_name}</span>
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleAccept(invite)}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-600 text-white text-sm font-medium shadow hover:bg-cyan-700 transition"
+                      >
+                        <CheckCircleIcon className="w-4 h-4" />
+                        Akceptuj
+                      </button>
+                      <button className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-sm text-slate-600 font-medium hover:bg-slate-200 transition">
+                        <XCircleIcon className="w-4 h-4" />
+                        Odrzuć
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))
             )}
           </div>
-        </div>
+        </section>
       </div>
-    </>
+      </div>
+    </div>
   )
 }

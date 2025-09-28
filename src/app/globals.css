@@ -6,4 +6,18 @@ body {
   @apply bg-gray-50 text-gray-900;
 }
 
+.page-fade {
+  animation: pageFadeIn 0.45s ease both;
+}
+
+@keyframes pageFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 

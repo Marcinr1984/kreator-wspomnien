@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '../../utils/supabaseClient'
 import NProgress from 'nprogress'
@@ -14,9 +14,10 @@ NProgress.configure({
   minimum: 0.15
 })
 
-import { Cog6ToothIcon, PlusIcon, UserCircleIcon, ArrowRightOnRectangleIcon, Squares2X2Icon, QuestionMarkCircleIcon, UsersIcon, HeartIcon, DocumentTextIcon, BriefcaseIcon, TagIcon, ChevronDownIcon } from '@heroicons/react/24/solid'
+import { Cog6ToothIcon, PlusIcon, UserCircleIcon, Squares2X2Icon, UsersIcon, HeartIcon, TagIcon } from '@heroicons/react/24/solid'
 import StepFormModal from '../../components/StepFormModal'
 import TopNavbar from '../../components/TopNavbar'
+import DashboardTabs from '../../components/DashboardTabs'
 
 const getUserAndMemorialPages = async (router: any, setUserName: any, setInitials: any, getMemorialPages: any): Promise<RealtimeChannel | null> => {
   const { data, error } = await supabase.auth.getUser()
@@ -53,11 +54,19 @@ export default function Dashboard() {
   const [initials, setInitials] = useState<string>('MR')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [memorialPages, setMemorialPages] = useState<any[]>([])
-  const [activeTab, setActiveTab] = useState<'panel' | 'prosby' | 'zgloszenia'>('panel')
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
   const subscriptionRef = useRef<RealtimeChannel | null>(null)
   const router = useRouter()
+
+  const stats = useMemo(() => {
+    const total = memorialPages.length
+    const published = memorialPages.filter((page) => page?.is_public).length
+    const drafts = total - published
+    return {
+      total,
+      published,
+      drafts
+    }
+  }, [memorialPages])
 
   const getMemorialPages = async () => {
     const {
@@ -94,7 +103,6 @@ export default function Dashboard() {
         }
       })
       .finally(() => NProgress.done())
-    setActiveTab('panel')
 
     return () => {
       isMounted = false
@@ -105,60 +113,11 @@ export default function Dashboard() {
     }
   }, [router])
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false)
-      }
-    }
-
-    if (isMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [isMenuOpen])
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
   return (
-    <div className="min-h-screen bg-[#EDF2F7] p-0 m-0">
+    <div className="min-h-screen bg-gradient-to-br from-[#ecf2f6] via-[#eef5f9] to-[#dfe9f3] p-0 m-0">
       {/* Pasek górny */}
       <TopNavbar onCreateMemorialPage={() => setIsModalOpen(true)} />
-      <nav className="w-full bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-6 flex items-center justify-center h-[75px] relative">
-          <div className="flex gap-14">
-            <button 
-              onClick={() => router.push('/dashboard')}
-              className={`relative text-base font-medium pb-1 mb-[-14px] ${activeTab === 'panel' ? 'text-cyan-600' : 'text-gray-600'}`}
-            >
-              Panel główny
-              {activeTab === 'panel' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
-            </button>
-            <button 
-              onClick={() => router.push('/dashboard/prosby')}
-              className={`relative text-base font-medium pb-1 mb-[-14px] ${activeTab === 'prosby' ? 'text-cyan-600' : 'text-gray-600'}`}
-            >
-              Prośby
-              {activeTab === 'prosby' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[200%] h-[2px] bg-cyan-600"></div>}
-            </button>
-            <button 
-              onClick={() => router.push('/dashboard/zgloszenia')}
-              className={`relative text-base font-medium pb-1 mb-[-14px] ${activeTab === 'zgloszenia' ? 'text-cyan-600' : 'text-gray-600'}`}
-            >
-              Zgłoszenia
-              {activeTab === 'zgloszenia' && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
-            </button>
-          </div>
-        </div>
-      </nav>
+      <DashboardTabs activePath="/dashboard" />
       <StepFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -174,145 +133,196 @@ export default function Dashboard() {
           }
         }}
       />
-      {/* Sekcja nagłówka */}
-      {/* 📱 Mobile: flex items-center space-x-4 */}
-      {/* 🖥 Desktop (sm+): sm:w-12 sm:h-12 for icon, sm:text-2xl for text */}
-      <div className="w-full bg-white rounded-md shadow-md shadow-gray-300/30 py-4 px-6 mb-0">
-        <div className="max-w-6xl mx-auto flex items-start justify-between">
-          <div className="flex items-center space-x-4">
-            <UserCircleIcon className="w-10 h-10 sm:w-12 sm:h-12 text-cyan-600" />
-            <div>
-              <p className="font-semibold text-xl sm:text-2xl text-gray-800">Witaj, {userName || 'Użytkowniku'}</p>
-              <p className="text-1xl text-gray-500">Jesteś w kreatorze wspomnień</p>
+      <div className="page-fade space-y-8">
+      {/* Sekcja hero z powitaniem i statystykami */}
+      <div className="max-w-6xl mx-auto px-6 mt-6">
+        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-cyan-500 via-sky-400 to-purple-500 text-white p-8 shadow-[0_30px_60px_-20px_rgba(14,116,144,0.45)]">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center shadow-lg">
+                <UserCircleIcon className="w-10 h-10" />
+              </div>
+              <div>
+                <p className="uppercase text-xs tracking-widest text-white/70">Panel główny</p>
+                <h1 className="text-3xl md:text-4xl font-semibold mt-1">Witaj, {userName || 'Użytkowniku'}</h1>
+                <p className="text-sm md:text-base text-white/80 mt-2 max-w-xl">
+                  Zarządzaj swoimi stronami pamięci, zapraszaj opiekunów i twórz nowe wspomnienia, które będą żyły wiecznie.
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full md:w-auto">
+              {[{
+                label: 'Strony pamięci',
+                value: stats.total
+              }, {
+                label: 'Publiczne',
+                value: stats.published
+              }, {
+                label: 'Szkice',
+                value: stats.drafts
+              }].map((stat) => (
+                <div key={stat.label} className="rounded-2xl bg-white/15 backdrop-blur px-5 py-4 text-left shadow-inner border border-white/10">
+                  <p className="text-xs uppercase tracking-wide text-white/70">{stat.label}</p>
+                  <p className="text-2xl font-semibold mt-1">{stat.value}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Sekcja przycisków */}
-      {/* 📱 Mobile: flex flex-col justify-center items-center gap-4 */}
-      {/* 🖥 Desktop (md+): md:flex-row md:justify-end */}
-      <div className="w-full bg-white rounded-md shadow-md shadow-gray-300/30 py-4 px-6 mb-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:justify-end justify-center items-center gap-4">
+      {/* Sekcja akcji */}
+      <div className="max-w-6xl mx-auto px-6 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             onClick={() => router.push('/profil')}
-            className="border border-gray-200 hover:border-cyan-400 transition-colors text-gray-700 rounded-full px-4 py-3 text-sm flex items-center justify-center gap-2 w-full md:w-auto"
+            className="group bg-white rounded-3xl px-6 py-5 text-left shadow-[0_20px_40px_-28px_rgba(14,116,144,0.45)] border border-white/60 hover:-translate-y-1 transition-all"
           >
-            <Cog6ToothIcon className="w-5 h-5 text-cyan-600" />
-            Ustawienia konta
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-sky-500 flex items-center justify-center text-white shadow-lg">
+                <Cog6ToothIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Ustawienia konta</p>
+                <p className="text-xs text-gray-500">Aktualizuj dane i konfiguruj preferencje</p>
+              </div>
+            </div>
           </button>
-          <button className="border border-gray-200 hover:border-cyan-400 transition-colors text-gray-700 rounded-full px-4 py-3 text-sm flex items-center justify-center gap-2 w-full md:w-auto">
-            <PlusIcon className="w-5 h-5 text-cyan-500" />
-            Stwórz mój żywy pomnik
-          </button>
+          <div className="group bg-white rounded-3xl px-6 py-5 text-left shadow-[0_20px_40px_-28px_rgba(218,70,125,0.4)] border border-white/60 hover:-translate-y-1 transition-all cursor-pointer">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-fuchsia-500 flex items-center justify-center text-white shadow-lg">
+                <HeartIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Stwórz żywy pomnik</p>
+                <p className="text-xs text-gray-500">Poznaj nowe możliwości upamiętniania</p>
+              </div>
+            </div>
+          </div>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="text-gray-700 text-sm flex items-center justify-center gap-2 w-full md:w-auto py-3"
+            className="group bg-white rounded-3xl px-6 py-5 text-left shadow-[0_20px_40px_-28px_rgba(14,116,144,0.45)] border border-white/60 hover:-translate-y-1 transition-all"
           >
-            <PlusIcon className="w-5 h-5 text-cyan-500" />
-            Utwórz stronę pamięci
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center text-white shadow-lg">
+                <PlusIcon className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Utwórz stronę pamięci</p>
+                <p className="text-xs text-gray-500">Rozpocznij nową historię w kilku krokach</p>
+              </div>
+            </div>
           </button>
         </div>
       </div>
 
       {/* Sekcja pamięci */}
-      {/* 📱 Mobile: grid grid-cols-1 gap-4 */}
-      {/* 🖥 Desktop (sm+): sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 */}
-      <div className="max-w-6xl mx-auto bg-white rounded-md shadow-md shadow-gray-300/30 pt-6 px-6 pb-10">
-        <div className="rounded-lg">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold mb-4">Twoje pamiątki</h2>
+      <div className="max-w-6xl mx-auto px-6 mt-12">
+        <div className="bg-white rounded-[28px] shadow-[0_25px_70px_-40px_rgba(15,82,109,0.45)] p-6 md:p-8">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-xl md:text-2xl font-semibold text-slate-800">Twoje pamiątki</h2>
+              <p className="text-sm text-slate-500 mt-1">Zarządzaj stworzonymi stronami i twórz nowe wspomnienia.</p>
+            </div>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="text-gray-700 text-sm flex items-center gap-2"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 text-sm text-slate-700 hover:bg-slate-200 transition"
             >
               <PlusIcon className="w-5 h-5 text-cyan-500" />
-              <span className="hidden sm:inline">Utwórz stronę pamięci</span>
+              Utwórz nową stronę
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {Array.from({ length: 5 }).map((_, i) => {
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {Array.from({ length: Math.max(memorialPages.length + 1, 4) }).map((_, i) => {
               const page = memorialPages[i]
+              if (!page) {
+                return (
+                  <button
+                    key={`placeholder-${i}`}
+                    onClick={() => setIsModalOpen(true)}
+                    className="group relative overflow-hidden rounded-3xl border border-dashed border-slate-300/70 bg-gradient-to-br from-white/70 to-white/40 backdrop-blur-sm p-8 flex flex-col items-center justify-center gap-3 text-slate-500 hover:-translate-y-1 hover:border-slate-400 transition"
+                  >
+                    <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center group-hover:bg-cyan-50 transition">
+                      <PlusIcon className="w-7 h-7 text-cyan-500" />
+                    </div>
+                    <span className="text-sm font-medium text-slate-600">Nowa strona pamięci</span>
+                    <span className="text-xs text-slate-400 text-center max-w-[160px]">
+                      Zacznij budować kolejne wspomnienie w kilku prostych krokach.
+                    </span>
+                  </button>
+                )
+              }
+
               return (
                 <div
-                  key={page?.id || i}
-                  className={`flex flex-col items-center justify-center border-2 ${page ? 'border-transparent' : 'border-dashed border-gray-300'} rounded-lg aspect-square text-center text-sm text-gray-600 cursor-pointer`}
+                  key={page.id}
+                  className="relative overflow-hidden rounded-[28px] bg-white shadow-[0_30px_60px_-40px_rgba(11,72,107,0.4)] border border-white/70 transition transform hover:-translate-y-1"
                 >
-                  {page ? (
+                  <button
+                    onClick={() => router.push(`/memorial/${page.id}`)}
+                    className="flex flex-col w-full text-left"
+                  >
+                    <div className="relative h-52 w-full overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/10 z-10" />
+                      {page.photo_url ? (
+                        <img
+                          src={page.photo_url}
+                          alt="miniatura"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full w-full bg-slate-100 flex items-center justify-center text-slate-300">
+                          <Squares2X2Icon className="w-12 h-12" />
+                        </div>
+                      )}
+                      <div className="absolute top-4 left-4 z-20 px-3 py-1 rounded-full text-xs font-semibold text-white bg-white/20 backdrop-blur border border-white/50">
+                        {page?.is_public ? 'Publiczna' : 'Szkic'}
+                      </div>
+                      <div className="absolute bottom-3 left-4 right-4 z-20">
+                        <p className="text-lg font-semibold text-white drop-shadow-sm">
+                          {[page.first_name, page.last_name].filter(Boolean).join(' ') || 'Strona pamięci'}
+                        </p>
+                        <p className="text-xs text-white/80">Utworzona {page.created_at?.slice(0, 10) ?? '–'}</p>
+                      </div>
+                    </div>
+                  </button>
+                  <div className="px-5 py-4 flex items-center justify-between text-xs text-slate-500">
+                    <span className="flex items-center gap-2 text-slate-600">
+                      <TagIcon className="w-4 h-4 text-cyan-500" />
+                      #{page.id}
+                    </span>
                     <button
-                      onClick={() => router.push(`/memorial/${page.id}`)}
-                      className="flex flex-col items-center justify-center w-full h-full"
+                      onClick={async (e) => {
+                        e.stopPropagation()
+
+                        const { error: keeperDeleteError } = await supabase
+                          .from('memorial_keepers')
+                          .delete()
+                          .eq('memorial_id', page.id)
+
+                        if (keeperDeleteError) {
+                          console.error('Błąd podczas usuwania opiekunów:', keeperDeleteError)
+                          return
+                        }
+
+                        const { error: deletePageError } = await supabase
+                          .from('memorial_pages')
+                          .delete()
+                          .eq('id', page.id)
+
+                        if (deletePageError) {
+                          console.error('Błąd podczas usuwania strony pamięci:', deletePageError)
+                          return
+                        }
+
+                        setMemorialPages(memorialPages.filter((p) => p.id !== page.id))
+                      }}
+                      className="text-red-500 hover:text-red-600 font-medium"
                     >
-                      <div className="relative w-32 h-32 mb-2">
-                        <div className="p-[6px] bg-white rounded-2xl shadow-md aspect-square">
-                          {page.photo_url ? (
-                            <img
-                              src={page.photo_url}
-                              alt="miniatura"
-                              className="w-full h-full object-cover aspect-square rounded-xl"
-                            />
-                          ) : (
-                            <div className="w-full h-full aspect-square bg-gray-100 flex items-center justify-center rounded-xl">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-10 h-10 text-gray-400">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5
-                                  1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18
-                                  3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0
-                                  0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0
-                                  1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375
-                                  0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                        <div className="absolute bottom-[-10px] right-[-10px] bg-white border rounded-lg shadow w-10 h-10 flex items-center justify-center">
-                          <Cog6ToothIcon className="w-5 h-5 text-gray-600" />
-                        </div>
-                      </div>
-                      <div className="text-sm font-semibold text-gray-700 truncate w-full text-center">
-                        {[page.first_name, page.last_name].filter(Boolean).join(' ') || 'Strona pamięci'}
-                      </div>
-                      <div className="text-xs text-gray-400">{page.created_at?.slice(0, 10)}</div>
-                      <div
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          
-                          // Najpierw usuń powiązania w memorial_keepers
-                          const { error: keeperDeleteError } = await supabase
-                            .from('memorial_keepers')
-                            .delete()
-                            .eq('memorial_id', page.id);
-                          
-                          if (keeperDeleteError) {
-                            console.error('Błąd podczas usuwania opiekunów:', keeperDeleteError);
-                            return;
-                          }
-                          
-                          // Potem usuń stronę pamięci
-                          const { error: deletePageError } = await supabase
-                            .from('memorial_pages')
-                            .delete()
-                            .eq('id', page.id);
-                          
-                          if (deletePageError) {
-                            console.error('Błąd podczas usuwania strony pamięci:', deletePageError);
-                            return;
-                          }
-                          
-                          setMemorialPages(memorialPages.filter(p => p.id !== page.id));
-                        }}
-                        className="mt-2 text-xs text-red-500 hover:underline cursor-pointer"
-                      >
-                        Usuń
-                      </div>
+                      Usuń
                     </button>
-                  ) : (
-                    <>
-                      <div className="bg-gray-100 p-6 rounded-lg flex items-center justify-center w-24 h-24 mb-2">
-                        <PlusIcon className="w-6 h-6 text-cyan-500" />
-                      </div>
-                      <div className="text-sm text-gray-600 font-medium">Nowa strona pamięci</div>
-                    </>
-                  )}
+                  </div>
                 </div>
               )
             })}
@@ -320,7 +330,10 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <KeeperPagesSection />
+      <div className="pb-16">
+        <KeeperPagesSection />
+      </div>
+      </div>
     </div>
   )
 }

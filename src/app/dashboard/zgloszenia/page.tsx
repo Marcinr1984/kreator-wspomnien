@@ -1,55 +1,45 @@
 'use client'
 
 import React from 'react'
-import { useRouter, usePathname } from 'next/navigation'
 import TopNavbar from '../../../components/TopNavbar'
+import { ShieldExclamationIcon } from '@heroicons/react/24/outline'
+import DashboardTabs from '../../../components/DashboardTabs'
 
 export default function ZgloszeniaPage() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const isActive = (path: string) => pathname === path
-
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-[#ecf2f6] via-[#eef5f9] to-[#dfe9f3] pb-20">
       <TopNavbar />
-      <nav className="w-full bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-6xl mx-auto px-6 flex items-center justify-center h-[75px] relative">
-          <div className="flex gap-14">
-            <button 
-              onClick={() => router.push('/dashboard')}
-              className={`relative text-base font-medium pb-1 mb-[-14px] ${isActive('/dashboard') ? 'text-cyan-600' : 'text-gray-600'}`}
-            >
-              Panel główny
-              {isActive('/dashboard') && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
-            </button>
-            <button 
-              onClick={() => router.push('/dashboard/prosby')}
-              className={`relative text-base font-medium pb-1 mb-[-14px] ${isActive('/dashboard/prosby') ? 'text-cyan-600' : 'text-gray-600'}`}
-            >
-              Prośby
-              {isActive('/dashboard/prosby') && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[200%] h-[2px] bg-cyan-600"></div>}
-            </button>
-            <button 
-              onClick={() => router.push('/dashboard/zgloszenia')}
-              className={`relative text-base font-medium pb-1 mb-[-14px] ${isActive('/dashboard/zgloszenia') ? 'text-cyan-600' : 'text-gray-600'}`}
-            >
-              Zgłoszenia
-              {isActive('/dashboard/zgloszenia') && <div className="absolute bottom-[-17px] left-1/2 transform -translate-x-1/2 w-[160%] h-[2px] bg-cyan-600"></div>}
-            </button>
+      <DashboardTabs activePath="/dashboard/zgloszenia" />
+      <div className="page-fade space-y-6">
+      <div className="max-w-6xl mx-auto px-6 mt-6">
+        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-rose-500 via-orange-400 to-amber-400 text-white p-8 shadow-[0_30px_60px_-20px_rgba(249,115,22,0.35)]">
+          <div className="flex items-start gap-4">
+            <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur border border-white/30 flex items-center justify-center shadow-lg">
+              <ShieldExclamationIcon className="w-10 h-10" />
+            </div>
+            <div>
+              <p className="uppercase text-xs tracking-widest text-white/70">Zgłoszenia</p>
+              <h1 className="text-3xl md:text-4xl font-semibold mt-1">Wszystko czyste!</h1>
+              <p className="text-sm md:text-base text-white/80 mt-2 max-w-xl">
+                Tu wyświetlą się zgłoszenia dotyczące Twoich treści. Na razie nikt nie zgłaszał żadnych nieprawidłowości – świetna robota!
+              </p>
+            </div>
           </div>
         </div>
-      </nav>
-      <div className="max-w-6xl mx-auto mt-10 py-10 px-8 bg-white rounded-md shadow-xs border text-center">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-10 text-left">Zgłoszenia</h2>
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-24 h-24 mb-6 bg-gray-100 rounded-lg flex items-center justify-center">
-            <span className="text-4xl">🏁</span>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-6 mt-8">
+        <div className="bg-white rounded-[28px] shadow-[0_30px_70px_-40px_rgba(249,115,22,0.35)] p-10 text-center border border-amber-100">
+          <div className="mx-auto w-24 h-24 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 mb-6">
+            <span className="text-4xl">🎉</span>
           </div>
-          <p className="text-gray-600 text-sm max-w-md">
-            Twoja kolejka zgłoszeń jest pusta. Jeśli ktoś zgłosi Twoją treść jako nieodpowiednią, pojawi się tutaj.
+          <h2 className="text-xl font-semibold text-slate-800 mb-2">Brak zgłoszeń</h2>
+          <p className="text-sm text-slate-500 max-w-md mx-auto">
+            Monitorujemy zgłoszenia 24/7. Jeśli ktoś uzna Twoją treść za nieodpowiednią, pojawi się tutaj i poinformujemy Cię e-mailem.
           </p>
         </div>
       </div>
-    </>
+      </div>
+    </div>
   )
 }
