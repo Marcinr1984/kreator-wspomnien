@@ -58,24 +58,24 @@ const KeeperAdminsTab: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full flex flex-col md:flex-row gap-16 items-start">
+    <div className="flex w-full flex-col gap-8 text-slate-700 lg:flex-row">
       <div className="flex-1">
-        <h3 className="text-lg font-semibold mb-8">Obecni opiekunowie</h3>
-        <p className="text-sm text-gray-500 mb-6">
+        <h3 className="text-lg font-semibold text-slate-900">Obecni opiekunowie</h3>
+        <p className="mt-1 text-sm text-slate-500">
           Strona jest obecnie zarządzana przez:
         </p>
-        <div className="bg-gray-100 p-8 rounded-xl">
+        <div className="mt-6 space-y-4 rounded-[24px] border border-slate-100 bg-white/95 p-6 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.2)]">
           {/* Właściciel */}
           {keepers
             .filter((k) => k.role === 'wlasciciel')
             .map((keeper, index) => (
-              <div key={`owner-${index}`} className="bg-white border border-gray-300 p-4 rounded-lg shadow-sm mb-6">
+              <div key={`owner-${index}`} className="rounded-2xl border border-slate-100 bg-white/95 p-4 shadow-sm">
                 <p className="font-medium">
                   {keeper['auth.users']?.raw_user_meta_data?.first_name
                     ? `${keeper['auth.users'].raw_user_meta_data.first_name} ${keeper['auth.users'].raw_user_meta_data.last_name || ''}`
                     : keeper.user_id ?? 'Brak danych'}
                 </p>
-                <p className="text-sm text-gray-500 capitalize">{keeper.role}</p>
+                <p className="text-sm text-slate-500 capitalize">{keeper.role}</p>
               </div>
             ))}
 
@@ -85,17 +85,17 @@ const KeeperAdminsTab: React.FC = () => {
               {keepers
                 .filter((k) => k.role === 'opiekun')
                 .map((keeper, index) => (
-                  <div key={`opiekun-${index}`} className="flex gap-4 mb-2">
-                    <div className="flex-1 bg-white border border-gray-300 p-4 rounded-lg shadow-sm">
+                  <div key={`opiekun-${index}`} className="flex gap-3">
+                    <div className="flex-1 rounded-2xl border border-slate-100 bg-white/95 p-4 shadow-sm">
                       <p className="font-medium">
                         {keeper['auth.users']?.raw_user_meta_data?.first_name
                           ? `${keeper['auth.users'].raw_user_meta_data.first_name} ${keeper['auth.users'].raw_user_meta_data.last_name || ''}`
                           : keeper.user_id ?? 'Brak danych'}
                       </p>
-                      <p className="text-sm text-gray-500 capitalize">{keeper.role}</p>
+                      <p className="text-sm text-slate-500 capitalize">{keeper.role}</p>
                     </div>
                     {ownerId === currentUser?.id && (
-                    <div className="w-[80px] flex flex-col justify-center items-center bg-white border border-gray-300 p-2 rounded-lg shadow-sm transition-colors duration-200 hover:border-cyan-600">
+                    <div className="flex w-[100px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white/90 p-3 text-xs font-semibold text-slate-500 shadow-sm transition hover:border-rose-300 hover:text-rose-500">
                         <button
                           onClick={async () => {
                             try {
@@ -127,10 +127,10 @@ const KeeperAdminsTab: React.FC = () => {
                               console.error('❌ Wyjątek podczas usuwania opiekuna:', err);
                             }
                           }}
-                        className="text-cyan-600 text-sm flex flex-col items-center gap-2"
+                        className="flex flex-col items-center gap-2 text-xs font-semibold text-rose-500"
                         >
                           <svg
-                            className="w-5 h-5 text-cyan-600 mr-0"
+                            className="h-5 w-5 text-rose-500"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -151,19 +151,19 @@ const KeeperAdminsTab: React.FC = () => {
                 ))}
             </>
           ) : (
-            <p className="text-sm text-gray-500">Brak przypisanych opiekunów</p>
+            <p className="text-sm text-slate-500">Brak przypisanych opiekunów</p>
           )}
         </div>
       </div>
 
       {/* RIGHT: Sekcja promująca Keeper Plus */}
       <div className="flex-1">
-        <h3 className="text-lg font-semibold mb-8">Zaproś opiekuna</h3>
-        <p className="text-sm text-gray-500 mb-6">
+        <h3 className="text-lg font-semibold text-slate-900">Zaproś opiekuna</h3>
+        <p className="mt-1 text-sm text-slate-500">
           Przydziel zaufaną osobę do zarządzania i edycji profilu tej strony pamięci.
         </p>
-        <div className="border border-cyan-600 p-8 rounded-xl min-h-[250px] flex flex-col items-center justify-center text-center">
-          <form
+        <div className="rounded-[24px] border border-slate-100 bg-white/95 p-6 text-center shadow-[0_20px_60px_-30px_rgba(15,23,42,0.2)]">
+          <form className="space-y-4"
           onSubmit={async (e) => {
             e.preventDefault();
             setInviteStatus('⏳ Szukam użytkownika...');
@@ -212,15 +212,15 @@ const KeeperAdminsTab: React.FC = () => {
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
             ref={emailInputRef}
-            className="w-full px-4 py-2 border rounded-md"
+            className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
           />
           <button
             type="submit"
-            className="w-full bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-md font-medium shadow"
+            className="inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-cyan-500 via-sky-500 to-purple-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-cyan-500/30 transition hover:shadow-cyan-500/50"
           >
             Wyślij zaproszenie
           </button>
-          {inviteStatus && <p className="text-sm text-gray-600">{inviteStatus}</p>}
+          {inviteStatus && <p className="text-sm font-semibold text-cyan-600">{inviteStatus}</p>}
           </form>
         </div>
       </div>

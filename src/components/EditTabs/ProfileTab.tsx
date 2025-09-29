@@ -1,6 +1,7 @@
 'use client';
-import React from 'react';
-import { useState, useRef, useEffect } from 'react';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
+import { Listbox, Transition } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/24/solid';
 import ImageCropper from '../ImageCropper';
 
 interface ProfileTabProps {
@@ -34,6 +35,9 @@ interface ProfileTabProps {
   memorialId: number;
   supabase: any;
 }
+
+const pronounOptions = ['on', 'ona', 'oni']
+const relationOptions = ['Rodzic', 'Dziecko', 'Małżonek/partner', 'Przyjaciel', 'Inne']
 
 const ProfileTab: React.FC<ProfileTabProps> = ({
   firstName, setFirstName,
@@ -100,102 +104,128 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
     }
   }, [photoUrl]);
   return (
-    <div className="flex w-full gap-4 flex-nowrap">
+    <div className="flex w-full flex-col gap-8 md:flex-row">
                         {/* Lewa kolumna – formularz */}
                         <div className="w-full md:w-1/2">
                         <h3 className="text-lg font-semibold mb-4">Dla kogo jest ta pamiątka?</h3>
-                    <div className="border-2 border-gray-200 rounded-2xl pt-12 px-6 pb-12 bg-white shadow-sm">
+                    <div className="rounded-[24px] border border-slate-100 bg-white/95 p-6 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.25)]">
     
     <div className="grid grid-cols-2 gap-4">
                             {/* Imię */}
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Imię <span className="text-red-500">*</span></label>
+                              <label className="block text-sm font-medium text-slate-600">Imię <span className="text-red-500">*</span></label>
                               <input
                                 type="text"
                                 value={firstName}
                                 onChange={(e) => setFirstName(e.target.value)}
-                                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                                className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
                                 placeholder="Wprowadź imię"
                               />
                             </div>
                             {/* Nazwisko */}
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Nazwisko <span className="text-red-500">*</span></label>
+                              <label className="block text-sm font-medium text-slate-600">Nazwisko <span className="text-red-500">*</span></label>
                               <input
                                 type="text"
                                 value={lastName}
                                 onChange={(e) => setLastName(e.target.value)}
-                                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                                className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
                                 placeholder="Wprowadź nazwisko"
                               />
                             </div>
                             {/* Drugie imię */}
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Drugie imię</label>
+                              <label className="block text-sm font-medium text-slate-600">Drugie imię</label>
                               <input
                                 type="text"
                                 value={middleName}
                                 onChange={(e) => setMiddleName(e.target.value)}
-                                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                                className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
                                 placeholder="Wprowadź drugie imię"
                               />
                             </div>
                             {/* Tytuł (np. Jr, M.D.) */}
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Tytuł (np. Jr, M.D.)</label>
+                              <label className="block text-sm font-medium text-slate-600">Tytuł (np. Jr, M.D.)</label>
                               <input
                                 type="text"
                                 value={suffix}
                                 onChange={(e) => setSuffix(e.target.value)}
-                                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                                className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
                                 placeholder="Wprowadź tytuł"
                               />
                             </div>
                             {/* Pseudonim */}
                             <div>
-                              <label className="block text-sm font-medium text-gray-700">Pseudonim</label>
+                              <label className="block text-sm font-medium text-slate-600">Pseudonim</label>
                               <input
                                 type="text"
                                 value={nickname}
                                 onChange={(e) => setNickname(e.target.value)}
-                                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                                className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
                                 placeholder="Wprowadź pseudonim"
                               />
                             </div>
                             {/* Zaimek */}
                             <div>
-                            <label className="block text-sm font-medium text-gray-700">
+                              <label className="block text-sm font-medium text-slate-600">
                                 Zaimek <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                value={pronoun}
-                                onChange={(e) => setPronoun(e.target.value)}
-                                className="mt-1 block w-full px-2 rounded-md border border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 sm:text-base h-12"
-                            >
-                                <option value="">Wybierz</option>
-                                <option value="on">on</option>
-                                <option value="ona">ona</option>
-                                <option value="oni">oni</option>
-                            </select>
+                              </label>
+                              <Listbox value={pronoun} onChange={setPronoun}>
+                                <div className="relative mt-1">
+                                  <Listbox.Button className="relative flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60">
+                                    <span>{pronoun || 'Wybierz'}</span>
+                                    <ChevronDownIcon className="h-4 w-4 text-slate-400" />
+                                  </Listbox.Button>
+                                  <Transition
+                                    as={Fragment}
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="opacity-100"
+                                    leaveTo="opacity-0"
+                                  >
+                                    <Listbox.Options className="absolute z-20 mt-2 w-full rounded-2xl border border-slate-200 bg-white py-2 text-sm shadow-xl">
+                                      <Listbox.Option
+                                        value=""
+                                        className={({ active }) => `cursor-pointer px-4 py-2 transition ${active ? 'bg-cyan-50 text-cyan-600' : 'text-slate-400'}`}
+                                      >
+                                        Wybierz
+                                      </Listbox.Option>
+                                      {pronounOptions.map((option) => (
+                                        <Listbox.Option
+                                          key={option}
+                                          value={option}
+                                          className={({ active }) =>
+                                            `cursor-pointer px-4 py-2 transition ${
+                                              active ? 'bg-cyan-50 text-cyan-600' : 'text-slate-700'
+                                            }`
+                                          }
+                                        >
+                                          {option}
+                                        </Listbox.Option>
+                                      ))}
+                                    </Listbox.Options>
+                                  </Transition>
+                                </div>
+                              </Listbox>
                             </div>
                             {/* Data urodzenia */}
                             <div>
-                            <label className="block text-sm font-medium text-gray-700">Data urodzenia <span className="text-red-500">*</span></label>
+                            <label className="block text-sm font-medium text-slate-600">Data urodzenia <span className="text-red-500">*</span></label>
                               <input
                                 type="date"
                                 value={birthDate}
                                 onChange={(e) => setBirthDate(e.target.value)}
-                                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                                className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
                               />
                             </div>
                             {/* Data śmierci */}
                             <div>
-                            <label className="block text-sm font-medium text-gray-700">Data śmierci {isDeceased && <span className="text-red-500">*</span>}</label>
+                            <label className="block text-sm font-medium text-slate-600">Data śmierci {isDeceased && <span className="text-red-500">*</span>}</label>
                               <input
                                 type="date"
                                 value={deathDate}
                                 onChange={(e) => setDeathDate(e.target.value)}
-                                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
+                                className="mt-2 h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
                               />
                             </div>
                             {/* Czy osoba zmarła */}
@@ -206,32 +236,56 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                                 onChange={(e) => setIsDeceased(e.target.checked)}
                                 className="h-4 w-4 text-cyan-600 border-gray-300 rounded"
                               />
-                              <label className="ml-2 block text-sm font-medium text-gray-700">Osoba zmarła?</label>
+                              <label className="ml-2 block text-sm font-medium text-slate-600">Osoba zmarła?</label>
                             </div>
                             {/* Wybierz relację */}
                             <div>
-                            <label className="block text-sm font-medium text-gray-700">Wybierz relację <span className="text-red-500">*</span></label>
-                            <select
-                                value={relation}
-                                onChange={(e) => setRelation(e.target.value)}
-                                className="mt-1 block w-full px-2 rounded-md border border-gray-300 shadow-sm focus:border-cyan-500 focus:ring-cyan-500 sm:text-base h-12"
-                            >
-                                <option value="">Wybierz</option>
-                                <option value="Rodzic">Rodzic</option>
-                                <option value="Dziecko">Dziecko</option>
-                                <option value="Małżonek/partner">Małżonek/partner</option>
-                                <option value="Przyjaciel">Przyjaciel</option>
-                                <option value="Inne">Inne</option>
-                            </select>
+                              <label className="block text-sm font-medium text-slate-600">Wybierz relację <span className="text-red-500">*</span></label>
+                              <Listbox value={relation} onChange={setRelation}>
+                                <div className="relative mt-1">
+                                  <Listbox.Button className="relative flex h-12 w-full items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60">
+                                    <span>{relation || 'Wybierz'}</span>
+                                    <ChevronDownIcon className="h-4 w-4 text-slate-400" />
+                                  </Listbox.Button>
+                                  <Transition
+                                    as={Fragment}
+                                    leave="transition ease-in duration-100"
+                                    leaveFrom="opacity-100"
+                                    leaveTo="opacity-0"
+                                  >
+                                    <Listbox.Options className="absolute z-20 mt-2 w-full rounded-2xl border border-slate-200 bg-white py-2 text-sm shadow-xl">
+                                      <Listbox.Option
+                                        value=""
+                                        className={({ active }) => `cursor-pointer px-4 py-2 transition ${active ? 'bg-cyan-50 text-cyan-600' : 'text-slate-400'}`}
+                                      >
+                                        Wybierz
+                                      </Listbox.Option>
+                                      {relationOptions.map((option) => (
+                                        <Listbox.Option
+                                          key={option}
+                                          value={option}
+                                          className={({ active }) =>
+                                            `cursor-pointer px-4 py-2 transition ${
+                                              active ? 'bg-cyan-50 text-cyan-600' : 'text-slate-700'
+                                            }`
+                                          }
+                                        >
+                                          {option}
+                                        </Listbox.Option>
+                                      ))}
+                                    </Listbox.Options>
+                                  </Transition>
+                                </div>
+                              </Listbox>
                             </div>
                             {/* Opisz relację */}
                             <div className="col-span-2">
-                              <label className="block text-sm font-medium text-gray-700">Opisz relację</label>
+                              <label className="block text-sm font-medium text-slate-600">Opisz relację</label>
                               <textarea
                                 value={relationDescription}
                                 onChange={(e) => setRelationDescription(e.target.value)}
-                                className="mt-1 w-full p-2 border border-gray-300 rounded-md"
-                                rows={2}
+                                className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-400/60"
+                                rows={3}
                                 placeholder="Krótki opis relacji..."
                               />
                             </div>
@@ -240,12 +294,12 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                         </div>
                         {/* Prawa kolumna – podgląd zdjęcia */}
                         
-                        <div className="w-full md:w-1/2 mt-4 md:mt-0 md:pl-4">
-                        <div className="flex flex-col items-center">
+                        <div className="w-full md:w-1/2 space-y-6">
+                        <div className="flex flex-col items-center rounded-[24px] border border-slate-100 bg-white/95 p-6 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.2)]">
                             {/* Nagłówek i przycisk 'Usuń' */}
                             {/* Nagłówek i przycisk 'Usuń' na jednej linii o stałej szerokości */}
-                            <div className="flex items-center justify-between w-80 mb-2">
-                            <h3 className="text-lg font-semibold text-gray-700">Aktualne zdjęcie</h3>
+                            <div className="mb-4 flex w-full max-w-sm items-center justify-between">
+                            <h3 className="text-lg font-semibold text-slate-900">Aktualne zdjęcie</h3>
                             <button
                                 onClick={async () => {
                                   try {
@@ -305,10 +359,10 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                                   }
                                   // Jeśli updateError pojawia się stale bez widocznych błędów, sprawdź reguły RLS w Supabase Studio dla tabeli memorial_pages.
                                 }}
-                                className="flex items-center text-black hover:underline"
+                                className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-600 transition hover:border-rose-300"
                             >
                                 <svg
-                                className="w-4 h-4 text-cyan-600 mr-1"
+                                className="h-4 w-4 text-rose-500"
                                 fill="none"
                                 stroke="currentColor"
                                 viewBox="0 0 24 24"
@@ -326,7 +380,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                             </div>
 
                             {/* Podgląd zdjęcia - zwiększony */}
-                            <div className="w-80 h-80 border-4 border-gray-100 shadow-md flex items-center justify-center rounded-2xl overflow-hidden relative">
+                            <div className="relative flex h-80 w-full max-w-sm items-center justify-center overflow-hidden rounded-3xl border-4 border-white/70 bg-slate-50 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.2)]">
                               {isCropping && photoUrl ? (
                                 <ImageCropper
                                   ref={cropperRef}
@@ -340,8 +394,8 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                               ) : (photoUrl && photoUrl !== '') ? (
                                 <img src={photoUrl} alt="Zdjęcie" className="w-full h-full object-cover" />
                               ) : (
-                                <div className="flex flex-col items-center justify-center text-gray-400">
-                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-20 h-20 text-gray-300 mb-2">
+                                <div className="flex flex-col items-center justify-center text-slate-400">
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-20 h-20 text-slate-300 mb-2">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5
                                       1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18
                                       3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0
@@ -357,10 +411,10 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                             
                             {/* Przyciski akcji */}
     {isCropping ? (
-  <div className="flex flex-wrap gap-2 mt-4">
+  <div className="mt-4 flex flex-wrap gap-3">
     <button
       onClick={handleUploadClick}
-      className="flex items-center gap-2 border border-gray-300 text-black px-4 py-2 text-sm rounded-md bg-white hover:border-[#0594B0]"
+      className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-600 transition hover:border-cyan-400 hover:text-cyan-600"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -409,22 +463,22 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
         }
         setIsCropping(false);
       }}
-      className="bg-[#0594B0] text-white font-semibold px-6 py-2 rounded-md hover:bg-[#007A99]"
+      className="rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-emerald-500/30 transition hover:shadow-emerald-500/50"
     >
       Zapisz
     </button>
     <button
       onClick={() => setIsCropping(false)}
-      className="bg-[#0594B0] text-white font-semibold px-6 py-2 rounded-md hover:bg-[#007A99]"
+      className="rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
     >
       Anuluj
     </button>
   </div>
   ) : (
-  <div className="flex flex-wrap gap-2 mt-4">
+  <div className="mt-4 flex flex-wrap gap-3">
     <button
       onClick={() => setIsCropping(true)}
-      className="flex items-center gap-2 border border-gray-300 text-black px-4 py-2 text-sm rounded-md bg-white hover:border-[#0594B0]"
+      className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-600 transition hover:border-cyan-400 hover:text-cyan-600"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -445,7 +499,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
 
     <button
       onClick={handleUploadClick}
-      className="flex items-center gap-2 border border-gray-300 text-black px-4 py-2 text-sm rounded-md bg-white hover:border-[#0594B0]"
+      className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-600 transition hover:border-cyan-400 hover:text-cyan-600"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -460,7 +514,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
       Prześlij nowe zdjęcie
     </button>
 
-    <button className="flex items-center gap-2 border border-gray-300 text-black px-4 py-2 text-sm rounded-md bg-white hover:border-[#0594B0]">
+    <button className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2 text-sm font-semibold text-slate-600 transition hover:border-cyan-400 hover:text-cyan-600">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-4 w-4 text-[#0594B0]"
@@ -489,7 +543,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
 />
 
                             {/* Informacja o bibliotece obrazów */}
-                            <p className="mt-4 text-sm text-gray-600 text-center">
+                            <p className="mt-4 text-sm text-slate-600 text-center">
                             Nie masz teraz dostępu do zdjęcia?
                             <br />
                             Skorzystaj z naszej{' '}
