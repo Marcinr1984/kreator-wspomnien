@@ -1016,7 +1016,7 @@ export default function MemorialPage() {
                       type="button"
                       onClick={togglePublishStatus}
                       disabled={isPublishing}
-                      className={`relative flex h-12 w-[280px] items-center justify-between rounded-full bg-gradient-to-r from-sky-400/85 via-sky-300/75 to-purple-400/85 transition duration-300 ease-out ${
+                      className={`relative flex h-12 w-[280px] items-center justify-between overflow-hidden rounded-full bg-gradient-to-r from-sky-400/85 via-sky-300/75 to-purple-400/85 transition duration-300 ease-out ${
                         isPublishing ? 'opacity-70' : 'hover:shadow-[0_20px_40px_-18px_rgba(14,116,144,0.65)]'
                       }`}
                     >
@@ -1025,10 +1025,10 @@ export default function MemorialPage() {
                         style={sliderKnobStyle}
                         aria-hidden="true"
                       />
-                      <span className={`relative z-10 flex-1 text-center text-sm font-semibold ${pageData.is_public ? 'text-white/70' : 'text-[#0b1426]'}`}>
+                      <span className={`relative z-10 flex-1 px-6 text-center text-sm font-semibold ${pageData.is_public ? 'text-white/70' : 'text-[#0b1426]'}`}>
                         Szkic
                       </span>
-                      <span className={`relative z-10 flex-1 text-center text-sm font-semibold ${pageData.is_public ? 'text-[#0b1426]' : 'text-white/70'}`}>
+                      <span className={`relative z-10 flex-1 px-6 text-center text-sm font-semibold ${pageData.is_public ? 'text-[#0b1426]' : 'text-white/70'}`}>
                         Opublikowano
                       </span>
                     </button>

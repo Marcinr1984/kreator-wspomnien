@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { supabase } from '../utils/supabaseClient'
-import { Dialog } from '@headlessui/react'
-import { PlusIcon } from '@heroicons/react/24/solid'
+import { Dialog, Transition } from '@headlessui/react'
+import { SparklesIcon } from '@heroicons/react/24/solid'
 
 interface AddQuoteModalProps {
   isOpen: boolean
@@ -75,86 +75,122 @@ export default function AddQuoteModal({ isOpen, onClose, memorialId, editingQuot
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black bg-opacity-40 transition-opacity" aria-hidden="true" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="z-50 w-[1100px] h-[620px] flex flex-col overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
-          <div className="w-full bg-black text-white px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="bg-cyan-600 w-8 h-8 flex items-center justify-center rounded-full text-white text-xl font-bold">
-                +
-              </div>
-              <span className="text-white font-medium">Dodaj cytat</span>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-black bg-white rounded-full px-4 py-1 text-sm font-medium hover:bg-gray-200"
-            >
-              Zamknij
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-8 gap-8 flex">
-            <div className="w-[550px] flex-shrink-0 flex flex-col justify-between">
-              <div>
-                <div className="w-full mb-8">
-                  <h3 className="text-lg font-semibold mb-2">Dodaj historię cytatu</h3>
-                  <p className="text-gray-600 text-sm">
-                    Historia cytatu może ożywić ulubione wersety, aforyzmy, fragmenty książek lub często powtarzane powiedzenia bliskiej osoby.
-                  </p>
-                </div>
-                <div className="border p-8 rounded-xl bg-white space-y-8">
-                  <div>
-                    <label className="block text-base font-semibold mb-2">
-                      Wprowadź cytat <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      value={quote}
-                      onChange={(e) => setQuote(e.target.value)}
-                      className="w-full max-w-full border rounded-lg p-4 text-sm bg-gray-50 resize-y min-h-[55px]"
-                      placeholder="Wpisz cytat"
-                    />
-                    <div className="text-right text-xs mt-1 text-gray-400">{1000 - quote.length} znaków pozostało</div>
-                  </div>
-                  <div>
-                    <label className="block text-base font-semibold mb-2">Kto jest autorem cytatu?</label>
-                    <input
-                      type="text"
-                      value={author}
-                      onChange={(e) => setAuthor(e.target.value)}
-                      className="w-full border rounded-lg p-4 text-sm bg-gray-50"
-                      placeholder="Wpisz autora (opcjonalnie)"
-                    />
-                    <div className="text-right text-xs mt-1 text-gray-400">{298 - author.length} znaków pozostało</div>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-[70]" onClose={() => onClose()}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-[#0b1426]/75 backdrop-blur-sm" />
+        </Transition.Child>
 
-            <div className="w-[550px] flex flex-col">
-              <h4 className="text-gray-400 text-xs font-medium mb-4 text-center w-full uppercase" style={{ letterSpacing: '2px' }}>Podgląd</h4>
-              <div className="border border-[2px] border-dashed border-cyan-400 rounded-lg p-8 flex flex-col items-center justify-center text-center text-gray-500 overflow-hidden">
-                <div className="relative flex flex-col items-center mt-2 w-full">
-                  <div className="text-cyan-500 text-[180px] leading-none absolute top-0">“</div>
-                  <div className="pt-[90px] text-center text-lg italic break-words w-full max-w-[350px] min-h-[150px] overflow-hidden line-clamp-3">
-                    {quote || "Twój tekst pojawi się tutaj podczas pisania."}
+        <div className="fixed inset-0 overflow-y-auto px-4 py-10 sm:px-6">
+          <div className="flex min-h-full items-center justify-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-6 scale-95"
+              enterTo="opacity-100 translate-y-0 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0 translate-y-6 scale-95"
+            >
+              <Dialog.Panel className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_30px_90px_-45px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+                <div className="relative bg-gradient-to-r from-purple-500 via-fuchsia-500 to-rose-500 px-6 py-6 text-white sm:px-8">
+                  <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/40 bg-white/20">
+                        <SparklesIcon className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <Dialog.Title className="text-2xl font-semibold sm:text-3xl">Dodaj cytat</Dialog.Title>
+                        <p className="mt-1 max-w-xl text-sm text-white/85">Utrwal ukochane słowa, powiedzenie lub fragment książki, które najlepiej oddają charakter osoby upamiętnionej.</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => onClose()}
+                      className="inline-flex items-center justify-center rounded-full border border-white/40 bg-white/20 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/30"
+                    >
+                      Zamknij
+                    </button>
                   </div>
                 </div>
-                <div className="border-t-2 border-cyan-400 w-1/3 my-4 mx-auto"></div>
-                <div className="text-sm text-gray-400">{author || "- Autor -"}</div>
-              </div>
-            </div>
+
+                <div className="grid gap-10 bg-white/95 px-6 py-8 sm:px-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-[#0b1426]">Treść cytatu</h3>
+                      <p className="text-sm text-[#0b1426]/70">Zapisz cytat oraz – jeśli chcesz – jego autora. Dla zachowania czytelności unikaj bardzo długich fragmentów.</p>
+                    </div>
+                    <div className="rounded-[28px] border border-[#dde5ec] bg-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] space-y-6">
+                      <div>
+                        <label className="block text-sm font-semibold text-[#0b1426] mb-2">Treść cytatu *</label>
+                        <textarea
+                          value={quote}
+                          onChange={(e) => setQuote(e.target.value)}
+                          className="min-h-[160px] w-full rounded-2xl border border-[#dce4ed] bg-[#f6f9fc] px-4 py-3 text-sm text-[#0b1426] placeholder:text-[#0b1426]/40 focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-200"
+                          placeholder="Wpisz cytat lub fragment, który chcesz zachować."
+                          maxLength={1000}
+                        />
+                        <div className="text-right text-xs text-[#0b1426]/40 mt-1">{1000 - quote.length} znaków pozostało</div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-[#0b1426] mb-2">Autor</label>
+                        <input
+                          type="text"
+                          value={author}
+                          onChange={(e) => setAuthor(e.target.value)}
+                          className="w-full rounded-2xl border border-[#dce4ed] bg-[#f6f9fc] px-4 py-3 text-sm text-[#0b1426] placeholder:text-[#0b1426]/40 focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-200"
+                          placeholder="Dodaj autora lub źródło (opcjonalnie)"
+                          maxLength={298}
+                        />
+                        <div className="text-right text-xs text-[#0b1426]/40 mt-1">{298 - author.length} znaków pozostało</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0b1426]/40 text-center lg:text-left">Podgląd</div>
+                    <div className="rounded-[28px] border border-[#dce4ed] bg-gradient-to-b from-white/95 via-white to-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] text-center">
+                      <div className="relative flex flex-col items-center">
+                        <span className="text-6xl font-serif text-rose-400/70">“</span>
+                        <p className="mt-4 text-base italic text-[#0b1426]/80 whitespace-pre-wrap leading-relaxed line-clamp-6 min-h-[120px]">
+                          {quote || 'Twój cytat pojawi się tutaj podczas pisania.'}
+                        </p>
+                        <span className="mt-6 block h-px w-16 bg-gradient-to-r from-transparent via-rose-300 to-transparent" />
+                        <p className="mt-2 text-sm font-semibold text-[#0b1426]/60">{author || 'Autor nieznany'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col-reverse gap-3 border-t border-white/30 bg-white/90 px-6 py-5 sm:flex-row sm:justify-end sm:px-8">
+                  <button
+                    onClick={() => onClose()}
+                    className="rounded-full border border-[#d4dde5] bg-white px-6 py-2 text-sm font-semibold text-[#0b1426]/70 transition hover:border-[#c6d2dd] hover:bg-[#f5f8fb]"
+                  >
+                    Anuluj
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    className={`rounded-full bg-gradient-to-r from-purple-500 via-fuchsia-500 to-rose-500 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-rose-500/30 transition hover:shadow-rose-500/45 ${
+                      loading ? 'cursor-wait opacity-80' : ''
+                    }`}
+                  >
+                    {loading ? 'Zapisywanie…' : editingQuote ? 'Zapisz zmiany' : 'Dodaj cytat'}
+                  </button>
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
-          <div className="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-200">
-            <button
-              onClick={handleSave}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={loading}
-            >
-              {loading ? 'Zapisywanie...' : editingQuote ? 'Zapisz zmiany' : 'Zapisz'}
-            </button>
-          </div>
-        </Dialog.Panel>
-      </div>
-    </Dialog>
+        </div>
+      </Dialog>
+    </Transition>
   )
 }

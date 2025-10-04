@@ -10,11 +10,11 @@ if (typeof window !== 'undefined') {
   mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN!;
 }
 
-import { useState, useEffect, useRef } from 'react'
+import { Fragment, useState, useEffect, useRef, CSSProperties } from 'react'
 import Map, { Marker } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { supabase } from '../utils/supabaseClient'
-import { Dialog } from '@headlessui/react'
+import { Dialog, Transition } from '@headlessui/react'
 
 interface AddMapModalProps {
   isOpen: boolean
@@ -195,140 +195,174 @@ useEffect(() => {
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black bg-opacity-40 transition-opacity" aria-hidden="true" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="z-50 w-[1100px] h-[730px] flex flex-col overflow-hidden rounded-2xl bg-white text-left align-middle shadow-xl transition-all">
-          <div className="w-full bg-black text-white px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="bg-cyan-600 w-8 h-8 flex items-center justify-center rounded-full text-white text-xl font-bold">
-                +
-              </div>
-              <span className="text-white font-medium">Dodaj miejsce na mapie</span>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-black bg-white rounded-full px-4 py-1 text-sm font-medium hover:bg-gray-200"
+    <Transition appear show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-[70]" onClose={() => onClose()}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-[#0b1426]/75 backdrop-blur-sm" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 overflow-y-auto px-4 py-10 sm:px-6">
+          <div className="flex min-h-full items-center justify-center">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-6 scale-95"
+              enterTo="opacity-100 translate-y-0 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0 translate-y-6 scale-95"
             >
-              Zamknij
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto p-8 gap-8 flex">
-            <div className="w-[550px] flex-shrink-0 flex flex-col justify-between">
-              <div>
-                <div className="w-full mb-8">
-                  <h3 className="text-lg font-semibold mb-2">Dodaj miejsce na mapie</h3>
-                  <p className="text-gray-600 text-sm">
-                    Opowiedz historię miejsca, dodaj jego nazwę oraz adres.
-                  </p>
+              <Dialog.Panel className="relative flex w-full max-w-5xl flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_30px_90px_-45px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+                <div className="relative bg-gradient-to-r from-cyan-500 via-sky-500 to-purple-500 px-6 py-6 text-white sm:px-8">
+                  <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/40 bg-white/20 text-lg font-semibold">
+                        +
+                      </div>
+                      <div>
+                        <Dialog.Title className="text-2xl font-semibold sm:text-3xl">Dodaj miejsce na mapie</Dialog.Title>
+                        <p className="mt-1 max-w-xl text-sm text-white/85">Opowiedz historię ważnego punktu i przypnij go do mapy pamięci, aby odwiedzający mogli łatwo go odnaleźć.</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => onClose()}
+                      className="inline-flex items-center justify-center rounded-full border border-white/40 bg-white/20 px-5 py-2 text-sm font-semibold text-white transition hover:bg-white/30"
+                    >
+                      Zamknij
+                    </button>
+                  </div>
                 </div>
-                <div className="border p-8 rounded-xl bg-white space-y-8">
-                  <div>
-                    <label className="block text-base font-semibold mb-2">
-                      Nazwa miejsca
-                    </label>
-                    <input
-                      type="text"
-                      value={mapTitle}
-                      onChange={(e) => setMapTitle(e.target.value)}
-                      className="w-full border rounded-lg p-4 text-sm bg-gray-50"
-                      placeholder="Wprowadź nazwę miejsca"
-                      maxLength={100}
-                    />
-                    <div className="text-right text-xs mt-1 text-gray-400">{100 - mapTitle.length} znaków pozostało</div>
-                  </div>
-                  <div>
-                    <label className="block text-base font-semibold mb-2">Historia miejsca</label>
-                    <textarea
-                      value={mapStory}
-                      onChange={(e) => setMapStory(e.target.value)}
-                      className="w-full border rounded-lg p-4 text-sm bg-gray-50 resize-y"
-                      placeholder="Wprowadź historię miejsca"
-                      maxLength={1000}
-                    />
-                    <div className="text-right text-xs mt-1 text-gray-400">{1000 - mapStory.length} znaków pozostało</div>
-                  </div>
-                  <div>
-                    <label className="block text-base font-semibold mb-2">
-                      Adres
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={mapAddress}
-                        onChange={(e) => setMapAddress(e.target.value)}
-                        onBlur={() => setTimeout(() => setAddressSuggestions([]), 100)}
-                        className="w-full border rounded-lg p-4 text-sm bg-gray-50"
-                        placeholder="Wprowadź adres"
-                        maxLength={200}
-                      />
-                      {addressSuggestions.length > 0 && (
-                        <ul className="absolute z-50 bg-white border border-gray-300 rounded-xl mt-1 max-h-60 overflow-y-auto w-full shadow-xl">
-                          {addressSuggestions
-                            .filter((suggestion) => suggestion !== mapAddress)
-                            .map((suggestion, index) => (
-                              <li
-                                key={index}
-                                onMouseDown={(e) => {
-                                  e.preventDefault();
-                                  setMapAddress(suggestion);
-                                  setAddressSuggestions([]);
-                                }}
-                                className="flex items-start gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-cyan-50 cursor-pointer transition-all"
-                              >
-                                <svg className="w-4 h-4 mt-1 text-cyan-500 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9l-4.243 4.243a1 1 0 01-1.414 0L5.05 13.95a7 7 0 010-9.9zm2.828 2.828a3 3 0 104.244 4.244 3 3 0 00-4.244-4.244z" clipRule="evenodd" />
-                                </svg>
-                                <span className="block text-left leading-snug">{suggestion}</span>
-                              </li>
-                            ))}
-                        </ul>
-                      )}
+
+                <div className="flex flex-col gap-10 bg-white/95 px-6 py-8 sm:px-10">
+                  <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
+                    <div className="space-y-8">
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-semibold text-[#0b1426]">Informacje o miejscu</h3>
+                        <p className="text-sm text-[#0b1426]/70">Uzupełnij nazwę, krótką historię oraz adres, a następnie zaznacz lokalizację na mapie.</p>
+                      </div>
+                      <div className="rounded-[28px] border border-[#dde5ec] bg-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] space-y-6">
+                        <div>
+                          <label className="block text-sm font-semibold text-[#0b1426] mb-2">Nazwa miejsca</label>
+                          <input
+                            type="text"
+                            value={mapTitle}
+                            onChange={(e) => setMapTitle(e.target.value)}
+                            className="w-full rounded-2xl border border-[#dce4ed] bg-[#f6f9fc] px-4 py-3 text-sm text-[#0b1426] placeholder:text-[#0b1426]/40 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                            placeholder="Wprowadź nazwę miejsca"
+                            maxLength={100}
+                          />
+                          <div className="text-right text-xs text-[#0b1426]/40 mt-1">{100 - mapTitle.length} znaków pozostało</div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-[#0b1426] mb-2">Historia miejsca</label>
+                          <textarea
+                            value={mapStory}
+                            onChange={(e) => setMapStory(e.target.value)}
+                            className="min-h-[140px] w-full rounded-2xl border border-[#dce4ed] bg-[#f6f9fc] px-4 py-3 text-sm text-[#0b1426] placeholder:text-[#0b1426]/40 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                            placeholder="Opisz znaczenie umieszczanego miejsca"
+                            maxLength={1000}
+                          />
+                          <div className="text-right text-xs text-[#0b1426]/40 mt-1">{1000 - mapStory.length} znaków pozostało</div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold text-[#0b1426] mb-2">Adres</label>
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={mapAddress}
+                              onChange={(e) => setMapAddress(e.target.value)}
+                              onBlur={() => setTimeout(() => setAddressSuggestions([]), 100)}
+                              className="w-full rounded-2xl border border-[#dce4ed] bg-[#f6f9fc] px-4 py-3 text-sm text-[#0b1426] placeholder:text-[#0b1426]/40 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-200"
+                              placeholder="Wprowadź adres lub nazwę miejscowości"
+                              maxLength={200}
+                            />
+                            {addressSuggestions.length > 0 && (
+                              <ul className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-[#dce4ed] bg-white shadow-[0_24px_60px_-36px_rgba(15,23,42,0.35)]">
+                                {addressSuggestions
+                                  .filter((suggestion) => suggestion !== mapAddress)
+                                  .map((suggestion, index) => (
+                                    <li
+                                      key={index}
+                                      onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        setMapAddress(suggestion);
+                                        setAddressSuggestions([]);
+                                      }}
+                                      className="flex items-start gap-3 px-4 py-3 text-sm text-[#0b1426]/80 transition hover:bg-cyan-50 cursor-pointer"
+                                    >
+                                      <svg className="mt-1 h-4 w-4 flex-shrink-0 text-cyan-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9l-4.243 4.243a1 1 0 01-1.414 0L5.05 13.95a7 7 0 010-9.9zm2.828 2.828a3 3 0 104.244 4.244 3 3 0 00-4.244-4.244z" clipRule="evenodd" />
+                                      </svg>
+                                      <span className="leading-snug">{suggestion}</span>
+                                    </li>
+                                  ))}
+                              </ul>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0b1426]/40 text-center lg:text-left">Podgląd mapy</div>
+                      <div className="overflow-hidden rounded-[28px] border border-[#dce4ed] bg-white/90 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)]">
+                        <div className="px-6 pt-6 text-center">
+                          <p className="text-base font-semibold text-[#0b1426] line-clamp-3 min-h-[60px]">
+                            {mapTitle || 'Nazwa miejsca'}
+                          </p>
+                          <p className="mt-2 text-xs text-[#0b1426]/60 line-clamp-3 min-h-[42px]">
+                            {mapStory || 'Krótki opis pojawi się tutaj po wypełnieniu formularza.'}
+                          </p>
+                        </div>
+                        <div className="mt-6 h-[320px] border-t border-[#dce4ed] bg-[#f6f9fc]">
+                          <Map
+                            ref={mapRef}
+                            reuseMaps={true}
+                            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                            initialViewState={{ latitude: 50.7284, longitude: 16.6517, zoom: 10 }}
+                            mapStyle="mapbox://styles/mapbox/streets-v11"
+                            style={{ width: '100%', height: '100%' }}
+                          >
+                            {coordinates && (
+                              <Marker latitude={coordinates.lat} longitude={coordinates.lng} color="#06b6d4" />
+                            )}
+                          </Map>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            <div className="w-[430px] flex flex-col">
-              <h4 className="text-gray-400 text-xs font-medium mb-4 text-center w-full uppercase" style={{ letterSpacing: '2px' }}>Podgląd mapy</h4>
-              <div className="border border-[2px] border-dashed border-cyan-400 rounded-lg p-8 flex flex-col items-center justify-center text-center text-gray-500 overflow-hidden space-y-0">
-                <div className="text-center text-lg font-semibold text-gray-800 break-words whitespace-pre-wrap w-full max-w-[300px] min-h-[50px] overflow-hidden line-clamp-3">
-                  {mapTitle || "Nazwa miejsca"}
-                </div>
-                
-                <div className="mt-6 w-full h-[300px] bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-300 rounded-lg">
-                  <Map
-                    ref={mapRef}
-                    reuseMaps={true}
-                    mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                    initialViewState={{
-                        latitude: 50.7284,
-                        longitude: 16.6517,
-                      zoom: 10,
-                    }}
-                    mapStyle="mapbox://styles/mapbox/streets-v11"
-                    style={{ width: '100%', height: '100%' }}
+                <div className="flex flex-col-reverse gap-3 border-t border-white/30 bg-white/90 px-6 py-5 sm:flex-row sm:justify-end sm:px-8">
+                  <button
+                    onClick={() => onClose()}
+                    className="rounded-full border border-[#d4dde5] bg-white px-6 py-2 text-sm font-semibold text-[#0b1426]/70 transition hover:border-[#c6d2dd] hover:bg-[#f5f8fb]"
                   >
-                    {coordinates && (
-                      <Marker latitude={coordinates.lat} longitude={coordinates.lng} color="red" />
-                    )}
-                  </Map>
+                    Anuluj
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={loading}
+                    className={`rounded-full bg-gradient-to-r from-cyan-500 via-sky-500 to-purple-500 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-cyan-500/30 transition hover:shadow-cyan-500/45 ${
+                      loading ? 'cursor-wait opacity-80' : ''
+                    }`}
+                  >
+                    {loading ? 'Zapisywanie…' : 'Zapisz miejsce'}
+                  </button>
                 </div>
-              </div>
-            </div>
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
-          <div className="bg-gray-50 px-6 py-4 flex justify-end border-t border-gray-200">
-            <button
-              onClick={handleSave}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={loading}
-            >
-              {loading ? 'Zapisywanie...' : 'Zapisz'}
-            </button>
-          </div>
-        </Dialog.Panel>
-      </div>
-    </Dialog>
+        </div>
+      </Dialog>
+    </Transition>
   )
 }
