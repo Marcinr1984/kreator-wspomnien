@@ -1,3 +1,4 @@
 {
-  "/preview/[id]/page": "app/preview/[id]/page.js"
+  "/preview/[id]/page": "app/preview/[id]/page.js",
+  "/memorial/[memorialId]/page": "app/memorial/[memorialId]/page.js"
 }

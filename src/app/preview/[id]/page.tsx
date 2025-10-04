@@ -64,6 +64,22 @@ export default function PublicMemorialView() {
   const heroDescription = data?.short_description || data?.summary || ''
   const relationLabel = data?.relation || data?.relations || ''
 
+  const handleShare = async () => {
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
+    if (!shareUrl) return
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ url: shareUrl, title: `${data.first_name} ${data.last_name}` })
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl)
+        alert('Link został skopiowany do schowka.')
+      }
+    } catch (err) {
+      console.warn('Nie udało się udostępnić linku:', err)
+    }
+  }
+
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-[#ecf2f6] via-[#eef5f9] to-[#dfe9f3] pb-16 text-[#0b1426]">
       <div className="relative">
@@ -81,11 +97,15 @@ export default function PublicMemorialView() {
               <StatusIcon className="h-5 w-5 text-white" />
               <span>{statusLabel}</span>
             </div>
-            <p className="max-w-xl text-sm text-white/80">
-              {data.is_public
-                ? 'Ta strona pamięci jest dostępna publicznie. Podziel się linkiem, aby bliscy mogli wspominać razem.'
-                : 'Strona nie została jeszcze opublikowana. Udostępnij ją tylko zaufanym osobom.'}
-            </p>
+            {data.is_public && (
+              <button
+                type="button"
+                onClick={handleShare}
+                className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/15 px-5 py-2 text-sm font-semibold text-white shadow-lg transition hover:bg-white/25"
+              >
+                Udostępnij link
+              </button>
+            )}
           </div>
         </div>
 
@@ -93,7 +113,7 @@ export default function PublicMemorialView() {
           <div className="mx-auto max-w-6xl">
             <div className="grid gap-8 lg:grid-cols-[320px_1fr] lg:gap-10">
               <div className="space-y-6">
-                <div className="group relative overflow-hidden rounded-[32px] border border-white/60 bg-white/90 shadow-[0_30px_60px_-32px_rgba(14,116,144,0.35)] backdrop-blur">
+                <div className="overflow-hidden rounded-[32px] border border-white/60 bg-white/90 shadow-[0_30px_60px_-32px_rgba(14,116,144,0.35)] backdrop-blur">
                   {data.photo_url ? (
                     <img src={data.photo_url} alt={`${data.first_name} ${data.last_name}`} className="h-[360px] w-full object-cover" />
                   ) : (
@@ -101,8 +121,6 @@ export default function PublicMemorialView() {
                       Brak zdjęcia
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-black/10 opacity-0 transition-opacity duration-300 group-hover:opacity-10" />
-                  <div className="absolute bottom-4 left-4 rounded-full bg-white/85 px-4 py-1 text-xs font-semibold text-[#0b1426]/70 shadow">Upamiętniona osoba</div>
                 </div>
 
                 <div className="space-y-4 rounded-[32px] border border-white/60 bg-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)]">
