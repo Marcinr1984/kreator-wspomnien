@@ -1,739 +1,602 @@
+'use client'
+
+import React, { useEffect, useMemo, useState } from 'react'
+import Map, { Marker } from 'react-map-gl'
+import 'mapbox-gl/dist/mapbox-gl.css'
+import AddQuoteModal from '../../components/AddQuoteModal'
+import AddTextModal from '../../components/AddTextModal'
+import AddMapModal from '../../components/AddMapModal'
+import AddPhotoModal from '../../components/AddPhotoModal'
+import { supabase } from '../../utils/supabaseClient'
+import { DndContext, closestCenter } from '@dnd-kit/core'
+import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import {
   PlusIcon,
   PencilSquareIcon,
-  ChatBubbleLeftEllipsisIcon,
-  StarIcon,
-  BookmarkIcon,
   EyeIcon,
-  TrashIcon
-} from '@heroicons/react/24/solid';
-import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/outline';
-import React, { useState, useEffect, useRef } from 'react';
-import Map, { Marker } from 'react-map-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
-import AddQuoteModal from '../../components/AddQuoteModal';
-import AddTextModal from '../../components/AddTextModal';
-import AddMapModal from '../../components/AddMapModal';
-import AddPhotoModal from '../../components/AddPhotoModal';
-import { supabase } from '../../utils/supabaseClient';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+  TrashIcon,
+  PhotoIcon as PhotoSolidIcon,
+  DocumentTextIcon,
+  SparklesIcon,
+  MapPinIcon,
+  ChatBubbleLeftRightIcon
+} from '@heroicons/react/24/solid'
+import { ArrowsPointingOutIcon } from '@heroicons/react/24/outline'
 
 interface PamiatkiTabProps {
-  setIsEditing: (value: boolean) => void;
-  memorialId: number;
-  isEditing?: boolean;
-  isPublicView?: boolean;
+  setIsEditing: (value: boolean) => void
+  memorialId: number
+  isEditing?: boolean
+  isPublicView?: boolean
 }
 
-const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isPublicView = false }) => {
-  const [localEditing, setLocalEditing] = useState(false);
-  const [isAddQuoteModalOpen, setIsAddQuoteModalOpen] = useState(false);
-  const [isAddTextModalOpen, setIsAddTextModalOpen] = useState(false);
-  const [isAddMapModalOpen, setIsAddMapModalOpen] = useState(false);
-  const [isAddPhotoModalOpen, setIsAddPhotoModalOpen] = useState(false);
-  const [mementos, setMementos] = useState<any[]>([]);
-  const [editingMemento, setEditingMemento] = useState<any | null>(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [mementoToDelete, setMementoToDelete] = useState<number | string | null>(null);
-  const [isSavingOrder, setIsSavingOrder] = useState(false);
-  // Stan interaktywności i pełnego ekranu mapy
-  const [isMapInteractive, setIsMapInteractive] = useState(false);
-  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
-  // Nowy stan: czy przeglądarka jest w trybie pełnoekranowym
-  const [isBrowserFullscreen, setIsBrowserFullscreen] = useState(false);
-  // Ref do mapy w trybie pełnoekranowym
-  const mapRef = useRef<any>(null);
+type Memento = {
+  id: number | string
+  type: 'quote' | 'text' | 'photo' | 'map'
+  sort_order: number
+  content: any
+}
 
-  // Nasłuchuj zmiany pełnego ekranu i ustawiaj isBrowserFullscreen
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      const fullscreen = !!document.fullscreenElement;
-      setIsBrowserFullscreen(fullscreen);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
+const CARD_BASE =
+  'relative overflow-hidden rounded-[32px] border border-white/60 bg-white/95 shadow-[0_24px_60px_-35px_rgba(14,116,144,0.4)] backdrop-blur px-8 py-10 sm:px-10'
+
+const ACTION_BUTTON =
+  'inline-flex items-center gap-2 rounded-full border border-[#d4dde5] bg-white/90 px-4 py-1.5 text-xs font-semibold text-[#0b1426]/70 transition hover:border-cyan-400 hover:text-cyan-600'
+
+const PRIMARY_GRADIENT_BUTTON =
+  'inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-cyan-500 via-sky-500 to-purple-500 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-cyan-500/30 transition hover:shadow-cyan-500/45'
+
+const SECONDARY_BUTTON =
+  'inline-flex items-center justify-center gap-2 rounded-full border border-[#d4dde5] bg-white px-6 py-2 text-sm font-semibold text-[#0b1426]/70 transition hover:border-[#c6d2dd] hover:bg-[#f5f8fb]'
+
+const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isEditing = false, isPublicView = false }) => {
+  const [localEditing, setLocalEditing] = useState(false)
+  const [mementos, setMementos] = useState<Memento[]>([])
+  const [editingMemento, setEditingMemento] = useState<any | null>(null)
+  const [mementoToDelete, setMementoToDelete] = useState<number | string | null>(null)
+  const [isSavingOrder, setIsSavingOrder] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+
+  const [isAddQuoteModalOpen, setIsAddQuoteModalOpen] = useState(false)
+  const [isAddTextModalOpen, setIsAddTextModalOpen] = useState(false)
+  const [isAddMapModalOpen, setIsAddMapModalOpen] = useState(false)
+  const [isAddPhotoModalOpen, setIsAddPhotoModalOpen] = useState(false)
+
+  const [fullscreenMap, setFullscreenMap] = useState<Memento | null>(null)
 
   const fetchMementos = async () => {
-    if (!memorialId) {
-      console.error('Brak memorialId! Nie można pobrać pamiątek.');
-      return;
-    }
+    if (!memorialId) return
 
     const { data, error } = await supabase
       .from('memorial_mementos')
       .select('*')
       .eq('memorial_id', memorialId)
-      .in('type', ['quote', 'text', 'photo'])  // Pobieramy cytaty, teksty i zdjęcia
-      .order('sort_order', { ascending: true });
+      .in('type', ['quote', 'text', 'photo'])
+      .order('sort_order', { ascending: true })
 
-    // Nowość: Pobieranie lokalizacji z memorial_maps
+    if (error) {
+      console.error('Błąd pobierania pamiątek:', error.message)
+    }
+
     const { data: mapsData, error: mapsError } = await supabase
       .from('memorial_maps')
       .select('*')
       .eq('memorial_id', memorialId)
-      .order('sort_order', { ascending: true });
+      .order('sort_order', { ascending: true })
 
     if (mapsError) {
-      console.error('Błąd pobierania lokalizacji:', mapsError.message);
+      console.error('Błąd pobierania lokalizacji:', mapsError.message)
     }
 
-    const mapsAsMementos = (mapsData || []).map((map) => ({
+    const mapsAsMementos: Memento[] = (mapsData || []).map((map) => ({
       id: `map-${map.id}`,
       type: 'map',
-      sort_order: map.sort_order,
+      sort_order: map.sort_order ?? 0,
       content: {
         title: map.title,
         story: map.story,
         address: map.address,
         lat: map.lat,
-        lng: map.lng,
-      },
-    }));
+        lng: map.lng
+      }
+    }))
 
-    const allMementos = [...(data || []), ...mapsAsMementos];
-    // Sortujemy allMementos po sort_order i ustawiamy do state
-    setMementos(allMementos.sort((a, b) => a.sort_order - b.sort_order));
-  };
+    const combined = [...(data as Memento[] | null || []), ...mapsAsMementos]
+    combined.sort((a, b) => a.sort_order - b.sort_order)
+    setMementos(combined)
+  }
 
   useEffect(() => {
-    if (memorialId) {
-      fetchMementos();
-    }
-  }, [memorialId]);
+    fetchMementos()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memorialId])
+
+  const visibleMementos = useMemo(() => mementos.filter((item) => item?.type && item?.content), [mementos])
 
   const handleStartEdit = () => {
-    setLocalEditing(true);
-    setIsEditing(true);
-  };
+    setLocalEditing(true)
+    setIsEditing(true)
+  }
 
   const handleStopEdit = async () => {
-    setLocalEditing(false);
-    setIsEditing(false);
-    setIsSavingOrder(true);
+    setLocalEditing(false)
+    setIsEditing(false)
+    setIsSavingOrder(true)
 
-    const updates = mementos.map((memento, index) => ({
-      id: memento.id,
-      sort_order: index,
-    }));
+    const updates = visibleMementos.map((memento, index) => ({ id: memento.id, sort_order: index }))
 
     for (const update of updates) {
       if (typeof update.id === 'string' && update.id.startsWith('map-')) {
-        const mapId = update.id.replace('map-', '');
-        const { error } = await supabase
-          .from('memorial_maps')
-          .update({ sort_order: update.sort_order })
-          .eq('id', mapId);
-
-        if (error) {
-          console.error('Błąd aktualizacji sort_order dla mapy:', error.message);
-        }
+        const mapId = update.id.replace('map-', '')
+        const { error } = await supabase.from('memorial_maps').update({ sort_order: update.sort_order }).eq('id', mapId)
+        if (error) console.error('Błąd aktualizacji mapy:', error.message)
       } else {
         const { error } = await supabase
           .from('memorial_mementos')
           .update({ sort_order: update.sort_order })
-          .eq('id', update.id);
-
-        if (error) {
-          console.error('Błąd aktualizacji sort_order:', error.message);
-        }
+          .eq('id', update.id)
+        if (error) console.error('Błąd aktualizacji sort_order:', error.message)
       }
     }
 
-    await fetchMementos();
-    setIsSavingOrder(false);
-  };
-
-  const handleEditMemento = (memento: any) => {
-    setEditingMemento(memento);
-
-    if (memento.type === 'quote') {
-      setIsAddQuoteModalOpen(true);
-    } else if (memento.type === 'text') {
-      setIsAddTextModalOpen(true);
-    } else if (memento.type === 'photo') {
-      setIsAddPhotoModalOpen(true);
-    }
-  };
-
-  const handleDeleteMemento = async (id: any) => {
-    setMementoToDelete(id);
-    setIsDeleteModalOpen(true);
-  };
-
-  interface SortableMementoItemProps {
-    memento: any;
-    localEditing: boolean;
-    handleDeleteMemento: (id: number) => void;
-    handleEditMemento: (memento: any) => void;
-    isLast: boolean;
+    await fetchMementos()
+    setIsSavingOrder(false)
   }
 
-  const SortableMementoItem: React.FC<SortableMementoItemProps> = ({
-    memento,
-    localEditing,
-    handleDeleteMemento,
-    handleEditMemento,
-    isLast,
-  }) => {
-    const {
-      attributes,
-      listeners,
-      setNodeRef,
-      transform,
-      transition,
-      isDragging,
-    } = useSortable({ id: memento.id });
+  const handleEditMemento = (memento: Memento) => {
+    setEditingMemento(memento)
+
+    switch (memento.type) {
+      case 'quote':
+        setIsAddQuoteModalOpen(true)
+        break
+      case 'text':
+        setIsAddTextModalOpen(true)
+        break
+      case 'photo':
+        setIsAddPhotoModalOpen(true)
+        break
+      case 'map':
+        setIsAddMapModalOpen(true)
+        break
+      default:
+        break
+    }
+  }
+
+  const handleDeleteMemento = (id: any) => {
+    setMementoToDelete(id)
+    setDeleteModalOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!mementoToDelete) return
+
+    if (typeof mementoToDelete === 'string' && mementoToDelete.startsWith('map-')) {
+      const mapId = mementoToDelete.replace('map-', '')
+      const { error } = await supabase.from('memorial_maps').delete().eq('id', mapId)
+      if (error) {
+        console.error('Błąd usuwania mapy:', error.message)
+      } else {
+        await fetchMementos()
+      }
+    } else {
+      const { data: mementoData } = await supabase
+        .from('memorial_mementos')
+        .select('*')
+        .eq('id', mementoToDelete)
+        .single()
+
+      if (mementoData?.type === 'photo' && mementoData?.content?.image_url) {
+        try {
+          const url = new URL(mementoData.content.image_url)
+          const path = url.pathname.split('/storage/v1/object/public/memorial-photos/')[1]
+          if (path) {
+            await supabase.storage.from('memorial-photos').remove([path])
+          }
+        } catch (e) {
+          console.warn('Nie można usunąć pliku ze storage:', e)
+        }
+      }
+
+      const { error } = await supabase.from('memorial_mementos').delete().eq('id', mementoToDelete)
+      if (error) {
+        console.error('Błąd usuwania pamiątki:', error.message)
+      } else {
+        await fetchMementos()
+      }
+    }
+
+    setDeleteModalOpen(false)
+    setMementoToDelete(null)
+  }
+
+  interface SortableMementoItemProps {
+    memento: Memento
+    localEditing: boolean
+    onEdit: (memento: Memento) => void
+    onDelete: (id: any) => void
+    onExpandMap: (memento: Memento) => void
+  }
+
+  const SortableMementoItem: React.FC<SortableMementoItemProps> = ({ memento, localEditing, onEdit, onDelete, onExpandMap }) => {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: memento.id })
 
     const style = {
       transform: CSS.Transform.toString(transform),
       transition: transition || 'transform 200ms ease',
-      opacity: isDragging ? 0.5 : 1,
-      backgroundColor: isDragging ? '#f0f9ff' : undefined, // Jasnoniebieskie tło w trakcie przeciągania
-    };
+      opacity: isDragging ? 0.65 : 1
+    }
+
+    const dragHandle = localEditing ? (
+      <button
+        type="button"
+        {...attributes}
+        {...listeners}
+        className="absolute -left-3 -top-3 hidden items-center justify-center rounded-full border border-[#d4dde5] bg-white p-3 shadow-sm transition hover:border-cyan-400 hover:text-cyan-600 sm:flex"
+        aria-label="Przeciągnij, aby zmienić kolejność"
+      >
+        <span className="text-lg leading-none text-cyan-500">⠿</span>
+      </button>
+    ) : null
+
+    const renderQuote = () => (
+      <div className="flex flex-col items-center gap-4 text-center">
+        <span className="text-6xl font-serif text-rose-400/70 leading-none">“</span>
+        <p className="text-lg sm:text-xl italic leading-relaxed text-[#0b1426]/80 whitespace-pre-wrap">
+          {memento.content?.quote || 'Cytat'}
+        </p>
+        {memento.content?.author && (
+          <p className="text-sm font-semibold text-[#0b1426]/50">— {memento.content.author}</p>
+        )}
+      </div>
+    )
+
+    const renderText = () => (
+      <div className="space-y-4 text-center sm:text-left">
+        {memento.content?.title && (
+          <h3 className="text-2xl font-semibold text-[#0b1426] whitespace-pre-wrap">{memento.content.title}</h3>
+        )}
+        {memento.content?.text && (
+          <p className="text-sm leading-relaxed text-[#0b1426]/75 whitespace-pre-wrap">
+            {memento.content.text}
+          </p>
+        )}
+      </div>
+    )
+
+    const renderPhoto = () => (
+      <div className={`flex flex-col gap-6 lg:flex-row ${memento.content?.layout === 'right' ? 'lg:flex-row-reverse' : ''}`}>
+        {memento.content?.image_url && (
+          <div className="mx-auto h-52 w-full max-w-[220px] overflow-hidden rounded-[24px] border border-[#dce4ed] bg-[#f6f9fc] lg:mx-0">
+            <img src={memento.content.image_url} alt={memento.content?.title || 'Zdjęcie'} className="h-full w-full object-cover" />
+          </div>
+        )}
+        <div className="flex-1 space-y-3 text-center lg:text-left">
+          <p className="text-xs uppercase tracking-[0.3em] text-[#0b1426]/40">
+            {memento.content?.date ? new Date(memento.content.date).toLocaleDateString('pl-PL') : 'Data nieznana'}
+          </p>
+          <h3 className="text-xl font-semibold text-[#0b1426]">{memento.content?.title}</h3>
+          {memento.content?.description && (
+            <p className="text-sm leading-relaxed text-[#0b1426]/75 whitespace-pre-wrap">
+              {memento.content.description}
+            </p>
+          )}
+        </div>
+      </div>
+    )
+
+    const renderMap = () => (
+      <div className="space-y-4">
+        <div className="space-y-2 text-center lg:text-left">
+          <h3 className="text-xl font-semibold text-[#0b1426]">{memento.content?.title || 'Lokalizacja na mapie'}</h3>
+          {memento.content?.story && (
+            <p className="text-sm leading-relaxed text-[#0b1426]/75 whitespace-pre-wrap">{memento.content.story}</p>
+          )}
+          {memento.content?.address && (
+            <p className="inline-flex items-center gap-2 rounded-full bg-[#f6f9fc] px-4 py-1 text-xs font-semibold text-[#0b1426]/60">
+              <MapPinIcon className="h-4 w-4 text-cyan-500" />
+              {memento.content.address}
+            </p>
+          )}
+        </div>
+        <div className="relative overflow-hidden rounded-[24px] border border-[#dce4ed] bg-[#f6f9fc]">
+          <Map
+            initialViewState={{
+              latitude: memento.content?.lat,
+              longitude: memento.content?.lng,
+              zoom: 15
+            }}
+            mapStyle="mapbox://styles/mapbox/streets-v11"
+            mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+            style={{ width: '100%', height: 320 }}
+            scrollZoom={localEditing}
+            dragPan={localEditing}
+            dragRotate={false}
+            touchZoomRotate={localEditing}
+          >
+            <Marker latitude={memento.content?.lat} longitude={memento.content?.lng} color="#06b6d4" />
+          </Map>
+          {!localEditing && (
+            <button
+              type="button"
+              onClick={() => onExpandMap(memento)}
+              className="absolute top-4 right-4 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/90 px-4 py-1.5 text-xs font-semibold text-[#0b1426]/70 shadow-lg transition hover:border-cyan-400 hover:text-cyan-600"
+            >
+              <ArrowsPointingOutIcon className="h-4 w-4" />
+              Pokaż na pełnym ekranie
+            </button>
+          )}
+        </div>
+      </div>
+    )
+
+    const renderContent = () => {
+      switch (memento.type) {
+        case 'quote':
+          return renderQuote()
+        case 'text':
+          return renderText()
+        case 'photo':
+          return renderPhoto()
+        case 'map':
+          return renderMap()
+        default:
+          return null
+      }
+    }
 
     return (
       <div ref={setNodeRef} style={style} className="w-full">
+        <div className="mx-auto w-full max-w-4xl">
+          <div className={`${CARD_BASE} ${localEditing ? 'pl-14' : ''}`}>
+            {dragHandle}
+            {renderContent()}
 
-        <div className={`relative p-8 w-full ${localEditing ? 'border-2 border-dashed border-gray-300 rounded-xl mb-6' : ''}`}>
-          {/* DRAG HANDLE ONLY IN EDIT MODE */}
-          {localEditing && (
-            <div className="absolute top-4 left-4 flex items-center" {...attributes} {...listeners}>
-              <div className="flex items-center justify-center w-10 h-10 rounded-full border border-gray-300 bg-white shadow-sm hover:border-cyan-500 cursor-grab active:cursor-grabbing transition">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10h14M5 14h14" />
-                </svg>
-              </div>
-            </div>
-          )}
-
-          {/* Renderowanie cytatu, mapy, tekstu, zdjęcia */}
-          {memento.type === 'quote' ? (
-            <div className="relative flex flex-col items-center mt-8">
-              <div className="text-cyan-500 text-[180px] leading-none absolute top-0">“</div>
-              <div className="pt-[90px] text-center text-3xl italic">{memento.content?.quote}</div>
-              <div className="border-t-2 border-cyan-400 w-1/5 my-6 mx-auto"></div>
-              <div className="text-lg text-gray-500 text-center mb-8">- {memento.content?.author}</div>
-            </div>
-          ) : memento.type === 'map' ? (
-            <div className="relative flex flex-col items-center mt-8">
-              <div className="text-center text-2xl font-bold text-gray-900 break-words w-full max-w-[350px]">
-                {memento.content?.title}
-              </div>
-              <div className="text-lg text-black mt-2 w-full max-w-[350px] text-center">
-                {memento.content?.story}
-              </div>
-              <div className="text-sm text-gray-500 mt-2 text-center">{memento.content?.address}</div>
-              {/* Renderowanie mapy: pełny ekran lub normalny */}
-              {isMapFullscreen ? (
-                <div className="fixed inset-0 z-50 bg-white">
-                  {/* Zamknij pełny ekran - przycisk X w lewym górnym rogu */}
-                  <button
-                    onClick={() => {
-                      if (document.fullscreenElement && document.exitFullscreen) {
-                        document.exitFullscreen().finally(() => {
-                          setIsMapFullscreen(false);
-                        });
-                      } else {
-                        setIsMapFullscreen(false);
-                      }
-                    }}
-                    className="absolute top-4 left-4 z-10 bg-white p-2 rounded-lg shadow-lg"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                  {/* Przyciski zoom + i - przeniesione pod przycisk zamykania pełnego ekranu */}
-                  <div className="absolute top-[72px] right-4 z-10 flex flex-col rounded-xl overflow-hidden border border-gray-200 shadow-md bg-white">
-                    <button
-                      onClick={() => {
-                        const zoom = mapRef.current?.getZoom();
-                        if (zoom !== undefined) {
-                          mapRef.current?.zoomTo(zoom + 1);
-                        }
-                      }}
-                      className="w-10 h-10 flex items-center justify-center border-b border-gray-200 hover:bg-gray-100"
-                    >
-                      <span className="text-cyan-500 text-2xl">+</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        const zoom = mapRef.current?.getZoom();
-                        if (zoom !== undefined) {
-                          mapRef.current?.zoomTo(zoom - 1);
-                        }
-                      }}
-                      className="w-10 h-10 flex items-center justify-center hover:bg-gray-100"
-                    >
-                      <span className="text-cyan-500 text-2xl">−</span>
-                    </button>
-                  </div>
-                  <Map
-                    ref={mapRef}
-                    initialViewState={{
-                      latitude: memento.content?.lat,
-                      longitude: memento.content?.lng,
-                      zoom: 17
-                    }}
-                    mapStyle="mapbox://styles/mapbox/streets-v11"
-                    mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                    style={{ width: '100%', height: '100%' }}
-                    scrollZoom
-                    dragPan
-                    dragRotate
-                    doubleClickZoom
-                    touchZoomRotate
-                  >
-                    <Marker latitude={memento.content?.lat} longitude={memento.content?.lng} />
-                  </Map>
-                  {/* Przycisk w prawym górnym rogu do obsługi pełnego ekranu przeglądarki */}
-                  <button
-                    onClick={() => {
-                      if (!document.fullscreenElement) {
-                        document.documentElement.requestFullscreen?.();
-                      } else {
-                        document.exitFullscreen?.();
-                      }
-                    }}
-                    className="absolute top-4 right-4 z-10 bg-white p-2 rounded-lg shadow-lg"
-                  >
-                    {isBrowserFullscreen ? (
-                      <ArrowsPointingInIcon className="w-6 h-6 text-cyan-500" />
-                    ) : (
-                      <ArrowsPointingOutIcon className="w-6 h-6 text-cyan-500" />
-                    )}
-                  </button>
-                </div>
-              ) : (
-                <div className="w-full h-[400px] mt-4 rounded-lg overflow-hidden relative">
-                  <Map
-                    initialViewState={{
-                      latitude: memento.content?.lat,
-                      longitude: memento.content?.lng,
-                      zoom: 17
-                    }}
-                    mapStyle="mapbox://styles/mapbox/streets-v11"
-                    mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                    style={{ width: '100%', height: '100%' }}
-                    scrollZoom={false}
-                    dragPan={false}
-                    dragRotate={false}
-                    doubleClickZoom={false}
-                    touchZoomRotate={false}
-                  >
-                    <Marker latitude={memento.content?.lat} longitude={memento.content?.lng} />
-                  </Map>
-                  {/* Przycisk pełnoekranowy */}
-                  {!localEditing && (
-                    <button
-                      onClick={() => {
-                        setIsMapFullscreen(true);
-                      }}
-                      className="absolute top-4 right-4 z-10 bg-white p-2 rounded-lg shadow-md"
-                      title="Pokaż na pełnym ekranie"
-                    >
-                      <ArrowsPointingOutIcon className="w-6 h-6 text-cyan-500" />
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          ) : memento.type === 'photo' ? (
-            <div className="relative flex flex-col items-center mt-8">
-              <div
-                className={`w-full flex flex-col md:flex-row gap-4 items-center justify-between ${
-                  memento.content?.layout === 'right' ? 'md:flex-row-reverse' : ''
-                }`}
-              >
-                {memento.content?.image_url && (
-                  <div className="w-full md:w-[300px] rounded-xl overflow-hidden shadow">
-                    <img
-                      src={memento.content.image_url}
-                      alt={memento.content.title || 'Zdjęcie'}
-                      className="w-full max-h-[300px] object-cover"
-                    />
-                  </div>
-                )}
-                <div className="w-full md:w-1/2 flex flex-col justify-center items-center md:items-start text-center md:text-left px-4">
-                  <div className="text-sm text-gray-500 mb-1">
-                    {memento.content?.date}
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900 mb-2">
-                    {memento.content?.title}
-                  </div>
-                  <div className="text-base text-gray-700 whitespace-pre-wrap">
-                    {memento.content?.description}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            // Renderowanie tytułu i tekstu
-            <div className="relative flex flex-col items-center mt-8">
-              <div className="text-center text-3xl font-bold text-gray-900 break-words w-full max-w-[350px] min-h-[50px] overflow-hidden line-clamp-3">
-                {memento.content?.title}
-              </div>
-              <div className="text-lg text-black mt-4 w-full max-w-[350px] break-words whitespace-pre-wrap text-center">
-                {memento.content?.text}
-              </div>
-            </div>
-          )}
-
-          {/* PRZYCISKI EDYCJI */}
-          {localEditing && (
-            <div className="absolute top-4 right-4 flex gap-2">
-              <button
-                onClick={() => handleDeleteMemento(memento.id)}
-                className="flex items-center justify-center rounded-full border border-gray-300 w-10 h-10 hover:border-cyan-500"
-                title="Usuń"
-              >
-                <TrashIcon className="h-5 w-5 text-cyan-500" />
-              </button>
-              {/* Przycisk edytuj cytat */}
-              {memento.type === 'quote' && (
-                <button
-                  onClick={() => handleEditMemento(memento)}
-                  className="flex items-center gap-2 border border-gray-300 rounded-full py-1.5 px-4 hover:border-cyan-500 text-sm font-medium"
-                  title="Edytuj cytat"
-                >
-                  <PencilSquareIcon className="h-5 w-5 text-cyan-500" />
-                  <span className="text-gray-800">Edytuj cytat</span>
+            {localEditing && (
+              <div className="absolute top-6 right-6 flex flex-wrap gap-2 justify-end">
+                <button onClick={() => onDelete(memento.id)} className="inline-flex items-center gap-2 rounded-full bg-rose-50 px-4 py-1.5 text-xs font-semibold text-rose-500 transition hover:bg-rose-100">
+                  <TrashIcon className="h-4 w-4" /> Usuń
                 </button>
-              )}
-              {/* Przycisk edytuj tytuł/tekst */}
-              {memento.type === 'text' && (
-                <button
-                  onClick={() => handleEditMemento(memento)}
-                  className="flex items-center gap-2 border border-gray-300 rounded-full py-1.5 px-4 hover:border-cyan-500 text-sm font-medium"
-                  title="Edytuj tytuł/tekst"
-                >
-                  <PencilSquareIcon className="h-5 w-5 text-cyan-500" />
-                  <span className="text-gray-800">Edytuj tytuł/tekst</span>
+                <button onClick={() => onEdit(memento)} className={ACTION_BUTTON}>
+                  <PencilSquareIcon className="h-4 w-4" /> Edytuj
                 </button>
-              )}
-              {/* Przycisk edytuj lokalizację */}
-              {memento.type === 'map' && (
-                <button
-                  onClick={() => {
-                    setEditingMemento(memento);
-                    setIsAddMapModalOpen(true);
-                  }}
-                  className="flex items-center gap-2 border border-gray-300 rounded-full py-1.5 px-4 hover:border-cyan-500 text-sm font-medium"
-                  title="Edytuj lokalizację"
-                >
-                  <PencilSquareIcon className="h-5 w-5 text-cyan-500" />
-                  <span className="text-gray-800">Edytuj lokalizację</span>
-                </button>
-              )}
-              {/* Przycisk edytuj zdjęcie */}
-              {memento.type === 'photo' && (
-                <button
-                  onClick={() => {
-                    setEditingMemento(memento);
-                    setIsAddPhotoModalOpen(true);
-                  }}
-                  className="flex items-center gap-2 border border-gray-300 rounded-full py-1.5 px-4 hover:border-cyan-500 text-sm font-medium"
-                  title="Edytuj zdjęcie"
-                >
-                  <PencilSquareIcon className="h-5 w-5 text-cyan-500" />
-                  <span className="text-gray-800">Edytuj zdjęcie</span>
-                </button>
-              )}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
-
-        {!localEditing && !isLast && <div className="border-b border-gray-300 w-full my-6" />}
       </div>
-    );
-  };
+    )
+  }
 
   const handleDragEnd = (event: any) => {
-    const { active, over } = event;
+    const { active, over } = event
+    if (!over || active.id === over.id) return
 
-    if (active.id !== over?.id) {
-      const oldIndex = mementos.findIndex((item) => item.id === active.id);
-      const newIndex = mementos.findIndex((item) => item.id === over?.id);
+    const oldIndex = visibleMementos.findIndex((item) => item.id === active.id)
+    const newIndex = visibleMementos.findIndex((item) => item.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
 
-      const newOrder = arrayMove(mementos, oldIndex, newIndex);
-      setMementos(newOrder);
+    const newOrder = arrayMove(visibleMementos, oldIndex, newIndex)
+    setMementos(newOrder)
+  }
+
+  const renderMementoList = localEditing ? (
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <SortableContext items={visibleMementos.map((m) => m.id)} strategy={verticalListSortingStrategy}>
+        <div className="flex flex-col gap-10">
+          {visibleMementos.map((memento) => (
+            <SortableMementoItem
+              key={memento.id}
+              memento={memento}
+              localEditing={localEditing}
+              onEdit={handleEditMemento}
+              onDelete={handleDeleteMemento}
+              onExpandMap={setFullscreenMap}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </DndContext>
+  ) : (
+    <div className="flex flex-col gap-10">
+      {visibleMementos.map((memento) => (
+        <SortableMementoItem
+          key={memento.id}
+          memento={memento}
+          localEditing={false}
+          onEdit={handleEditMemento}
+          onDelete={handleDeleteMemento}
+          onExpandMap={setFullscreenMap}
+        />
+      ))}
+    </div>
+  )
+
+  const creationButtons = [
+    {
+      label: 'Dodaj mapę',
+      description: 'Zaznacz ważne miejsce na mapie',
+      icon: MapPinIcon,
+      action: () => {
+        setEditingMemento(null)
+        setIsAddMapModalOpen(true)
+      }
+    },
+    {
+      label: 'Dodaj tytuł lub tekst',
+      description: 'Dodaj akapit lub nagłówek historii',
+      icon: DocumentTextIcon,
+      action: () => {
+        setEditingMemento(null)
+        setIsAddTextModalOpen(true)
+      }
+    },
+    {
+      label: 'Dodaj cytat',
+      description: 'Zapisz słowa, które warto zapamiętać',
+      icon: ChatBubbleLeftRightIcon,
+      action: () => {
+        setEditingMemento(null)
+        setIsAddQuoteModalOpen(true)
+      }
+    },
+    {
+      label: 'Dodaj zdjęcie',
+      description: 'Dodaj pojedyncze zdjęcie z opisem',
+      icon: PhotoSolidIcon,
+      action: () => {
+        setEditingMemento(null)
+        setIsAddPhotoModalOpen(true)
+      }
     }
-  };
+  ]
 
   return (
-    <div className="p-4">
-      {/* Przycisk Edytuj lub Zobacz */}
-      <div className="flex justify-center mb-4">
-        {!isPublicView && (
-          !localEditing ? (
-            <button
-              onClick={handleStartEdit}
-              className="bg-gray-900 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2 min-w-[350px]"
-            >
-              <PencilSquareIcon className="w-5 h-5 text-white" />
-              <span>Edytuj wspomnienia</span>
-            </button>
-          ) : (
-            <button
-              onClick={handleStopEdit}
-              className="bg-gray-900 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2 min-w-[350px]"
-            >
-              <EyeIcon className="w-5 h-5 text-white" />
-              <span>Zobacz wspomnienia</span>
-            </button>
-          )
-        )}
-      </div>
-
-      {isSavingOrder && (
-        <div className="text-center text-gray-500 text-sm my-2">
-          Zapisywanie zmian...
+    <div className="space-y-12">
+      {!isPublicView && (
+        <div className="rounded-[32px] border border-white/60 bg-white/95 px-6 py-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] backdrop-blur sm:px-10">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-[#0b1426]">Pamiątki i wspomnienia</h2>
+              <p className="text-sm text-[#0b1426]/70">
+                Dodawaj cytaty, teksty, zdjęcia i miejsca, aby wspólnie tworzyć historię upamiętnionej osoby.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              {localEditing ? (
+                <button onClick={handleStopEdit} className={SECONDARY_BUTTON}>
+                  <EyeIcon className="h-4 w-4" /> Zakończ edycję
+                </button>
+              ) : (
+                <button onClick={handleStartEdit} className={PRIMARY_GRADIENT_BUTTON}>
+                  <PencilSquareIcon className="h-4 w-4" /> Edytuj wspomnienia
+                </button>
+              )}
+            </div>
+          </div>
+          {isSavingOrder && (
+            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#f6f9fc] px-4 py-1 text-xs font-semibold text-[#0b1426]/60">
+              <SparklesIcon className="h-4 w-4 text-cyan-500" /> Zapisywanie zmian kolejności…
+            </div>
+          )}
         </div>
       )}
 
-      {/* Sekcja dla edycji - przyciski dodawania */}
       {localEditing && (
-        <div className="border-2 border-dashed border-gray-300 p-6 rounded-lg text-center mt-20">
-          <h2 className="text-lg font-semibold mb-10">Opowiedz nam o życiu tej osoby</h2>
-          <div className="flex flex-wrap gap-4 justify-center mb-8">
-            <button
-              onClick={() => {
-                setEditingMemento(null);
-                setIsAddMapModalOpen(true);
-              }}
-              className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium"
-            >
-              <PlusIcon className="w-5 h-5 text-cyan-500" />
-              Dodaj mapę
-            </button>
-            <button
-              onClick={() => {
-                setEditingMemento(null);
-                setIsAddTextModalOpen(true);
-              }}
-              className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium"
-            >
-              <PlusIcon className="w-5 h-5 text-cyan-500" />
-              Dodaj tytuł lub tekst
-            </button>
-            <button
-              onClick={() => {
-                setEditingMemento(null);
-                setIsAddQuoteModalOpen(true);
-              }}
-              className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium"
-            >
-              <PlusIcon className="w-5 h-5 text-cyan-500" />
-              Dodaj cytat
-            </button>
-            <button
-              onClick={() => {
-                setEditingMemento(null);
-                setIsAddPhotoModalOpen(true);
-              }}
-              className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium"
-            >
-              <PlusIcon className="w-5 h-5 text-cyan-500" />
-              Dodaj zdjęcia
-            </button>
-            <button className="border border-gray-300 h-10 py-1.5 px-4 rounded-full hover:border-cyan-500 flex items-center gap-2 justify-center text-sm font-medium">
-              <PlusIcon className="w-5 h-5 text-cyan-500" />
-              Dodaj film
-            </button>
+        <div className="rounded-[32px] border border-white/60 bg-white/95 px-6 py-8 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] backdrop-blur sm:px-10">
+          <h3 className="text-lg font-semibold text-[#0b1426]">Dodaj nowe wspomnienie</h3>
+          <p className="text-sm text-[#0b1426]/70">Wybierz typ elementu, aby wzbogacić stronę pamięci o kolejne historie.</p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {creationButtons.map(({ label, description, icon: Icon, action }) => (
+              <button
+                key={label}
+                type="button"
+                onClick={action}
+                className="group flex flex-col items-start gap-3 rounded-[24px] border border-[#dce4ed] bg-[#f6f9fc] px-5 py-6 text-left transition hover:border-cyan-400 hover:bg-white"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 text-white shadow-lg shadow-cyan-500/30">
+                  <Icon className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-[#0b1426]">{label}</p>
+                  <p className="text-xs text-[#0b1426]/60">{description}</p>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Cytaty, teksty i mapy */}
-      {localEditing ? (
-        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext
-            items={mementos.map((m) => m.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            <div className="flex flex-col items-center justify-center mt-28 w-full">
-              {mementos
-                .filter((memento) => memento?.type && memento?.content)
-                .map((memento, index) => (
-                  <SortableMementoItem
-                    key={memento.id}
-                    memento={memento}
-                    localEditing={localEditing}
-                    handleDeleteMemento={handleDeleteMemento}
-                    handleEditMemento={handleEditMemento}
-                    isLast={index === mementos.filter((m) => m?.type && m?.content).length - 1}
-                  />
-                ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+      {visibleMementos.length > 0 ? (
+        renderMementoList
       ) : (
-        <div className="flex flex-col items-center justify-center mt-28 w-full">
-          {mementos
-            .filter((memento) => memento?.type && memento?.content)
-            .map((memento, index) => (
-              <SortableMementoItem
-                key={memento.id}
-                memento={memento}
-                localEditing={localEditing}
-                handleDeleteMemento={handleDeleteMemento}
-                handleEditMemento={handleEditMemento}
-                isLast={index === mementos.filter((m) => m?.type && m?.content).length - 1}
-              />
-            ))}
+        <div className="rounded-[32px] border border-dashed border-[#dce4ed] bg-white/70 px-6 py-16 text-center text-sm text-[#0b1426]/60">
+          Nie dodano jeszcze żadnych wspomnień.
         </div>
       )}
 
-      {isDeleteModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="rounded-lg overflow-hidden max-w-xl w-full shadow-lg">
-            <div className="bg-white p-6 relative flex flex-col gap-4">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 bg-gray-100 rounded-full p-2">
-                  <TrashIcon className="w-4 h-4 text-red-500" />
-                </div>
-                <div className="flex-grow">
-                  <h2 className="text-lg font-bold">Czy na pewno chcesz to usunąć?</h2>
-                </div>
-                <button
-                  onClick={() => {
-                    setIsDeleteModalOpen(false);
-                    setMementoToDelete(null);
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-800 rounded-full hover:bg-gray-200 absolute top-4 right-4"
-                  aria-label="Zamknij"
-                >
-                  <span>Zamknij</span>
-                  <span className="text-lg">×</span>
-                </button>
-              </div>
-              <div className="text-gray-600 text-left ml-0 mt-4">
-                Jeśli chcesz trwale usunąć ten element, kliknij 'Usuń'. Aby anulować, kliknij 'Anuluj'.
-              </div>
+      {fullscreenMap && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#0b1426]/80 backdrop-blur-sm px-4 py-8">
+          <div className="relative w-full max-w-4xl overflow-hidden rounded-[32px] border border-white/20 bg-white shadow-[0_40px_90px_-45px_rgba(15,23,42,0.65)]">
+            <button
+              type="button"
+              onClick={() => setFullscreenMap(null)}
+              className="absolute right-4 top-4 inline-flex items-center justify-center rounded-full border border-[#d4dde5] bg-white px-4 py-1.5 text-xs font-semibold text-[#0b1426]/70 transition hover:border-[#c6d2dd] hover:bg-[#f5f8fb]"
+            >
+              Zamknij
+            </button>
+            <div className="space-y-4 px-6 pt-10 pb-6">
+              <h3 className="text-lg font-semibold text-[#0b1426]">{fullscreenMap.content?.title}</h3>
+              <p className="text-sm text-[#0b1426]/70">{fullscreenMap.content?.story}</p>
+              <p className="inline-flex items-center gap-2 rounded-full bg-[#f6f9fc] px-4 py-1 text-xs font-semibold text-[#0b1426]/60">
+                <MapPinIcon className="h-4 w-4 text-cyan-500" />
+                {fullscreenMap.content?.address}
+              </p>
             </div>
-            <div className="bg-gray-100 p-4 flex justify-end gap-4">
-              <button
-                onClick={() => {
-                  setIsDeleteModalOpen(false);
-                  setMementoToDelete(null);
-                }}
-                className="px-4 py-2 border rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            <div className="h-[420px] border-t border-[#dce4ed]">
+              <Map
+                initialViewState={{ latitude: fullscreenMap.content?.lat, longitude: fullscreenMap.content?.lng, zoom: 15 }}
+                mapStyle="mapbox://styles/mapbox/streets-v11"
+                mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                style={{ width: '100%', height: '100%' }}
               >
+                <Marker latitude={fullscreenMap.content?.lat} longitude={fullscreenMap.content?.lng} color="#06b6d4" />
+              </Map>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteModalOpen && (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#0b1426]/70 backdrop-blur-sm px-4">
+          <div className="w-full max-w-lg overflow-hidden rounded-[28px] border border-white/10 bg-white/95 shadow-[0_30px_90px_-45px_rgba(15,23,42,0.55)]">
+            <div className="px-6 py-6">
+              <h3 className="text-lg font-semibold text-[#0b1426]">Czy na pewno chcesz usunąć to wspomnienie?</h3>
+              <p className="mt-2 text-sm text-[#0b1426]/70">
+                Element zostanie trwale usunięty ze strony pamięci. Tego działania nie można cofnąć.
+              </p>
+            </div>
+            <div className="flex flex-col-reverse gap-3 border-t border-white/30 bg-white/90 px-6 py-5 sm:flex-row sm:justify-end">
+              <button onClick={() => setDeleteModalOpen(false)} className={SECONDARY_BUTTON}>
                 Anuluj
               </button>
-              <button
-                onClick={async () => {
-                  if (mementoToDelete !== null) {
-                    // Obsługa usuwania mapy (jeśli mementoToDelete jest stringiem i zaczyna się od "map-")
-                    if (typeof mementoToDelete === 'string' && mementoToDelete.startsWith('map-')) {
-                      const mapId = mementoToDelete.replace('map-', '');
-                      const { error } = await supabase.from('memorial_maps').delete().eq('id', mapId);
-                      if (error) {
-                        console.error('Błąd usuwania mapy:', error.message);
-                      } else {
-                        await fetchMementos();
-                      }
-                    } else if (typeof mementoToDelete !== 'string') {
-                      // Najpierw pobierz dane pamiątki, żeby sprawdzić czy to zdjęcie i usunąć je ze storage
-                      const { data: mementoData } = await supabase
-                        .from('memorial_mementos')
-                        .select('*')
-                        .eq('id', mementoToDelete)
-                        .single();
-
-                      // Nowy kod usuwania zdjęcia ze storage:
-                      if (mementoData?.type === 'photo' && mementoData?.content?.image_url) {
-                        const imageUrl = mementoData.content.image_url;
-
-                        try {
-                          const url = new URL(imageUrl);
-                          const path = url.pathname.split('/storage/v1/object/public/memorial-photos/')[1];
-                          console.log('Ścieżka do usunięcia:', JSON.stringify(path));
-                          if (!path || !path.includes('68/')) {
-                            console.warn('⚠️ Ścieżka zdjęcia wygląda podejrzanie, nie usuwam:', path);
-                            return;
-                          }
-                          if (!path) {
-                            console.warn('⚠️ Nie udało się wyciągnąć ścieżki zdjęcia ze storage!');
-                          } else {
-                            const { error: storageError } = await supabase
-                              .storage
-                              .from('memorial-photos')
-                              .remove([path]);
-
-                            if (storageError) {
-                              console.error('❌ Błąd usuwania pliku ze storage:', storageError.message);
-                            } else {
-                              console.log('✅ Usunięto plik ze storage:', path);
-                            }
-                          }
-                        } catch (e) {
-                          console.error('❌ Wyjątek podczas usuwania zdjęcia ze storage:', e);
-                        }
-                      }
-
-                      const { error } = await supabase
-                        .from('memorial_mementos')
-                        .delete()
-                        .eq('id', mementoToDelete);
-                      if (error) {
-                        console.error('Błąd podczas usuwania pamiątki:', error.message);
-                      } else {
-                        await fetchMementos();
-                      }
-                    }
-                  }
-                  setIsDeleteModalOpen(false);
-                  setMementoToDelete(null);
-                }}
-                className="px-4 py-2 bg-red-400 text-white rounded-md hover:bg-red-500"
-              >
-                Usuń
+              <button onClick={handleConfirmDelete} className="inline-flex items-center justify-center gap-2 rounded-full bg-rose-500 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-rose-500/30 transition hover:bg-rose-400">
+                <TrashIcon className="h-4 w-4" /> Usuń
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Modal dla cytatów */}
       {isAddQuoteModalOpen && (
         <AddQuoteModal
           isOpen={isAddQuoteModalOpen}
           onClose={async (newQuote) => {
-            setIsAddQuoteModalOpen(false);
-            setEditingMemento(null);  // Wyczyszczenie danych po zamknięciu modalu
+            setIsAddQuoteModalOpen(false)
+            setEditingMemento(null)
             if (newQuote && !editingMemento) {
-              // Dodajemy nowy cytat na początek z sort_order: 0
-              setMementos((prev) => [
-                { ...newQuote, sort_order: 0 },
-                ...prev,
-              ]);
+              setMementos((prev) => [{ ...newQuote, sort_order: 0 }, ...prev])
             } else {
-              await fetchMementos();
+              await fetchMementos()
             }
           }}
           memorialId={memorialId}
-          editingQuote={editingMemento} // Przekazujemy dane do edycji cytatu
+          editingQuote={editingMemento}
         />
       )}
 
-      {/* Modal dla tytułów/tekstów */}
       {isAddTextModalOpen && (
         <AddTextModal
           isOpen={isAddTextModalOpen}
           onClose={async (newText) => {
-            console.log("📥 Modal zamknięty, odświeżam dane...");
-            setIsAddTextModalOpen(false);
+            setIsAddTextModalOpen(false)
+            setEditingMemento(null)
             if (newText && !editingMemento) {
-              setMementos((prev) => [
-                { ...newText, sort_order: 0 },
-                ...prev,
-              ]);
+              setMementos((prev) => [{ ...newText, sort_order: 0 }, ...prev])
             } else {
-              await fetchMementos();
+              await fetchMementos()
             }
           }}
           memorialId={memorialId}
@@ -741,48 +604,36 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isP
         />
       )}
 
-      {/* Modal dla mapy */}
       {isAddMapModalOpen && (
         <AddMapModal
           isOpen={isAddMapModalOpen}
           onClose={async (newMap) => {
-            setIsAddMapModalOpen(false);
+            setIsAddMapModalOpen(false)
+            setEditingMemento(null)
             if (newMap && !editingMemento) {
-              setMementos((prev) => [
-                { ...newMap, sort_order: 0 },
-                ...prev,
-              ]);
+              setMementos((prev) => [{ ...newMap, sort_order: 0 }, ...prev])
             } else {
-              await fetchMementos();
+              await fetchMementos()
             }
-            setEditingMemento(null);
           }}
           memorialId={memorialId}
-          editingMap={editingMemento}
         />
       )}
-      {/* Modal dla zdjęć */}
+
       {isAddPhotoModalOpen && (
         <AddPhotoModal
           isOpen={isAddPhotoModalOpen}
-          onClose={async (newPhoto) => {
-            setIsAddPhotoModalOpen(false);
-            if (newPhoto && !editingMemento) {
-              setMementos((prev) => [
-                { ...newPhoto, sort_order: 0 },
-                ...prev,
-              ]);
-            } else {
-              await fetchMementos();
-            }
-            setEditingMemento(null);
+          onClose={async () => {
+            setIsAddPhotoModalOpen(false)
+            setEditingMemento(null)
+            await fetchMementos()
           }}
           memorialId={memorialId}
           editingPhoto={editingMemento}
         />
       )}
     </div>
-  );
-};
+  )
+}
 
-export default PamiatkiTab;
+export default PamiatkiTab
