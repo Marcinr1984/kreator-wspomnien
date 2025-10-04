@@ -163,8 +163,9 @@ const KeeperAdminsTab: React.FC = () => {
           Przydziel zaufaną osobę do zarządzania i edycji profilu tej strony pamięci.
         </p>
         <div className="rounded-[24px] border border-slate-100 bg-white/95 p-6 text-center shadow-[0_20px_60px_-30px_rgba(15,23,42,0.2)]">
-          <form className="space-y-4"
-          onSubmit={async (e) => {
+          <form
+            className="space-y-6"
+            onSubmit={async (e) => {
             e.preventDefault();
             setInviteStatus('⏳ Szukam użytkownika...');
 
@@ -203,7 +204,6 @@ const KeeperAdminsTab: React.FC = () => {
               emailInputRef.current?.blur();
             }
           }}
-          className="space-y-6"
         >
           <input
             type="email"
