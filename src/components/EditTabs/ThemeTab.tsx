@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../utils/supabaseClient'
-import { PhotoIcon, ArrowPathIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline'
+import { CloudArrowUpIcon } from '@heroicons/react/24/outline'
 
 const BANNER_BUCKET = 'memorial-banners'
 
@@ -232,7 +232,8 @@ const ThemeTab = ({ memorialId, currentBannerUrl, onBannerChange }: ThemeTabProp
     allowDelete = false,
     onDelete,
     pendingUrl,
-    deleting
+    deleting,
+    enableScroll = false
   }: {
     title: string
     items: StoredBackground[]
@@ -240,66 +241,77 @@ const ThemeTab = ({ memorialId, currentBannerUrl, onBannerChange }: ThemeTabProp
     onDelete?: (background: StoredBackground) => void
     pendingUrl?: string | null
     deleting?: string | null
+    enableScroll?: boolean
   }) => {
     if (!items.length) return null
+
+    const grid = (
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+        {items.map((background) => {
+          const isActive = selectedUrl === background.url
+          const isPending = pendingUrl === background.url
+          const isDeleting = deleting === background.path
+          return (
+            <div key={background.path} className="relative">
+              <button
+                type="button"
+                onClick={() => handleSelect(background.url)}
+                disabled={isPending || isDeleting}
+                className={`group relative w-full overflow-hidden rounded-[24px] border ${
+                  isActive ? 'border-cyan-400 shadow-[0_16px_40px_-26px_rgba(14,116,144,0.45)]' : 'border-[#dce4ed] shadow-[0_12px_34px_-26px_rgba(15,23,42,0.2)]'
+                } bg-[#f6f9fc] transition hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60`}
+              >
+                <div
+                  className="h-32 w-full bg-cover bg-center"
+                  style={{ backgroundImage: `url(${background.url})` }}
+                />
+                <div
+                  className={`pointer-events-none absolute inset-x-3 bottom-3 flex justify-center transition-all duration-200 ease-out ${
+                    isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0'
+                  }`}
+                >
+                  <div
+                    className={`inline-flex items-center justify-center rounded-full border px-5 py-1.5 text-[13px] font-semibold leading-none backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] ${
+                      isActive
+                        ? 'border-white/40 bg-gradient-to-r from-white/85 via-white/60 to-white/25 text-[#0b1426]'
+                        : 'border-white/30 bg-gradient-to-r from-white/60 via-white/35 to-white/18 text-[#0b1426]/80'
+                    }`}
+                  >
+                    {isPending ? 'Ustawianie…' : isActive ? 'Aktywne' : 'Ustaw tło'}
+                  </div>
+                </div>
+              </button>
+              {allowDelete && onDelete && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete(background)
+                  }}
+                  disabled={isDeleting || isPending}
+                  className={`absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-rose-200 bg-white text-[15px] font-semibold leading-none text-rose-500 shadow-[0_6px_18px_-10px_rgba(225,29,72,0.4)] transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    isDeleting ? 'animate-pulse' : ''
+                  }`}
+                >
+                  {isDeleting ? '…' : '×'}
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+    )
 
     return (
       <div className="space-y-4">
         <h4 className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0b1426]/40">{title}</h4>
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {items.map((background) => {
-            const isActive = selectedUrl === background.url
-            const isPending = pendingUrl === background.url
-            const isDeleting = deleting === background.path
-            return (
-              <div key={background.path} className="relative">
-                <button
-                  type="button"
-                  onClick={() => handleSelect(background.url)}
-                  disabled={isPending || isDeleting}
-                  className={`group relative w-full overflow-hidden rounded-[24px] border ${
-                    isActive ? 'border-cyan-400 shadow-[0_16px_40px_-26px_rgba(14,116,144,0.45)]' : 'border-[#dce4ed] shadow-[0_12px_34px_-26px_rgba(15,23,42,0.2)]'
-                  } bg-[#f6f9fc] transition hover:border-cyan-400 disabled:cursor-not-allowed disabled:opacity-60`}
-                >
-                  <div
-                    className="h-32 w-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${background.url})` }}
-                  />
-                  <div
-                    className={`pointer-events-none absolute inset-x-3 bottom-3 flex justify-center transition-all duration-200 ease-out ${
-                      isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0'
-                    }`}
-                  >
-                    <div
-                      className={`inline-flex items-center justify-center rounded-full border px-5 py-1.5 text-[13px] font-semibold leading-none backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] ${
-                        isActive
-                          ? 'border-white/40 bg-gradient-to-r from-white/85 via-white/60 to-white/25 text-[#0b1426]'
-                          : 'border-white/30 bg-gradient-to-r from-white/60 via-white/35 to-white/18 text-[#0b1426]/80'
-                      }`}
-                    >
-                      {isPending ? 'Ustawianie…' : isActive ? 'Aktywne' : 'Ustaw tło'}
-                    </div>
-                  </div>
-                </button>
-                {allowDelete && onDelete && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onDelete(background)
-                    }}
-                    disabled={isDeleting || isPending}
-                    className={`absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full border border-rose-200 bg-white text-[15px] font-semibold leading-none text-rose-500 shadow-[0_6px_18px_-10px_rgba(225,29,72,0.4)] transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 ${
-                      isDeleting ? 'animate-pulse' : ''
-                    }`}
-                  >
-                    {isDeleting ? '…' : '×'}
-                  </button>
-                )}
-              </div>
-            )
-          })}
-        </div>
+        {enableScroll ? (
+          <div className="max-h-[540px] overflow-y-auto pr-1 sm:max-h-[420px] md:max-h-[280px]">
+            {grid}
+          </div>
+        ) : (
+          grid
+        )}
       </div>
     )
   }
@@ -313,10 +325,6 @@ const ThemeTab = ({ memorialId, currentBannerUrl, onBannerChange }: ThemeTabProp
         <p className="text-sm text-[#0b1426]/70">
           Skorzystaj z gotowych motywów lub wgraj własne zdjęcia, aby dopasować stronę pamięci do charakteru bliskiej osoby.
         </p>
-        <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#f6f9fc] px-4 py-1 text-xs font-semibold text-[#0b1426]/60">
-          <ArrowPathIcon className="h-4 w-4 text-cyan-500" />
-          Aktualne tło jest podświetlone.
-        </div>
       </div>
 
       {error && <p className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm text-rose-600">{error}</p>}
@@ -327,7 +335,13 @@ const ThemeTab = ({ memorialId, currentBannerUrl, onBannerChange }: ThemeTabProp
         </div>
       ) : (
         <div className="space-y-10">
-          <BannerGrid title="Galeria publiczna" items={sharedBackgrounds} pendingUrl={pendingSelection} deleting={deletingPath} />
+          <BannerGrid
+            title="Galeria publiczna"
+            items={sharedBackgrounds}
+            pendingUrl={pendingSelection}
+            deleting={deletingPath}
+            enableScroll
+          />
           {userId && (
             <BannerGrid
               title="Twoje przesłane tła"
