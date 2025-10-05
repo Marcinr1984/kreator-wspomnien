@@ -1,17 +1,5 @@
 {
   "pages": {
-    "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
-    ],
-    "/memorial/[memorialId]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/memorial/[memorialId]/page.css",
-      "static/chunks/app/memorial/[memorialId]/page.js"
-    ],
     "/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -23,6 +11,12 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/layout.js"
     ],
+    "/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
+    ],
     "/auth/login/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -33,11 +27,11 @@
       "static/chunks/main-app.js",
       "static/chunks/app/auth/layout.js"
     ],
-    "/preview/[id]/page": [
+    "/memorial/[memorialId]/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/preview/[id]/page.css",
-      "static/chunks/app/preview/[id]/page.js"
+      "static/css/app/memorial/[memorialId]/page.css",
+      "static/chunks/app/memorial/[memorialId]/page.js"
     ]
   }
 }

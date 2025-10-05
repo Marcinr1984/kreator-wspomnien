@@ -168,11 +168,24 @@ export default function MemorialPage() {
   }, [isDragging, repositionMode, position, parsedId]);
 
   const handleBannerChange = async (newUrl: string) => {
+    const previousUrl = pageData?.banner_url
     setPageData((prev: any) => ({ ...prev, banner_url: newUrl }))
-    await supabase
+    const { data: updated, error } = await supabase
       .from('memorial_pages')
       .update({ banner_url: newUrl })
       .eq('id', parsedId)
+      .select('banner_url')
+      .single()
+
+    if (error) {
+      console.error('Błąd zapisu tła:', error)
+      setPageData((prev: any) => ({ ...prev, banner_url: previousUrl }))
+    } else {
+      if (updated?.banner_url) {
+        setPageData((prev: any) => ({ ...prev, banner_url: updated.banner_url }))
+      }
+      console.log('✅ Zmieniono tło na', updated?.banner_url)
+    }
   }
 
   const handleRelationsChange = async (newRelations: string) => {
@@ -1216,19 +1229,22 @@ export default function MemorialPage() {
   return (
     <>
       {useLegacyLayout ? legacyLayout : refreshedLayout}
-      <EditPageSettingsModal 
-        isOpen={isModalOpen} 
-        closeModal={closeModal} 
-        memorialId={parsedId} 
-        pageData={pageData} 
-        onRelationsChange={handleRelationsChange}
-        defaultTab={modalDefaultTab}
-        onUpdate={(newPhotoUrl) => {
-          setPhotoLoading(true);
-          setPageData((prev: any) => ({ ...prev, photo_url: newPhotoUrl }));
-          setTimeout(() => setPhotoLoading(false), 1000);
-        }}
-      />
+          <EditPageSettingsModal 
+            isOpen={isModalOpen} 
+            closeModal={closeModal} 
+            memorialId={parsedId} 
+            pageData={pageData} 
+            onRelationsChange={handleRelationsChange}
+            defaultTab={modalDefaultTab}
+            onUpdate={(newPhotoUrl) => {
+              setPhotoLoading(true);
+              setPageData((prev: any) => ({ ...prev, photo_url: newPhotoUrl }));
+              setTimeout(() => setPhotoLoading(false), 1000);
+            }}
+            onBannerChange={async (newUrl) => {
+              await handleBannerChange(newUrl)
+            }}
+          />
     </>
   );
 }

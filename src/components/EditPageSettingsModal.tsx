@@ -25,10 +25,11 @@ interface EditPageSettingsModalProps {
   onRelationsChange?: (newRelations: string) => Promise<void>;
   defaultTab?: string;
   onUpdate?: (newPhotoUrl: string) => void;
+  onBannerChange?: (newBannerUrl: string) => Promise<void> | void;
 }
   
 
-const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, closeModal, memorialId, pageData, defaultTab, onUpdate }) => {
+const EditPageSettingsModal: React.FC<EditPageSettingsModalProps> = ({ isOpen, closeModal, memorialId, pageData, defaultTab, onUpdate, onBannerChange }) => {
     const [validationError, setValidationError] = useState('');
     const [firstName, setFirstName] = useState(pageData.first_name);
   const [middleName, setMiddleName] = useState(pageData.middle_name || '');
@@ -268,7 +269,13 @@ setUploading(false);
                           supabase={supabase}
                         />
                       )}
-                      {activeTab === 'theme' && <ThemeTab />}
+                      {activeTab === 'theme' && (
+                        <ThemeTab
+                          memorialId={memorialId}
+                          currentBannerUrl={pageData?.banner_url}
+                          onBannerChange={onBannerChange}
+                        />
+                      )}
                       {activeTab === 'icon' && <IconTab />}
                       {activeTab === 'privacy' && (
                         <PrivacyTab
