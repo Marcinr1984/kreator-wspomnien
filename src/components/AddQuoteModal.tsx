@@ -100,7 +100,7 @@ export default function AddQuoteModal({ isOpen, onClose, memorialId, editingQuot
               leaveFrom="opacity-100"
               leaveTo="opacity-0 translate-y-6 scale-95"
             >
-              <Dialog.Panel className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_30px_90px_-45px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+              <Dialog.Panel className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)] backdrop-blur-xl">
                 <div className="relative bg-gradient-to-r from-purple-500 via-fuchsia-500 to-rose-500 px-6 py-6 text-white sm:px-8">
                   <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-center gap-4">
@@ -127,7 +127,7 @@ export default function AddQuoteModal({ isOpen, onClose, memorialId, editingQuot
                       <h3 className="text-lg font-semibold text-[#0b1426]">Treść cytatu</h3>
                       <p className="text-sm text-[#0b1426]/70">Zapisz cytat oraz – jeśli chcesz – jego autora. Dla zachowania czytelności unikaj bardzo długich fragmentów.</p>
                     </div>
-                    <div className="rounded-[28px] border border-[#dde5ec] bg-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] space-y-6">
+                    <div className="rounded-[28px] border border-[#dde5ec] bg-white/90 p-6 shadow-[0_20px_55px_-38px_rgba(15,23,42,0.28)] space-y-6">
                       <div>
                         <label className="block text-sm font-semibold text-[#0b1426] mb-2">Treść cytatu *</label>
                         <textarea
@@ -156,7 +156,7 @@ export default function AddQuoteModal({ isOpen, onClose, memorialId, editingQuot
 
                   <div className="space-y-4">
                     <div className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0b1426]/40 text-center lg:text-left">Podgląd</div>
-                    <div className="rounded-[28px] border border-[#dce4ed] bg-gradient-to-b from-white/95 via-white to-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] text-center">
+                    <div className="rounded-[28px] border border-[#dce4ed] bg-gradient-to-b from-white/95 via-white to-white/90 p-6 shadow-[0_20px_55px_-38px_rgba(15,23,42,0.28)] text-center">
                       <div className="relative flex flex-col items-center">
                         <span className="text-6xl font-serif text-rose-400/70">“</span>
                         <p className="mt-4 text-base italic text-[#0b1426]/80 whitespace-pre-wrap leading-relaxed line-clamp-6 min-h-[120px]">

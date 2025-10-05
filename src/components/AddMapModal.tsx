@@ -220,7 +220,7 @@ useEffect(() => {
               leaveFrom="opacity-100"
               leaveTo="opacity-0 translate-y-6 scale-95"
             >
-              <Dialog.Panel className="relative flex w-full max-w-5xl flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_30px_90px_-45px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+              <Dialog.Panel className="relative flex w-full max-w-5xl flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)] backdrop-blur-xl">
                 <div className="relative bg-gradient-to-r from-cyan-500 via-sky-500 to-purple-500 px-6 py-6 text-white sm:px-8">
                   <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-center gap-4">
@@ -248,7 +248,7 @@ useEffect(() => {
                         <h3 className="text-lg font-semibold text-[#0b1426]">Informacje o miejscu</h3>
                         <p className="text-sm text-[#0b1426]/70">Uzupełnij nazwę, krótką historię oraz adres, a następnie zaznacz lokalizację na mapie.</p>
                       </div>
-                      <div className="rounded-[28px] border border-[#dde5ec] bg-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] space-y-6">
+                      <div className="rounded-[28px] border border-[#dde5ec] bg-white/90 p-6 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.28)] space-y-6">
                         <div>
                           <label className="block text-sm font-semibold text-[#0b1426] mb-2">Nazwa miejsca</label>
                           <input
@@ -285,7 +285,7 @@ useEffect(() => {
                               maxLength={200}
                             />
                             {addressSuggestions.length > 0 && (
-                              <ul className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-[#dce4ed] bg-white shadow-[0_24px_60px_-36px_rgba(15,23,42,0.35)]">
+                              <ul className="absolute z-50 mt-2 w-full overflow-hidden rounded-2xl border border-[#dce4ed] bg-white shadow-[0_20px_48px_-32px_rgba(15,23,42,0.28)]">
                                 {addressSuggestions
                                   .filter((suggestion) => suggestion !== mapAddress)
                                   .map((suggestion, index) => (
@@ -313,7 +313,7 @@ useEffect(() => {
 
                     <div className="space-y-4">
                       <div className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0b1426]/40 text-center lg:text-left">Podgląd mapy</div>
-                      <div className="overflow-hidden rounded-[28px] border border-[#dce4ed] bg-white/90 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)]">
+                      <div className="overflow-hidden rounded-[28px] border border-[#dce4ed] bg-white/90 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.28)]">
                         <div className="px-6 pt-6 text-center">
                           <p className="text-base font-semibold text-[#0b1426] line-clamp-3 min-h-[60px]">
                             {mapTitle || 'Nazwa miejsca'}

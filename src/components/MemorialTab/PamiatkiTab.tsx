@@ -39,7 +39,7 @@ type Memento = {
 }
 
 const CARD_BASE =
-  'relative overflow-hidden rounded-[32px] border border-white/60 bg-white/95 shadow-[0_24px_60px_-35px_rgba(14,116,144,0.4)] backdrop-blur px-8 py-10 sm:px-10'
+  'relative overflow-hidden rounded-[32px] border border-white/60 bg-white/95 shadow-[0_20px_52px_-32px_rgba(14,116,144,0.28)] backdrop-blur px-8 py-10 sm:px-10'
 
 const ACTION_BUTTON =
   'inline-flex items-center gap-2 rounded-full border border-[#d4dde5] bg-white/90 px-4 py-1.5 text-xs font-semibold text-[#0b1426]/70 transition hover:border-cyan-400 hover:text-cyan-600'
@@ -456,7 +456,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
   return (
     <div className="space-y-12">
       {!isPublicView && (
-        <div className="rounded-[32px] border border-white/60 bg-white/95 px-6 py-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] backdrop-blur sm:px-10">
+        <div className="rounded-[32px] border border-white/60 bg-white/95 px-6 py-6 shadow-[0_20px_52px_-32px_rgba(15,23,42,0.28)] backdrop-blur sm:px-10">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold text-[#0b1426]">Pamiątki i wspomnienia</h2>
@@ -485,7 +485,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       )}
 
       {localEditing && (
-        <div className="rounded-[32px] border border-white/60 bg-white/95 px-6 py-8 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] backdrop-blur sm:px-10">
+        <div className="rounded-[32px] border border-white/60 bg-white/95 px-6 py-8 shadow-[0_20px_52px_-32px_rgba(15,23,42,0.28)] backdrop-blur sm:px-10">
           <h3 className="text-lg font-semibold text-[#0b1426]">Dodaj nowe wspomnienie</h3>
           <p className="text-sm text-[#0b1426]/70">Wybierz typ elementu, aby wzbogacić stronę pamięci o kolejne historie.</p>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -519,7 +519,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
 
       {fullscreenMap && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#0b1426]/80 backdrop-blur-sm px-4 py-8">
-          <div className="relative w-full max-w-4xl overflow-hidden rounded-[32px] border border-white/20 bg-white shadow-[0_40px_90px_-45px_rgba(15,23,42,0.65)]">
+          <div className="relative w-full max-w-4xl overflow-hidden rounded-[32px] border border-white/20 bg-white shadow-[0_28px_70px_-40px_rgba(15,23,42,0.45)]">
             <button
               type="button"
               onClick={() => setFullscreenMap(null)}
@@ -551,7 +551,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
 
       {deleteModalOpen && (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#0b1426]/70 backdrop-blur-sm px-4">
-          <div className="w-full max-w-lg overflow-hidden rounded-[28px] border border-white/10 bg-white/95 shadow-[0_30px_90px_-45px_rgba(15,23,42,0.55)]">
+          <div className="w-full max-w-lg overflow-hidden rounded-[28px] border border-white/10 bg-white/95 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)]">
             <div className="px-6 py-6">
               <h3 className="text-lg font-semibold text-[#0b1426]">Czy na pewno chcesz usunąć to wspomnienie?</h3>
               <p className="mt-2 text-sm text-[#0b1426]/70">

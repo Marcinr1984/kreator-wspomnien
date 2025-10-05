@@ -93,7 +93,7 @@ export default function AddTextModal({ isOpen, onClose, memorialId, editingText 
               leaveFrom="opacity-100"
               leaveTo="opacity-0 translate-y-6 scale-95"
             >
-              <Dialog.Panel className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_30px_90px_-45px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+              <Dialog.Panel className="relative flex w-full max-w-4xl flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)] backdrop-blur-xl">
                 <div className="relative bg-gradient-to-r from-cyan-500 via-sky-500 to-purple-500 px-6 py-6 text-white sm:px-8">
                   <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-center gap-4">
@@ -120,7 +120,7 @@ export default function AddTextModal({ isOpen, onClose, memorialId, editingText 
                       <h3 className="text-lg font-semibold text-[#0b1426]">Treść</h3>
                       <p className="text-sm text-[#0b1426]/70">Teksty pomagają uporządkować stronę i nadać jej rytm. Zadbaj o krótkie akapity i klarowne nagłówki.</p>
                     </div>
-                    <div className="rounded-[28px] border border-[#dde5ec] bg-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] space-y-6">
+                    <div className="rounded-[28px] border border-[#dde5ec] bg-white/90 p-6 shadow-[0_20px_55px_-38px_rgba(15,23,42,0.28)] space-y-6">
                       <div>
                         <label className="block text-sm font-semibold text-[#0b1426] mb-2">Tytuł tekstu</label>
                         <input
@@ -149,7 +149,7 @@ export default function AddTextModal({ isOpen, onClose, memorialId, editingText 
 
                   <div className="space-y-4">
                     <div className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0b1426]/40 text-center lg:text-left">Podgląd</div>
-                    <div className="rounded-[28px] border border-[#dce4ed] bg-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)]">
+                    <div className="rounded-[28px] border border-[#dce4ed] bg-white/90 p-6 shadow-[0_20px_55px_-38px_rgba(15,23,42,0.28)]">
                       <div className="text-center text-base font-semibold text-[#0b1426] line-clamp-3 min-h-[48px]">
                         {title || 'Tytuł tekstu'}
                       </div>

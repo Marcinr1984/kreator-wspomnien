@@ -191,7 +191,7 @@ export default function AddPhotoModal({ isOpen, onClose, memorialId, editingPhot
               leaveFrom="opacity-100"
               leaveTo="opacity-0 translate-y-6 scale-95"
             >
-              <Dialog.Panel className="relative flex w-full max-w-6xl flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_30px_90px_-45px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+              <Dialog.Panel className="relative flex w-full max-w-6xl flex-col overflow-hidden rounded-[32px] border border-white/10 bg-white/95 text-left shadow-[0_24px_70px_-38px_rgba(15,23,42,0.35)] backdrop-blur-xl">
                 <div className="relative bg-gradient-to-r from-cyan-500 via-sky-500 to-purple-500 px-6 py-6 text-white sm:px-8">
                   <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex items-center gap-4">
@@ -216,7 +216,7 @@ export default function AddPhotoModal({ isOpen, onClose, memorialId, editingPhot
                   {isEditing && editablePhotoUrl ? (
                     <div className="flex flex-col items-center gap-6">
                       <p className="text-sm font-semibold text-[#0b1426]">Przytnij zdjęcie, aby idealnie pasowało.</p>
-                      <div className="w-full max-w-xl overflow-hidden rounded-[28px] border border-[#dde5ec] shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)]">
+                      <div className="w-full max-w-xl overflow-hidden rounded-[28px] border border-[#dde5ec] shadow-[0_22px_55px_-38px_rgba(15,23,42,0.28)]">
                         {isCropping && (
                           <ImageCropper
                             ref={cropperRef}
@@ -262,7 +262,7 @@ export default function AddPhotoModal({ isOpen, onClose, memorialId, editingPhot
                           <h3 className="text-lg font-semibold text-[#0b1426]">Szczegóły</h3>
                           <p className="text-sm text-[#0b1426]/70">Dodaj opis zdjęcia i wybierz układ, w jakim ma się pojawiać w historii.</p>
                         </div>
-                        <div className="rounded-[28px] border border-[#dde5ec] bg-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)] space-y-6">
+                        <div className="rounded-[28px] border border-[#dde5ec] bg-white/90 p-6 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.28)] space-y-6">
                           <div className="rounded-[24px] border-2 border-dashed border-[#dce4ed] bg-[#f6f9fc] px-6 py-8 text-center">
                             {file ? (
                               <div className="space-y-4">
@@ -355,7 +355,7 @@ export default function AddPhotoModal({ isOpen, onClose, memorialId, editingPhot
 
                       <div className="space-y-4">
                         <div className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0b1426]/40 text-center lg:text-left">Podgląd</div>
-                        <div className="rounded-[28px] border border-[#dce4ed] bg-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)]">
+                        <div className="rounded-[28px] border border-[#dce4ed] bg-white/90 p-6 shadow-[0_22px_55px_-38px_rgba(15,23,42,0.28)]">
                           <div className={`flex flex-col gap-4 ${layout === 'right' ? 'lg:flex-row-reverse' : 'lg:flex-row'} lg:items-start`}>
                             <div className="mx-auto flex h-40 w-full max-w-[180px] items-center justify-center overflow-hidden rounded-2xl border border-[#dce4ed] bg-[#f6f9fc] lg:mx-0">
                               {file ? (

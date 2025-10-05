@@ -98,7 +98,7 @@ export default function TopNavbar({ onCreateMemorialPage }: TopNavbarProps) {
                   <ChevronDownIcon className="w-4 h-4 text-white" />
                 </button>
                 {isMenuOpen && (
-                  <nav className="absolute right-0 mt-4 w-[min(18rem,85vw)] rounded-3xl border border-white/10 bg-[#0f1b33]/95 backdrop-blur-xl text-white shadow-[0_24px_60px_-30px_rgba(14,116,144,0.65)] z-50 p-3">
+                  <nav className="absolute right-0 mt-4 w-[min(18rem,85vw)] rounded-3xl border border-white/10 bg-[#0f1b33]/95 backdrop-blur-xl text-white shadow-[0_20px_48px_-28px_rgba(14,116,144,0.45)] z-50 p-3">
                     <ul className="space-y-1 text-sm">
                       <li
                         onClick={() => {

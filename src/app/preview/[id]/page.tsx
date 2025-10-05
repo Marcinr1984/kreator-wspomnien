@@ -34,7 +34,7 @@ export default function PublicMemorialView() {
   if (!data) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#ecf2f6] via-[#eef5f9] to-[#dfe9f3] flex items-center justify-center px-6">
-        <div className="max-w-md rounded-[32px] border border-white/60 bg-white/90 p-8 text-center shadow-[0_30px_60px_-32px_rgba(14,116,144,0.35)] backdrop-blur">
+        <div className="max-w-md rounded-[32px] border border-white/60 bg-white/90 p-8 text-center shadow-[0_20px_52px_-32px_rgba(14,116,144,0.28)] backdrop-blur">
           <h1 className="text-xl font-semibold text-[#0b1426]">Nie znaleziono strony pamięci</h1>
           <p className="mt-3 text-sm text-[#0b1426]/70">Sprawdź poprawność linku lub skontaktuj się z opiekunem strony.</p>
         </div>
@@ -113,7 +113,7 @@ export default function PublicMemorialView() {
           <div className="mx-auto max-w-6xl">
             <div className="grid gap-8 lg:grid-cols-[320px_1fr] lg:gap-10">
               <div className="space-y-6">
-                <div className="overflow-hidden rounded-[32px] border border-white/60 bg-white/90 shadow-[0_30px_60px_-32px_rgba(14,116,144,0.35)] backdrop-blur">
+                <div className="overflow-hidden rounded-[32px] border border-white/60 bg-white/90 shadow-[0_20px_52px_-32px_rgba(14,116,144,0.28)] backdrop-blur">
                   {data.photo_url ? (
                     <img src={data.photo_url} alt={`${data.first_name} ${data.last_name}`} className="h-[360px] w-full object-cover" />
                   ) : (
@@ -123,7 +123,7 @@ export default function PublicMemorialView() {
                   )}
                 </div>
 
-                <div className="space-y-4 rounded-[32px] border border-white/60 bg-white/90 p-6 shadow-[0_18px_60px_-45px_rgba(15,23,42,0.35)]">
+                <div className="space-y-4 rounded-[32px] border border-white/60 bg-white/90 p-6 shadow-[0_20px_52px_-32px_rgba(15,23,42,0.25)]">
                   <h2 className="text-sm font-semibold uppercase tracking-[0.3em] text-[#0b1426]/40">Informacje</h2>
                   <div className="space-y-3 text-sm text-[#0b1426]/70">
                     <p className="flex items-center gap-3"><CalendarIcon className="h-5 w-5 text-cyan-500" /><span>{birthDateLabel} — {deathDateLabel}</span></p>
@@ -138,7 +138,7 @@ export default function PublicMemorialView() {
               </div>
 
               <div className="space-y-6">
-                <div className="relative overflow-hidden rounded-[32px] border border-white/60 bg-gradient-to-r from-cyan-500 via-sky-400 to-purple-500 p-8 text-white shadow-[0_30px_60px_-20px_rgba(14,116,144,0.45)]">
+                <div className="relative overflow-hidden rounded-[32px] border border-white/60 bg-gradient-to-r from-cyan-500 via-sky-400 to-purple-500 p-8 text-white shadow-[0_22px_50px_-28px_rgba(14,116,144,0.32)]">
                   <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-[0.3em] text-white/70">Upamiętniona osoba</p>
@@ -161,7 +161,7 @@ export default function PublicMemorialView() {
                   </div>
                 </div>
 
-                <div className="overflow-hidden rounded-[32px] border border-white/60 bg-white/90 shadow-[0_30px_60px_-28px_rgba(14,116,144,0.35)] backdrop-blur">
+                <div className="overflow-hidden rounded-[32px] border border-white/60 bg-white/90 shadow-[0_20px_52px_-32px_rgba(14,116,144,0.28)] backdrop-blur">
                   <div className="px-6 pt-6 text-sm font-semibold uppercase tracking-[0.3em] text-[#0b1426]/40">Pamiątki</div>
                   <div className="px-0 pb-8 pt-2">
                     <PamiatkiTab memorialId={parsedId} isEditing={false} setIsEditing={() => {}} isPublicView={true} />
