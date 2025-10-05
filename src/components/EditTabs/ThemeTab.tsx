@@ -18,6 +18,13 @@ interface StoredBackground {
   name: string
 }
 
+type StorageListItem = {
+  name?: string | null
+  id?: string | null
+  metadata?: Record<string, any> | null
+  type?: 'file' | 'folder'
+}
+
 const ThemeTab = ({ memorialId, currentBannerUrl, onBannerChange }: ThemeTabProps) => {
   const [sharedBackgrounds, setSharedBackgrounds] = useState<StoredBackground[]>([])
   const [userBackgrounds, setUserBackgrounds] = useState<StoredBackground[]>([])
@@ -61,18 +68,20 @@ const ThemeTab = ({ memorialId, currentBannerUrl, onBannerChange }: ThemeTabProp
 
       let collected: StoredBackground[] = []
 
-      for (const item of data || []) {
-        if (!item?.name) continue
-        const pathBase = normalized ? `${normalized}/${item.name}` : item.name
+      for (const rawItem of (data ?? []) as StorageListItem[]) {
+        if (typeof rawItem?.name !== 'string') continue
 
-        if (item.type === 'folder') {
+        const pathBase = normalized ? `${normalized}/${rawItem.name}` : rawItem.name
+        const isFolder = rawItem.type === 'folder' || !rawItem.id || rawItem.metadata == null // folders come back without id/metadata
+
+        if (isFolder) {
           const nested = await fetchRecursive(pathBase)
           collected = collected.concat(nested)
         } else {
           collected.push({
             path: pathBase,
             url: getPublicUrl(pathBase),
-            name: item.name
+            name: rawItem.name
           })
         }
       }
