@@ -150,48 +150,65 @@ useEffect(() => {
 
       let error = null;
 
+      let createdEntry: any | null = null
+
       if (editingMap) {
-        const res = await supabase.from('memorial_maps').update({
-          title: mapTitle,
-          story: mapStory,
-          address: mapAddress,
-          lat: coordinates.lat,
-          lng: coordinates.lng,
-        }).eq('id', parseInt(editingMap.id.replace('map-', '')));
+        const res = await supabase
+          .from('memorial_maps')
+          .update({
+            title: mapTitle,
+            story: mapStory,
+            address: mapAddress,
+            lat: coordinates.lat,
+            lng: coordinates.lng,
+          })
+          .eq('id', parseInt(editingMap.id.replace('map-', '')))
         error = res.error;
       } else {
-        const res = await supabase.from('memorial_maps').insert({
-          memorial_id: parsedId,
-          title: mapTitle,
-          story: mapStory,
-          address: mapAddress,
-          lat: coordinates.lat,
-          lng: coordinates.lng,
-        });
+        const res = await supabase
+          .from('memorial_maps')
+          .insert({
+            memorial_id: parsedId,
+            title: mapTitle,
+            story: mapStory,
+            address: mapAddress,
+            lat: coordinates.lat,
+            lng: coordinates.lng,
+          })
+          .select()
+          .single();
         error = res.error;
+        if (!error && res.data) {
+          const map = res.data
+          createdEntry = {
+            id: `map-${map.id}`,
+            type: 'map',
+            sort_order: map.sort_order ?? 0,
+            content: {
+              title: map.title,
+              story: map.story,
+              address: map.address,
+              lat: map.lat,
+              lng: map.lng
+            }
+          }
+        }
       }
 
       if (error) {
         console.error('Błąd zapisu do memorial_maps:', error);
       } else {
         console.log('Zapis udany do memorial_maps');
+        setLoading(false);
+        onClose(createdEntry || undefined)
+        return
       }
     } else {
       console.warn('Brak współrzędnych – zapis pominięty');
     }
 
     setLoading(false);
-    onClose({
-      id: `map-${Date.now()}`,
-      type: 'map',
-      content: {
-        title: mapTitle,
-        story: mapStory,
-        address: mapAddress,
-        lat: coordinates?.lat,
-        lng: coordinates?.lng,
-      },
-    });
+    onClose()
   }
 
   return (

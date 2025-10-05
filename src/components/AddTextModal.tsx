@@ -45,6 +45,9 @@ export default function AddTextModal({ isOpen, onClose, memorialId, editingText 
         .eq('id', editingText.id);
       error = res.error;
       console.log('✅ Odpowiedź z Supabase (update):', res);
+      if (!error) {
+        onClose();
+      }
     } else {
       const res = await supabase
         .from('memorial_mementos')
@@ -52,16 +55,14 @@ export default function AddTextModal({ isOpen, onClose, memorialId, editingText 
           memorial_id: parsedId,
           type: 'text',
           content: { title, text },
-        });
+        })
+        .select()
+        .single();
       error = res.error;
       console.log('✅ Odpowiedź z Supabase (insert):', res);
-    }
-
-    if (error) {
-      alert('Wystąpił błąd podczas zapisywania.');
-      console.error(error);
-    } else {
-      onClose();
+      if (!error && res.data) {
+        onClose(res.data);
+      }
     }
 
     setLoading(false);

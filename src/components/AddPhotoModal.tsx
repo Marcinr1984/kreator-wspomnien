@@ -138,7 +138,7 @@ export default function AddPhotoModal({ isOpen, onClose, memorialId, editingPhot
         return
       }
     } else {
-      const { error } = await supabase
+      const { data: inserted, error } = await supabase
         .from('memorial_mementos')
         .insert({
           memorial_id: parsedId,
@@ -152,11 +152,17 @@ export default function AddPhotoModal({ isOpen, onClose, memorialId, editingPhot
             image_path,
           },
         })
+        .select()
+        .single()
 
-      if (error) {
+      if (error || !inserted) {
         alert('Błąd podczas zapisywania zdjęcia.')
         console.error(error)
         setLoading(false)
+        return
+      } else {
+        setLoading(false)
+        onClose(inserted)
         return
       }
     }

@@ -58,17 +58,21 @@ export default function AddQuoteModal({ isOpen, onClose, memorialId, editingQuot
       }
     } else {
       const parsedId = typeof memorialId === 'string' ? parseInt(memorialId) : memorialId;
-      const { error } = await supabase.from('memorial_mementos').insert({
-        memorial_id: parsedId,
-        type: 'quote',
-        content: { quote, author },
-      });
+      const { data, error } = await supabase
+        .from('memorial_mementos')
+        .insert({
+          memorial_id: parsedId,
+          type: 'quote',
+          content: { quote, author }
+        })
+        .select()
+        .single();
 
-      if (error) {
+      if (error || !data) {
         alert('Wystąpił błąd podczas zapisywania.');
         console.error(error);
       } else {
-        onClose();
+        onClose(data);
       }
     }
     setLoading(false);

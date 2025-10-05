@@ -7,6 +7,7 @@ import AddQuoteModal from '../../components/AddQuoteModal'
 import AddTextModal from '../../components/AddTextModal'
 import AddMapModal from '../../components/AddMapModal'
 import AddPhotoModal from '../../components/AddPhotoModal'
+import AddGalleryModal from '../../components/AddGalleryModal'
 import { supabase } from '../../utils/supabaseClient'
 import { DndContext, closestCenter } from '@dnd-kit/core'
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
@@ -20,7 +21,8 @@ import {
   DocumentTextIcon,
   SparklesIcon,
   MapPinIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  Squares2X2Icon
 } from '@heroicons/react/24/solid'
 import { ArrowsPointingOutIcon } from '@heroicons/react/24/outline'
 
@@ -33,7 +35,7 @@ interface PamiatkiTabProps {
 
 type Memento = {
   id: number | string
-  type: 'quote' | 'text' | 'photo' | 'map'
+  type: 'quote' | 'text' | 'photo' | 'map' | 'gallery'
   sort_order: number
   content: any
 }
@@ -50,6 +52,8 @@ const PRIMARY_GRADIENT_BUTTON =
 const SECONDARY_BUTTON =
   'inline-flex items-center justify-center gap-2 rounded-full border border-[#d4dde5] bg-white px-6 py-2 text-sm font-semibold text-[#0b1426]/70 transition hover:border-[#c6d2dd] hover:bg-[#f5f8fb]'
 
+const STORAGE_BUCKET = 'memorial-photos'
+
 const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isEditing = false, isPublicView = false }) => {
   const [localEditing, setLocalEditing] = useState(false)
   const [mementos, setMementos] = useState<Memento[]>([])
@@ -62,6 +66,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
   const [isAddTextModalOpen, setIsAddTextModalOpen] = useState(false)
   const [isAddMapModalOpen, setIsAddMapModalOpen] = useState(false)
   const [isAddPhotoModalOpen, setIsAddPhotoModalOpen] = useState(false)
+  const [isAddGalleryModalOpen, setIsAddGalleryModalOpen] = useState(false)
 
   const [fullscreenMap, setFullscreenMap] = useState<Memento | null>(null)
 
@@ -72,7 +77,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       .from('memorial_mementos')
       .select('*')
       .eq('memorial_id', memorialId)
-      .in('type', ['quote', 'text', 'photo'])
+      .in('type', ['quote', 'text', 'photo', 'gallery'])
       .order('sort_order', { ascending: true })
 
     if (error) {
@@ -157,6 +162,9 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       case 'photo':
         setIsAddPhotoModalOpen(true)
         break
+      case 'gallery':
+        setIsAddGalleryModalOpen(true)
+        break
       case 'map':
         setIsAddMapModalOpen(true)
         break
@@ -188,15 +196,123 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
         .eq('id', mementoToDelete)
         .single()
 
-      if (mementoData?.type === 'photo' && mementoData?.content?.image_url) {
+      const extractStoragePath = (publicUrl?: string | null) => {
+        if (!publicUrl) return null
         try {
-          const url = new URL(mementoData.content.image_url)
-          const path = url.pathname.split('/storage/v1/object/public/memorial-photos/')[1]
-          if (path) {
-            await supabase.storage.from('memorial-photos').remove([path])
-          }
+          const url = new URL(publicUrl)
+          const raw = url.pathname.replace('/storage/v1/object/public/memorial-photos/', '')
+          const decoded = decodeURIComponent(raw)
+          return decoded.length ? decoded : null
         } catch (e) {
-          console.warn('Nie można usunąć pliku ze storage:', e)
+          console.warn('Nie można sparsować ścieżki pliku:', e)
+          return null
+        }
+      }
+
+      const collectPathCandidates = (...values: Array<string | null | undefined>) => {
+        const variants = new Set<string>()
+
+        const addVariant = (value?: string | null) => {
+          if (!value) return
+          const normalized = decodeURIComponent(value)
+            .replace(/^\/+/, '')
+            .replace(/^public\//, '')
+            .replace(/\/+/g, '/')
+            .replace(/\/+$/, '')
+          if (!normalized) return
+
+          const push = (path: string | null | undefined) => {
+            if (!path) return
+            const trimmed = path.replace(/^\/+/, '').replace(/\/+$/, '')
+            if (trimmed) {
+              variants.add(trimmed)
+            }
+          }
+
+          push(normalized)
+
+          const possiblePrefixes = ['gallery', normalized.split('/')[0]]
+          const filename = normalized.split('/').pop()
+          possiblePrefixes.forEach((prefix) => {
+            if (!prefix) return
+            push(`${prefix}/${normalized}`)
+            push(`${prefix}/${filename}`)
+            push(`${prefix}/${prefix}/${normalized}`)
+          })
+
+          const segments = normalized.split('/').filter(Boolean)
+          if (segments.length > 1) {
+            const [, ...rest] = segments
+            push(rest.join('/'))
+            push(`${segments[0]}/gallery/${rest.join('/')}`)
+            push(`${segments[0]}/${segments[0]}/${rest.join('/')}`)
+            if (segments.length > 2) {
+              const [, second, ...tail] = segments
+              push(`${segments[0]}/${second}/gallery/${tail.join('/')}`)
+            }
+          }
+        }
+
+        values.forEach(addVariant)
+        const filenames = values
+          .map((val) => (val ? decodeURIComponent(val).split('/').pop() : null))
+          .filter(Boolean) as string[]
+        filenames.forEach((name) => {
+          variants.add(name)
+          variants.add(`gallery/${name}`)
+        })
+        return Array.from(variants)
+      }
+
+      const storagePathsToDelete = new Set<string>()
+      const registerCandidates = (candidates: string[]) => {
+        for (const candidate of candidates) {
+          if (!candidate) continue
+          const normalized = candidate.replace(/^\/+/, '').replace(/\/+$/, '')
+          if (!normalized) continue
+          storagePathsToDelete.add(normalized)
+          if (!normalized.startsWith('public/')) {
+            storagePathsToDelete.add(`public/${normalized}`)
+          }
+        }
+      }
+
+      if (mementoData?.type === 'photo' && mementoData?.content?.image_url) {
+        const candidates = collectPathCandidates(mementoData.content?.image_path, extractStoragePath(mementoData.content.image_url))
+        registerCandidates(candidates)
+      } else if (mementoData?.type === 'gallery') {
+        const galleryItems = Array.isArray(mementoData?.content?.images) ? mementoData.content.images : []
+
+        for (const image of galleryItems) {
+          const candidates = collectPathCandidates(image?.path, extractStoragePath(image?.url))
+          if (process.env.NODE_ENV !== 'production') {
+            console.log('Usuwanie plików galerii:', candidates)
+          }
+          registerCandidates(candidates)
+        }
+      }
+
+      if (storagePathsToDelete.size) {
+        try {
+          const payload = {
+            bucket: STORAGE_BUCKET,
+            paths: Array.from(storagePathsToDelete)
+          }
+          const response = await fetch('/api/storage/delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          })
+          const result = await response.json().catch(() => ({}))
+          if (!response.ok) {
+            console.warn('Błąd API podczas usuwania plików:', result?.error ?? result)
+          } else if (Array.isArray(result?.deleted) && result.deleted.length) {
+            console.log('API usunęło pliki:', result.deleted)
+          } else {
+            console.warn('API nie potwierdziło usunięcia plików:', Array.from(storagePathsToDelete))
+          }
+        } catch (err: any) {
+          console.error('Nie udało się wywołać API usuwania plików:', err?.message ?? err)
         }
       }
 
@@ -287,6 +403,125 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       </div>
     )
 
+    const renderGallery = () => {
+      const images = Array.isArray(memento.content?.images) ? memento.content.images : []
+      if (!images.length) {
+        return (
+          <div className="rounded-[24px] border border-dashed border-[#dce4ed] bg-white/70 px-6 py-12 text-center text-sm text-[#0b1426]/60">
+            Brak zdjęć w galerii.
+          </div>
+        )
+      }
+
+      type GalleryLayoutType = 'grid' | 'masonry' | 'polaroid' | 'circle'
+      const legacyMap: Record<string, GalleryLayoutType> = {
+        spotlight: 'polaroid',
+        carousel: 'circle'
+      }
+      const allowedLayouts: GalleryLayoutType[] = ['grid', 'masonry', 'polaroid', 'circle']
+      const rawLayout = typeof memento.content?.layout === 'string' ? memento.content.layout : 'grid'
+      const normalizedLayout: GalleryLayoutType = legacyMap[rawLayout] ?? (allowedLayouts.includes(rawLayout as GalleryLayoutType) ? (rawLayout as GalleryLayoutType) : 'grid')
+
+      const figureBase = 'group relative overflow-hidden rounded-[24px] border border-[#dce4ed] bg-[#f6f9fc]'
+
+      const renderFigure = (photo: any, index: number, extraWrapperClass = '', aspect?: string, imageClassName = '') => (
+        <figure key={`${photo?.url ?? index}-${index}`} className={`flex flex-col gap-2 ${extraWrapperClass}`}>
+          <div
+            className={`${figureBase} ${aspect ? '' : 'aspect-[4/3]'}`}
+            style={aspect ? { aspectRatio: aspect } : undefined}
+          >
+            <img
+              src={photo?.url}
+              alt={photo?.caption || `Zdjęcie ${index + 1}`}
+              className={`h-full w-full object-cover ${imageClassName}`}
+            />
+          </div>
+          {photo?.caption && <figcaption className="text-xs text-[#0b1426]/60">{photo.caption}</figcaption>}
+        </figure>
+      )
+
+      const renderGridLayout = () => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {images.map((photo: any, index: number) => renderFigure(photo, index))}
+        </div>
+      )
+
+      const renderMasonryLayout = () => (
+        <div className="columns-2 gap-4 space-y-4 md:columns-3 [column-fill:_balance]">
+          {images.map((photo: any, index: number) => (
+            <div key={`${photo?.url ?? index}-masonry`} className="break-inside-avoid">
+              {renderFigure(photo, index, '', index % 3 === 0 ? '3 / 4' : index % 3 === 1 ? '4 / 3' : '1 / 1')}
+            </div>
+          ))}
+        </div>
+      )
+
+      const renderPolaroidLayout = () => {
+        const rotations = ['-rotate-3', 'rotate-2', '-rotate-1', 'rotate-1']
+        return (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {images.map((photo: any, index: number) => {
+              const rotation = rotations[index % rotations.length]
+              return (
+                <div key={`${photo?.url ?? index}-polaroid`} className="flex flex-col items-center gap-4">
+                  <div
+                    className={`relative w-full max-w-[240px] bg-white px-4 pb-6 pt-4 shadow-[0_26px_38px_-32px_rgba(15,23,42,0.5)] ring-1 ring-[#e8eef7] transition-transform duration-300 ${rotation} hover:-translate-y-[6px] hover:rotate-0`}
+                  >
+                    <div className="absolute inset-x-6 top-[10%] -z-[1] h-[70%] rounded-[14px] bg-gradient-to-br from-cyan-400/15 via-sky-300/10 to-purple-400/10 blur-md" />
+                    <div className="overflow-hidden rounded-[12px] border border-white/60 shadow-[0_18px_32px_-32px_rgba(15,23,42,0.4)]">
+                      <img
+                        src={photo?.url}
+                        alt={photo?.caption || `Zdjęcie ${index + 1}`}
+                        className="aspect-square w-full object-cover"
+                      />
+                    </div>
+                    <div className="mt-4 min-h-[32px] text-center text-xs font-medium text-[#0b1426]/65">
+                      {photo?.caption || ' '}
+                    </div>
+                    <div className="pointer-events-none absolute inset-x-10 bottom-3 h-2 rounded-full bg-[#0b1426]/12" />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )
+      }
+
+      const renderCircleLayout = () => (
+        <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-4">
+          {images.map((photo: any, index: number) => (
+            <figure key={`${photo?.url ?? index}-circle`} className="flex flex-col items-center gap-2">
+              <div className="relative h-28 w-28 overflow-hidden rounded-full border border-[#dce4ed] bg-[#f6f9fc] shadow-[0_20px_45px_-32px_rgba(15,23,42,0.35)]">
+                <img src={photo?.url} alt={photo?.caption || `Zdjęcie ${index + 1}`} className="h-full w-full object-cover" />
+              </div>
+              {photo?.caption && <figcaption className="max-w-[150px] text-center text-xs text-[#0b1426]/60">{photo.caption}</figcaption>}
+            </figure>
+          ))}
+        </div>
+      )
+
+      const layouts: Record<GalleryLayoutType, React.ReactNode> = {
+        grid: renderGridLayout(),
+        masonry: renderMasonryLayout(),
+        polaroid: renderPolaroidLayout(),
+        circle: renderCircleLayout()
+      }
+
+      return (
+        <div className="space-y-5">
+          {(memento.content?.title || memento.content?.description) && (
+            <div className="space-y-2 text-center lg:text-left">
+              {memento.content?.title && <h3 className="text-xl font-semibold text-[#0b1426]">{memento.content.title}</h3>}
+              {memento.content?.description && (
+                <p className="text-sm leading-relaxed text-[#0b1426]/75 whitespace-pre-wrap">{memento.content.description}</p>
+              )}
+            </div>
+          )}
+          {layouts[normalizedLayout] || renderGridLayout()}
+        </div>
+      )
+    }
+
     const renderMap = () => (
       <div className="space-y-4">
         <div className="space-y-2 text-center lg:text-left">
@@ -340,6 +575,8 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
           return renderText()
         case 'photo':
           return renderPhoto()
+        case 'gallery':
+          return renderGallery()
         case 'map':
           return renderMap()
         default:
@@ -434,6 +671,15 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       }
     },
     {
+      label: 'Dodaj galerię zdjęć',
+      description: 'Połącz kilka fotografii w różnych układach',
+      icon: Squares2X2Icon,
+      action: () => {
+        setEditingMemento(null)
+        setIsAddGalleryModalOpen(true)
+      }
+    },
+    {
       label: 'Dodaj cytat',
       description: 'Zapisz słowa, które warto zapamiętać',
       icon: ChatBubbleLeftRightIcon,
@@ -488,7 +734,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
         <div className="rounded-[32px] border border-white/60 bg-white/95 px-6 py-8 shadow-[0_20px_52px_-32px_rgba(15,23,42,0.28)] backdrop-blur sm:px-10">
           <h3 className="text-lg font-semibold text-[#0b1426]">Dodaj nowe wspomnienie</h3>
           <p className="text-sm text-[#0b1426]/70">Wybierz typ elementu, aby wzbogacić stronę pamięci o kolejne historie.</p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             {creationButtons.map(({ label, description, icon: Icon, action }) => (
               <button
                 key={label}
@@ -623,13 +869,34 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       {isAddPhotoModalOpen && (
         <AddPhotoModal
           isOpen={isAddPhotoModalOpen}
-          onClose={async () => {
+          onClose={async (newPhoto) => {
             setIsAddPhotoModalOpen(false)
             setEditingMemento(null)
-            await fetchMementos()
+            if (newPhoto && !editingMemento) {
+              setMementos((prev) => [{ ...newPhoto, sort_order: 0 }, ...prev])
+            } else {
+              await fetchMementos()
+            }
           }}
           memorialId={memorialId}
           editingPhoto={editingMemento}
+        />
+      )}
+
+      {isAddGalleryModalOpen && (
+        <AddGalleryModal
+          isOpen={isAddGalleryModalOpen}
+          onClose={async (newGallery) => {
+            setIsAddGalleryModalOpen(false)
+            setEditingMemento(null)
+            if (newGallery && !editingMemento) {
+              setMementos((prev) => [{ ...newGallery, sort_order: 0 }, ...prev])
+            } else {
+              await fetchMementos()
+            }
+          }}
+          memorialId={memorialId}
+          editingGallery={editingMemento}
         />
       )}
     </div>
