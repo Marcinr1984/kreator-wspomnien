@@ -8,6 +8,7 @@ import AddTextModal from '../../components/AddTextModal'
 import AddMapModal from '../../components/AddMapModal'
 import AddPhotoModal from '../../components/AddPhotoModal'
 import AddGalleryModal from '../../components/AddGalleryModal'
+import AddVideoModal from '../../components/AddVideoModal'
 import { supabase } from '../../utils/supabaseClient'
 import { DndContext, closestCenter } from '@dnd-kit/core'
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
@@ -22,7 +23,8 @@ import {
   SparklesIcon,
   MapPinIcon,
   ChatBubbleLeftRightIcon,
-  Squares2X2Icon
+  Squares2X2Icon,
+  PlayCircleIcon
 } from '@heroicons/react/24/solid'
 import { ArrowsPointingOutIcon } from '@heroicons/react/24/outline'
 
@@ -35,10 +37,12 @@ interface PamiatkiTabProps {
 
 type Memento = {
   id: number | string
-  type: 'quote' | 'text' | 'photo' | 'map' | 'gallery'
+  type: 'quote' | 'text' | 'photo' | 'map' | 'gallery' | 'video'
   sort_order: number
   content: any
 }
+
+type VideoSource = 'upload' | 'youtube' | 'vimeo'
 
 const CARD_BASE =
   'relative overflow-hidden rounded-[32px] border border-white/60 bg-white/95 shadow-[0_20px_52px_-32px_rgba(14,116,144,0.28)] backdrop-blur px-8 py-10 sm:px-10'
@@ -53,6 +57,8 @@ const SECONDARY_BUTTON =
   'inline-flex items-center justify-center gap-2 rounded-full border border-[#d4dde5] bg-white px-6 py-2 text-sm font-semibold text-[#0b1426]/70 transition hover:border-[#c6d2dd] hover:bg-[#f5f8fb]'
 
 const STORAGE_BUCKET = 'memorial-photos'
+const VIDEO_BUCKET = 'memorial-videos'
+const VIDEO_LIMIT = 3
 
 const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isEditing = false, isPublicView = false }) => {
   const [localEditing, setLocalEditing] = useState(false)
@@ -66,6 +72,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
   const [isAddTextModalOpen, setIsAddTextModalOpen] = useState(false)
   const [isAddMapModalOpen, setIsAddMapModalOpen] = useState(false)
   const [isAddPhotoModalOpen, setIsAddPhotoModalOpen] = useState(false)
+  const [isAddVideoModalOpen, setIsAddVideoModalOpen] = useState(false)
   const [isAddGalleryModalOpen, setIsAddGalleryModalOpen] = useState(false)
 
   const [fullscreenMap, setFullscreenMap] = useState<Memento | null>(null)
@@ -77,7 +84,7 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       .from('memorial_mementos')
       .select('*')
       .eq('memorial_id', memorialId)
-      .in('type', ['quote', 'text', 'photo', 'gallery'])
+      .in('type', ['quote', 'text', 'photo', 'gallery', 'video'])
       .order('sort_order', { ascending: true })
 
     if (error) {
@@ -118,6 +125,8 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
   }, [memorialId])
 
   const visibleMementos = useMemo(() => mementos.filter((item) => item?.type && item?.content), [mementos])
+  const videoCount = useMemo(() => visibleMementos.filter((item) => item.type === 'video').length, [visibleMementos])
+  const videoLimitReached = videoCount >= VIDEO_LIMIT
 
   const handleStartEdit = () => {
     setLocalEditing(true)
@@ -161,6 +170,9 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
         break
       case 'photo':
         setIsAddPhotoModalOpen(true)
+        break
+      case 'video':
+        setIsAddVideoModalOpen(true)
         break
       case 'gallery':
         setIsAddGalleryModalOpen(true)
@@ -264,22 +276,23 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
         return Array.from(variants)
       }
 
-      const storagePathsToDelete = new Set<string>()
-      const registerCandidates = (candidates: string[]) => {
+      const photoPathsToDelete = new Set<string>()
+      const videoPathsToDelete = new Set<string>()
+      const registerPhotoCandidates = (candidates: string[]) => {
         for (const candidate of candidates) {
           if (!candidate) continue
           const normalized = candidate.replace(/^\/+/, '').replace(/\/+$/, '')
           if (!normalized) continue
-          storagePathsToDelete.add(normalized)
+          photoPathsToDelete.add(normalized)
           if (!normalized.startsWith('public/')) {
-            storagePathsToDelete.add(`public/${normalized}`)
+            photoPathsToDelete.add(`public/${normalized}`)
           }
         }
       }
 
       if (mementoData?.type === 'photo' && mementoData?.content?.image_url) {
         const candidates = collectPathCandidates(mementoData.content?.image_path, extractStoragePath(mementoData.content.image_url))
-        registerCandidates(candidates)
+        registerPhotoCandidates(candidates)
       } else if (mementoData?.type === 'gallery') {
         const galleryItems = Array.isArray(mementoData?.content?.images) ? mementoData.content.images : []
 
@@ -288,15 +301,23 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
           if (process.env.NODE_ENV !== 'production') {
             console.log('Usuwanie plików galerii:', candidates)
           }
-          registerCandidates(candidates)
+          registerPhotoCandidates(candidates)
+        }
+      } else if (mementoData?.type === 'video') {
+        const videoPath = mementoData?.content?.path
+        if (videoPath) {
+          const normalized = videoPath.replace(/^\/+/, '').replace(/^public\//, '')
+          videoPathsToDelete.add(normalized)
+          videoPathsToDelete.add(`public/${normalized}`)
         }
       }
 
-      if (storagePathsToDelete.size) {
+      const callDeleteApi = async (bucket: string, paths: Set<string>) => {
+        if (!paths.size) return
         try {
           const payload = {
-            bucket: STORAGE_BUCKET,
-            paths: Array.from(storagePathsToDelete)
+            bucket,
+            paths: Array.from(paths)
           }
           const response = await fetch('/api/storage/delete', {
             method: 'POST',
@@ -309,12 +330,15 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
           } else if (Array.isArray(result?.deleted) && result.deleted.length) {
             console.log('API usunęło pliki:', result.deleted)
           } else {
-            console.warn('API nie potwierdziło usunięcia plików:', Array.from(storagePathsToDelete))
+            console.warn('API nie potwierdziło usunięcia plików:', Array.from(paths))
           }
         } catch (err: any) {
           console.error('Nie udało się wywołać API usuwania plików:', err?.message ?? err)
         }
       }
+
+      await callDeleteApi(STORAGE_BUCKET, photoPathsToDelete)
+      await callDeleteApi(VIDEO_BUCKET, videoPathsToDelete)
 
       const { error } = await supabase.from('memorial_mementos').delete().eq('id', mementoToDelete)
       if (error) {
@@ -522,8 +546,43 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       )
     }
 
-    const renderMap = () => (
-      <div className="space-y-4">
+    const renderVideo = () => {
+      const source = memento.content?.source as VideoSource | undefined
+      const url = memento.content?.url
+      const embedUrl = memento.content?.embedUrl
+      return (
+        <div className="space-y-4">
+          <div className="space-y-2 text-center lg:text-left">
+            <h3 className="text-xl font-semibold text-[#0b1426]">{memento.content?.title || 'Materiał wideo'}</h3>
+            {memento.content?.description && (
+              <p className="text-sm leading-relaxed text-[#0b1426]/75 whitespace-pre-wrap">{memento.content.description}</p>
+            )}
+          </div>
+          <div className="overflow-hidden rounded-[24px] border border-[#dce4ed] bg-[#0b1426]/5 shadow-[0_20px_45px_-30px_rgba(15,23,42,0.35)]">
+            {source === 'upload' && url ? (
+              <video controls src={url} className="h-full w-full" preload="metadata" />
+            ) : embedUrl ? (
+              <iframe
+                src={embedUrl}
+                title={memento.content?.title || 'Materiał wideo'}
+                className="h-full w-full aspect-video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            ) : url ? (
+              <video controls src={url} className="h-full w-full" preload="metadata" />
+            ) : (
+              <div className="flex aspect-video items-center justify-center text-sm text-[#0b1426]/50">
+                Materiał wideo niedostępny.
+              </div>
+            )}
+          </div>
+        </div>
+      )
+    }
+
+      const renderMap = () => (
+        <div className="space-y-4">
         <div className="space-y-2 text-center lg:text-left">
           <h3 className="text-xl font-semibold text-[#0b1426]">{memento.content?.title || 'Lokalizacja na mapie'}</h3>
           {memento.content?.story && (
@@ -577,6 +636,8 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
           return renderPhoto()
         case 'gallery':
           return renderGallery()
+        case 'video':
+          return renderVideo()
         case 'map':
           return renderMap()
         default:
@@ -662,13 +723,24 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       }
     },
     {
+      label: 'Dodaj wideo',
+      description: 'Osadź materiał z YouTube lub Vimeo',
+      icon: PlayCircleIcon,
+      action: () => {
+        setEditingMemento(null)
+        setIsAddVideoModalOpen(true)
+      },
+      disabled: videoLimitReached
+    },
+    {
       label: 'Dodaj tytuł lub tekst',
       description: 'Dodaj akapit lub nagłówek historii',
       icon: DocumentTextIcon,
       action: () => {
         setEditingMemento(null)
         setIsAddTextModalOpen(true)
-      }
+      },
+      disabled: false
     },
     {
       label: 'Dodaj galerię zdjęć',
@@ -677,7 +749,8 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       action: () => {
         setEditingMemento(null)
         setIsAddGalleryModalOpen(true)
-      }
+      },
+      disabled: false
     },
     {
       label: 'Dodaj cytat',
@@ -686,7 +759,8 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       action: () => {
         setEditingMemento(null)
         setIsAddQuoteModalOpen(true)
-      }
+      },
+      disabled: false
     },
     {
       label: 'Dodaj zdjęcie',
@@ -695,12 +769,13 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
       action: () => {
         setEditingMemento(null)
         setIsAddPhotoModalOpen(true)
-      }
+      },
+      disabled: false
     }
   ]
 
   return (
-    <div className="space-y-12">
+      <div className="space-y-12">
       {!isPublicView && (
         <div className="rounded-[32px] border border-white/60 bg-white/95 px-6 py-6 shadow-[0_20px_52px_-32px_rgba(15,23,42,0.28)] backdrop-blur sm:px-10">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -735,12 +810,17 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
           <h3 className="text-lg font-semibold text-[#0b1426]">Dodaj nowe wspomnienie</h3>
           <p className="text-sm text-[#0b1426]/70">Wybierz typ elementu, aby wzbogacić stronę pamięci o kolejne historie.</p>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            {creationButtons.map(({ label, description, icon: Icon, action }) => (
+            {creationButtons.map(({ label, description, icon: Icon, action, disabled }) => (
               <button
                 key={label}
                 type="button"
                 onClick={action}
-                className="group flex flex-col items-start gap-3 rounded-[24px] border border-[#dce4ed] bg-[#f6f9fc] px-5 py-6 text-left transition hover:border-cyan-400 hover:bg-white"
+                disabled={disabled}
+                className={`group flex flex-col items-start gap-3 rounded-[24px] border px-5 py-6 text-left transition ${
+                  disabled
+                    ? 'border-[#e5e9f0] bg-[#f6f9fc] text-[#0b1426]/40 cursor-not-allowed opacity-60'
+                    : 'border-[#dce4ed] bg-[#f6f9fc] hover:border-cyan-400 hover:bg-white'
+                }`}
               >
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 text-white shadow-lg shadow-cyan-500/30">
                   <Icon className="h-5 w-5" />
@@ -752,6 +832,11 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
               </button>
             ))}
           </div>
+          {videoLimitReached && (
+            <p className="mt-4 text-xs text-[#0b1426]/50">
+              Limit 3 materiałów wideo osiągnięty. Usuń istniejący film, aby dodać kolejny.
+            </p>
+          )}
         </div>
       )}
 
@@ -897,6 +982,25 @@ const PamiatkiTab: React.FC<PamiatkiTabProps> = ({ setIsEditing, memorialId, isE
           }}
           memorialId={memorialId}
           editingGallery={editingMemento}
+        />
+      )}
+
+      {isAddVideoModalOpen && (
+        <AddVideoModal
+          isOpen={isAddVideoModalOpen}
+          onClose={async (newVideo) => {
+            setIsAddVideoModalOpen(false)
+            setEditingMemento(null)
+            if (newVideo && !editingMemento) {
+              setMementos((prev) => [{ ...newVideo, sort_order: 0 }, ...prev])
+            } else {
+              await fetchMementos()
+            }
+          }}
+          memorialId={memorialId}
+          editingVideo={editingMemento?.type === 'video' ? editingMemento : null}
+          currentCount={videoCount}
+          maxVideos={VIDEO_LIMIT}
         />
       )}
     </div>
